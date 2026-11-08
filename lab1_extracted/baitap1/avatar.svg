@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#020617;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="glowRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#fb923c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="hoodieGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ea580c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9a3412;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <circle cx="120" cy="120" r="114" fill="url(#bgGrad)" stroke="url(#glowRing)" stroke-width="4.5" />
+  
+  <!-- Subtle Grid lines -->
+  <circle cx="120" cy="120" r="95" fill="none" stroke="rgba(249, 115, 22, 0.15)" stroke-width="1.5" stroke-dasharray="4,4" />
+
+  <!-- Body / Hoodie -->
+  <path d="M 45 220 C 50 160, 80 145, 120 145 C 160 145, 190 160, 195 220 Z" fill="url(#hoodieGrad)" />
+  <path d="M 80 220 C 85 175, 100 160, 120 160 C 140 160, 155 175, 160 220 Z" fill="#7c2d12" />
+
+  <!-- Neck -->
+  <rect x="106" y="120" width="28" height="30" rx="8" fill="#fde68a" />
+
+  <!-- Face / Head -->
+  <ellipse cx="120" cy="98" rx="36" ry="42" fill="#fef08a" />
+
+  <!-- Hair (Modern side taper) -->
+  <path d="M 80 90 C 78 58, 102 44, 128 44 C 152 44, 164 58, 162 78 C 150 68, 132 66, 114 74 C 98 80, 88 88, 80 90 Z" fill="#1e293b" />
+
+  <!-- Glasses -->
+  <rect x="91" y="90" width="24" height="17" rx="5" fill="none" stroke="#f97316" stroke-width="3.5" />
+  <rect x="125" y="90" width="24" height="17" rx="5" fill="none" stroke="#f97316" stroke-width="3.5" />
+  <line x1="115" y1="98" x2="125" y2="98" stroke="#f97316" stroke-width="3.5" />
+
+  <!-- Eyes behind glasses -->
+  <circle cx="103" cy="98" r="3" fill="#0f172a" />
+  <circle cx="137" cy="98" r="3" fill="#0f172a" />
+
+  <!-- Friendly Smile -->
+  <path d="M 110 122 Q 120 130 130 122" stroke="#475569" stroke-width="3" fill="none" stroke-linecap="round" />
+
+  <!-- Laptop Badge at bottom -->
+  <rect x="90" y="195" width="60" height="34" rx="5" fill="#1e293b" stroke="#f97316" stroke-width="2" />
+  <polygon points="82,230 158,230 148,235 92,235" fill="#f97316" />
+  <text x="120" y="217" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="bold" fill="#ffffff" text-anchor="middle">&lt;IT24M/&gt;</text>
+</svg>

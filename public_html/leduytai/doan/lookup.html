@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tra Cứu Vé & Lấy Lại Mã QR Thanh Toán - Buôn Ma Thuột</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+</head>
+<body style="min-height: 100vh; display: flex; flex-direction: column;">
+  <!-- Top announcement bar -->
+  <div class="top-announcement">
+    <span>⚡ Hệ thống tra cứu phiếu đặt sân trực tuyến &amp; mở lại mã QR thanh toán cọc trong 30 phút</span>
+    <span>📞 Hotline hỗ trợ: <strong>0896.890.399</strong> (Lê Duy Tài)</span>
+  </div>
+
+  <!-- Topbar -->
+  <header class="topbar-wrapper">
+    <div class="topbar">
+      <a class="brand" href="./index.html">
+        <div class="brand-icon">⚽</div>
+        <div>SÂN<span>NHÀ</span> <small style="font-size: 11px; color: #64748b; font-weight: 700;">BUÔN MA THUỘT</small></div>
+      </a>
+
+      <nav class="nav-links">
+        <a href="./index.html#danh-sach-san">🏟️ Cụm sân mẹ &amp; con</a>
+        <a href="./index.html#dat-san">📅 Lịch sân trống</a>
+        <a href="./index.html#bang-gia">💰 Bảng giá</a>
+        <a href="./lookup.html" style="color: var(--primary); font-weight: 800;">🔍 Tra cứu vé</a>
+        <a href="./cv.html" style="color: #16a34a; font-weight: 700;">👨‍💻 CV Lê Duy Tài</a>
+        <a class="btn-nav-admin" href="./admin.html">⚙️ Cổng Quản trị</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main style="max-width: 900px; margin: 40px auto; padding: 0 20px; width: 100%;">
+    <div style="text-align: center; margin-bottom: 32px;">
+      <span class="section-tag">TRA CỨU &amp; MỞ LẠI MÃ QR (UI-06)</span>
+      <h1 style="font-size: 32px; margin: 10px 0 8px;">Tra Cứu Vé &amp; Mã QR Chuyển Cọc</h1>
+      <p style="font-size: 14px; color: #64748b; margin: 0;">
+        Nếu bạn lỡ đóng trang đặt sân, hãy nhập Mã đơn hoặc Số điện thoại để mở lại mã QR thanh toán trong vòng 30 phút.
+      </p>
+    </div>
+
+    <!-- Search Form -->
+    <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: var(--shadow-sm); margin-bottom: 32px;">
+      <form onsubmit="handleLookup(event)" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: flex-end;">
+        <div class="form-group" style="margin: 0;">
+          <label style="font-size: 12px; font-weight: 700;">Mã phiếu đặt sân</label>
+          <input type="text" id="lookupCode" placeholder="Ví dụ: SAN-..." style="height: 44px; text-transform: uppercase;">
+        </div>
+        <div class="form-group" style="margin: 0;">
+          <label style="font-size: 12px; font-weight: 700;">Số điện thoại người đặt</label>
+          <input type="tel" id="lookupPhone" placeholder="Ví dụ: 0896890399" style="height: 44px;">
+        </div>
+        <button type="submit" class="primary-button" style="height: 44px; padding: 0 24px; white-space: nowrap;">
+          🔍 Tìm kiếm vé
+        </button>
+      </form>
+
+      <!-- Recent chips -->
+      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span style="font-size: 12px; color: #64748b; font-weight: 600;">⚡ Vé đã đặt gần đây:</span>
+        <div id="recentChips" style="display: inline-flex; gap: 6px; flex-wrap: wrap;"></div>
+      </div>
+
+      <div id="noticeArea" style="margin-top: 16px;"></div>
+    </div>
+
+    <!-- Ticket Result Card -->
+    <div id="ticketResultCard" style="display: none; background: #ffffff; border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-md); overflow: hidden; margin-bottom: 40px;">
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, #0f172a, #1e293b); color: #ffffff; padding: 24px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">PHIẾU ĐẶT SÂN ĐIỆN TỬ</span>
+          <div id="resCode" style="font-size: 26px; font-weight: 900; color: #38bdf8; font-family: monospace; margin-top: 4px;">SAN-XXXX</div>
+        </div>
+        <div id="resBadge" class="badge-status badge-pending" style="font-size: 14px; padding: 8px 18px;">
+          ⏳ Chờ xác nhận
+        </div>
+      </div>
+
+      <!-- Ticket Body -->
+      <div style="padding: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px;">
+        <div>
+          <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Cụm sân bóng thi đấu</div>
+          <div id="resField" style="font-size: 16px; font-weight: 800; color: #16a34a; margin-top: 4px;">Sân bóng</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Sân con cụ thể</div>
+          <div id="resSubPitch" style="font-size: 15px; font-weight: 800; color: #0284c7; margin-top: 4px;">Sân con 5 - Số 1</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Ca thi đấu (1.5 tiếng) &amp; Ngày</div>
+          <div id="resTime" style="font-size: 15px; font-weight: 700; margin-top: 4px;">18:00 - 19:30 · 2026-11-02</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Người đặt sân</div>
+          <div id="resCustomer" style="font-size: 15px; font-weight: 700; margin-top: 4px;">Nguyễn Văn A</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Tổng giá trọn gói</div>
+          <div id="resPrice" style="font-size: 18px; font-weight: 900; color: #b45309; margin-top: 4px;">250.000đ</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Tiền cọc giữ chỗ (30%)</div>
+          <div id="resDeposit" style="font-size: 18px; font-weight: 900; color: #16a34a; margin-top: 4px;">100.000đ</div>
+        </div>
+      </div>
+
+      <!-- VietQR Section with 30-min countdown -->
+      <div id="qrPaymentSection" style="margin: 0 32px 32px; background: #f8fafc; border: 2px dashed #16a34a; border-radius: 16px; padding: 24px;">
+        <div id="countdownBox" style="background: rgba(234, 88, 12, 0.12); border: 1px solid #fdba74; padding: 12px 16px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
+          <div id="countdownText" style="font-size: 16px; font-weight: 900; color: #c2410c;">
+            ⏳ MÃ QR CÒN HIỆU LỰC: <span id="countdownTimer">30:00</span>
+          </div>
+          <div style="font-size: 12px; color: #7c2d12; margin-top: 4px;">
+            Vui lòng hoàn tất quét mã QR thanh toán tiền cọc trong 30 phút. Quá hạn hệ thống sẽ tự động hủy đơn!
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img id="qrImage" src="" alt="Mã VietQR" style="width: 220px; height: 220px; display: block; margin: 0 auto; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: var(--shadow-sm);">
+        </div>
+
+        <div style="background: #ffffff; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; line-height: 1.7; color: #334155;">
+          <div>Ngân hàng: <strong>MB Bank (Napas 247)</strong></div>
+          <div>Số tài khoản: <strong>02304200699999</strong></div>
+          <div>Chủ tài khoản: <strong>LE DUY TAI</strong></div>
+          <div>Số tiền cọc: <strong id="qrDepositAmount" style="color: #b45309;">100.000đ</strong></div>
+          <div>Nội dung CK: <strong id="qrTransferContent" style="color: #16a34a; font-size: 16px;">SAN-XXXX</strong></div>
+        </div>
+      </div>
+
+      <!-- Expired Banner -->
+      <div id="expiredBanner" style="display: none; margin: 0 32px 24px; background: #fee2e2; border: 1px solid #fca5a5; padding: 16px; border-radius: 12px; text-align: center; color: #991b1b;">
+        <div style="font-size: 16px; font-weight: 800;">❌ ĐƠN ĐẶT SÂN ĐÃ HẾT HẠN HIỆU LỰC (QUÁ 30 PHÚT)</div>
+        <p style="margin: 6px 0 0; font-size: 13px;">
+          Đơn đã bị tự động hủy do chưa nhận được chuyển khoản cọc. Ca sân đã được nhường cho người khác. Vui lòng quay lại đặt ca mới!
+        </p>
+      </div>
+
+      <!-- Action Footer -->
+      <div style="background: #f8fafc; padding: 20px 32px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <span style="font-size: 12px; color: #64748b;">
+          * Hỗ trợ kỹ thuật: <strong>0896.890.399</strong> (Lê Duy Tài - Lớp IT24M)
+        </span>
+        <button type="button" class="outline-button" style="color: #ef4444; border-color: #fca5a5;" onclick="openCancelModal()">
+          Yêu cầu hủy đơn này
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Cancel Modal -->
+  <div id="cancelModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Xác nhận hủy phiếu đặt</h3>
+        <button class="modal-close-btn" onclick="closeCancelModal()">✕</button>
+      </div>
+      <form onsubmit="handleCancelSubmit(event)" style="padding: 24px;">
+        <p style="font-size: 13px; color: #475569; margin: 0 0 16px;">
+          Bạn có chắc chắn muốn hủy phiếu đặt này? Sân sẽ được mở lại cho khách khác ngay lập tức.
+        </p>
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 700;">Lý do hủy:</label>
+          <select id="cancelReasonSelect" style="width: 100%; height: 42px;">
+            <option value="Bận việc đột xuất không đủ người đá">Bận việc đột xuất không đủ người đá</option>
+            <option value="Thời tiết mưa bão">Thời tiết mưa bão xấu</option>
+            <option value="Đổi lịch sang ngày khác">Muốn đổi sang ngày khác</option>
+            <option value="Khác">Lý do khác</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="button" class="outline-button" style="flex: 1;" onclick="closeCancelModal()">Không hủy</button>
+          <button type="submit" class="primary-button" style="flex: 1; background: #dc2626; border-color: #dc2626;">Xác nhận hủy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background: #0f172a; color: #94a3b8; padding: 30px 20px; margin-top: auto; font-size: 12px; text-align: center;">
+    <div>Hệ Thống Đặt Sân Bóng Đá Buôn Ma Thuột · Đồng hành bởi <strong>Lê Duy Tài</strong> (IT24M) &amp; <strong>Kpa Trần Quang Thịnh</strong></div>
+    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Neon Cloud DB · Wispbyte Server · VietQR Napas 247 · Bản quyền © 2026</div>
+  </footer>
+
+  <script src="./js/app.js"></script>
+  <script>
+    let currentViewingBooking = null;
+    let countdownTimerInterval = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderRecentChips();
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code") || params.get("bookingCode");
+      if (code) {
+        document.getElementById("lookupCode").value = code;
+        fillLookup(code, "");
+      }
+    });
+
+    function renderRecentChips() {
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const container = document.getElementById("recentChips");
+      if (bookings.length === 0) {
+        container.innerHTML = "<span style='font-size: 12px; color: #94a3b8;'>Chưa có vé lưu gần đây</span>";
+        return;
+      }
+      container.innerHTML = bookings.slice(0, 4).map(b => `
+        <button type="button" class="quick-day-btn" style="font-size: 11px; padding: 4px 10px;" onclick="fillLookup('${b.bookingCode}', '${b.customerPhone || ''}')">
+          ${b.bookingCode} (${(b.fieldName || b.parentVenueName || 'Sân').split(' ')[0]})
+        </button>
+      `).join("");
+    }
+
+    function fillLookup(code, phone) {
+      document.getElementById("lookupCode").value = code;
+      if (phone) document.getElementById("lookupPhone").value = phone;
+      executeSearch(code, phone);
+    }
+
+    async function handleLookup(e) {
+      e.preventDefault();
+      const code = document.getElementById("lookupCode").value.trim().toUpperCase();
+      const phone = document.getElementById("lookupPhone").value.trim();
+      await executeSearch(code, phone);
+    }
+
+    async function executeSearch(code, phone) {
+      if (!code && !phone) {
+        document.getElementById("noticeArea").innerHTML = `
+          <div style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px 18px; border-radius: 10px; font-size: 13px;">
+            Vui lòng nhập Mã phiếu đặt sân hoặc Số điện thoại để tra cứu!
+          </div>
+        `;
+        return;
+      }
+
+      document.getElementById("noticeArea").innerHTML = "";
+
+      // Try API first
+      try {
+        const queryParams = new URLSearchParams();
+        if (code) queryParams.set("bookingCode", code);
+        if (phone) queryParams.set("customerPhone", phone);
+
+        const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+        const res = await fetch(`${apiUrl}/bookings/lookup?${queryParams.toString()}`);
+        if (res.ok) {
+          const apiData = await res.json();
+          displayTicket(apiData);
+          return;
+        }
+      } catch (err) {
+        // Fallback to local
+      }
+
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const found = bookings.find(b => 
+        (code && b.bookingCode.toUpperCase() === code.toUpperCase()) ||
+        (phone && b.customerPhone === phone)
+      );
+
+      if (found) {
+        displayTicket(found);
+      } else {
+        document.getElementById("ticketResultCard").style.display = "none";
+        document.getElementById("noticeArea").innerHTML = `
+          <div style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px 18px; border-radius: 10px; font-size: 13px;">
+            Không tìm thấy phiếu đặt sân với mã <strong>${code || ''}</strong> ${phone ? `(SĐT: ${phone})` : ''}. Vui lòng kiểm tra lại!
+          </div>
+        `;
+      }
+    }
+
+    // Parse Neon UTC Date reliably across timezones
+    function parseUtcDateMs(val) {
+      if (!val) return Date.now();
+      if (typeof val === "number") return val;
+      let s = String(val).trim();
+      if (!s.endsWith("Z") && !s.includes("+")) {
+        s = s.replace(" ", "T") + "Z";
+      }
+      const ms = new Date(s).getTime();
+      return isNaN(ms) ? Date.now() : ms;
+    }
+
+    function displayTicket(booking) {
+      currentViewingBooking = booking;
+      document.getElementById("ticketResultCard").style.display = "block";
+      document.getElementById("resCode").textContent = booking.bookingCode;
+      document.getElementById("resField").textContent = booking.fieldName || booking.parentVenueName || "Cụm sân Buôn Ma Thuột";
+      document.getElementById("resSubPitch").textContent = booking.subPitchName || "Sân con chi tiết";
+      document.getElementById("resTime").textContent = `${booking.timeLabel || ''} ${booking.date || booking.startAt ? '· ' + (booking.date || booking.startAt.slice(0, 10)) : ''}`;
+      document.getElementById("resCustomer").textContent = `${booking.customerName} (${booking.customerPhone})`;
+      
+      const price = Number(booking.totalPrice || 250000);
+      const deposit = booking.depositAmount || Math.max(100000, Math.round(price * 0.3));
+      document.getElementById("resPrice").textContent = formatMoney(price);
+      document.getElementById("resDeposit").textContent = formatMoney(deposit);
+
+      // Check status & 30-min expiration
+      const createdAtMs = booking.createdAt ? parseUtcDateMs(booking.createdAt) : Date.now();
+      const diffMs = Date.now() - createdAtMs;
+      const isExpired = (diffMs > 30 * 60 * 1000 && booking.status === "PENDING") || booking.status === "CANCELLED";
+      const remainingSec = Math.max(0, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
+
+      const qrSection = document.getElementById("qrPaymentSection");
+      const expiredBanner = document.getElementById("expiredBanner");
+      const resBadge = document.getElementById("resBadge");
+
+      if (isExpired) {
+        resBadge.className = "badge-status badge-cancelled";
+        resBadge.textContent = "✕ Đã hủy (Quá hạn 30p)";
+        qrSection.style.display = "none";
+        expiredBanner.style.display = "block";
+      } else if (booking.status === "CONFIRMED") {
+        resBadge.className = "badge-status badge-confirmed";
+        resBadge.textContent = "✓ Đã nhận cọc & Xác nhận";
+        qrSection.style.display = "none";
+        expiredBanner.style.display = "none";
+      } else {
+        // Pending deposit with valid QR
+        resBadge.className = "badge-status badge-pending";
+        resBadge.textContent = "⏳ Chờ chuyển cọc (Còn hạn 30p)";
+        qrSection.style.display = "block";
+        expiredBanner.style.display = "none";
+
+        const qrImgUrl = `https://img.vietqr.io/image/970422-02304200699999-compact2.png?amount=${deposit}&addInfo=${encodeURIComponent(booking.bookingCode)}&accountName=LE%20DUY%20TAI`;
+        document.getElementById("qrImage").src = qrImgUrl;
+        document.getElementById("qrDepositAmount").textContent = formatMoney(deposit);
+        document.getElementById("qrTransferContent").textContent = booking.bookingCode;
+
+        startCountdown(remainingSec > 0 ? remainingSec : 1800);
+      }
+    }
+
+    function startCountdown(seconds) {
+      if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+      let left = seconds;
+
+      function update() {
+        if (left <= 0) {
+          clearInterval(countdownTimerInterval);
+          document.getElementById("qrPaymentSection").style.display = "none";
+          document.getElementById("expiredBanner").style.display = "block";
+          document.getElementById("resBadge").className = "badge-status badge-cancelled";
+          document.getElementById("resBadge").textContent = "✕ Đã hủy (Quá hạn 30p)";
+          return;
+        }
+        const m = Math.floor(left / 60).toString().padStart(2, "0");
+        const s = (left % 60).toString().padStart(2, "0");
+        document.getElementById("countdownTimer").textContent = `${m}:${s}`;
+        left--;
+      }
+
+      update();
+      countdownTimerInterval = setInterval(update, 1000);
+    }
+
+    function openCancelModal() {
+      document.getElementById("cancelModal").style.display = "flex";
+    }
+
+    function closeCancelModal() {
+      document.getElementById("cancelModal").style.display = "none";
+    }
+
+    function handleCancelSubmit(e) {
+      e.preventDefault();
+      if (!currentViewingBooking) return;
+      currentViewingBooking.status = "CANCELLED";
+      currentViewingBooking.cancelReason = document.getElementById("cancelReasonSelect").value;
+      
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const updated = bookings.map(b => b.bookingCode === currentViewingBooking.bookingCode ? currentViewingBooking : b);
+      localStorage.setItem("my-bookings", JSON.stringify(updated));
+
+      closeCancelModal();
+      displayTicket(currentViewingBooking);
+    }
+
+    function formatMoney(n) {
+      return new Intl.NumberFormat("vi-VN").format(Number(n)) + "đ";
+    }
+  </script>
+</body>
+</html>

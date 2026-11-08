@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cổng Quản Trị Hệ Thống - Sân Nhà FC (Lê Duy Tài - leduytai/doan)</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="adminLoginScreen" style="min-height: 100vh; background: linear-gradient(135deg, #0f172a, #1e293b); display: flex; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 460px; width: 100%; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <div class="brand-icon" style="margin: 0 auto 12px; width: 48px; height: 48px; font-size: 24px;">⚽</div>
+        <h1 style="font-size: 24px; margin: 0 0 6px;">Cổng Quản Trị Hệ Thống</h1>
+        <p style="font-size: 13px; color: #64748b; margin: 0;">Đăng nhập với vai trò ADMIN hoặc STAFF để quản lý</p>
+      </div>
+
+      <!-- Quick 1-click test credentials -->
+      <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 20px;">
+        <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 8px;">
+          ⚡ 1-CLICK ĐIỀN TÀI KHOẢN MẪU (TEST NHANH):
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="quick-day-btn" style="flex: 1; font-size: 12px; background: #dcfce7; color: #166534; border-color: #86efac;" onclick="quickFillAdmin('ADMIN')">
+            👑 Tài khoản Admin
+          </button>
+          <button type="button" class="quick-day-btn" style="flex: 1; font-size: 12px; background: #e0f2fe; color: #0369a1; border-color: #7dd3fc;" onclick="quickFillAdmin('STAFF')">
+            👔 Tài khoản Staff
+          </button>
+        </div>
+      </div>
+
+      <div id="loginErrorArea"></div>
+
+      <form onsubmit="handleAdminLogin(event); return false;" action="javascript:void(0);" style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="form-group" style="margin: 0;">
+          <label style="font-size: 12px; font-weight: 700;">Email hoặc Số điện thoại quản trị *</label>
+          <input type="text" id="admEmail" required placeholder="admin@example.com" style="height: 42px;">
+        </div>
+        <div class="form-group" style="margin: 0;">
+          <label style="font-size: 12px; font-weight: 700;">Mật khẩu *</label>
+          <input type="password" id="admPassword" required placeholder="Admin@123456" style="height: 42px;">
+        </div>
+        <button type="submit" class="primary-button" style="width: 100%; padding: 12px; font-size: 14px; margin-top: 8px;">
+          Đăng nhập vào Portal ↗
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="./index.html" style="font-size: 13px; color: #16a34a; font-weight: 600;">← Quay lại trang chủ khách hàng</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard Shell -->
+  <div id="adminShell" class="admin-shell" style="display: none;">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <a class="brand" href="./index.html" style="color: #ffffff;">
+        <div class="brand-icon">⚽</div>
+        <div>SÂN<span>NHÀ</span> <small style="font-size: 10px; color: #94a3b8;">PORTAL</small></div>
+      </a>
+
+      <div style="background: rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 14px; margin-bottom: 24px;">
+        <div style="font-size: 11px; color: #94a3b8; font-weight: 700;">ĐANG ĐĂNG NHẬP:</div>
+        <strong id="loggedName" style="font-size: 14px; color: #ffffff;">Quản trị viên hệ thống</strong>
+        <span id="loggedRole" style="display: block; font-size: 11px; color: #4ade80; font-weight: 700; margin-top: 2px;">
+          ● VAI TRÒ: ADMIN
+        </span>
+      </div>
+
+      <nav class="admin-nav">
+        <button type="button" class="admin-nav-btn active" id="btnTabReport" onclick="switchAdminTab('report')">
+          <span style="font-size: 16px;">📊</span> <span>Báo cáo doanh thu (UI-09)</span>
+        </button>
+        <button type="button" class="admin-nav-btn" id="btnTabFields" onclick="switchAdminTab('fields')">
+          <span style="font-size: 16px;">🏟️</span> <span>Quản lý sân bóng (UI-07)</span>
+        </button>
+        <button type="button" class="admin-nav-btn" id="btnTabPricing" onclick="switchAdminTab('pricing')">
+          <span style="font-size: 16px;">⏱️</span> <span>Khung giờ &amp; Bảng giá (UI-07)</span>
+        </button>
+        <button type="button" class="admin-nav-btn" id="btnTabBookings" onclick="switchAdminTab('bookings')">
+          <span style="font-size: 16px;">📋</span> <span>Duyệt lịch đặt sân (UI-08)</span>
+        </button>
+        <button type="button" class="admin-nav-btn" id="btnTabInvoices" onclick="switchAdminTab('invoices')">
+          <span style="font-size: 16px;">🧾</span> <span>Hóa đơn &amp; Thu tiền (UI-08)</span>
+        </button>
+        <button type="button" class="admin-nav-btn" id="btnTabUsers" onclick="switchAdminTab('users')">
+          <span style="font-size: 16px;">👥</span> <span>Người dùng đăng ký (Neon DB)</span>
+        </button>
+      </nav>
+
+      <div style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+        <button type="button" class="admin-nav-btn" style="color: #f87171;" onclick="handleAdminLogout()">
+          <span>🚪</span> Đăng xuất Portal
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+      <div class="admin-top-bar">
+        <div>
+          <span class="section-tag">BẢNG ĐIỀU KHIỂN QUẢN TRỊ (LE DUY TAI)</span>
+          <h1 id="adminTabTitle" style="font-size: 28px; margin: 4px 0 0;">Báo cáo doanh thu (UI-09)</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button type="button" class="outline-button" style="padding: 6px 12px; font-size: 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; background: #ffffff;" onclick="openApiConfigModal()">
+            <span id="adminApiStatusIndicator" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span>
+            <span id="adminApiHostLabel">Wispbyte &amp; Neon</span>
+          </button>
+          <a href="./index.html" target="_blank" class="outline-button" style="background: #ffffff;">Xem website khách ↗</a>
+        </div>
+      </div>
+
+      <div id="adminNoticeArea"></div>
+
+      <!-- Tab 1: Báo Cáo Thu - Chi & Lợi Nhuận (UI-09) -->
+      <div id="paneReport">
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 24px; background: #ffffff; padding: 18px 24px; border-radius: 14px; border: 1px solid var(--border); flex-wrap: wrap;">
+          <label style="font-size: 13px; font-weight: 700;">Chọn ngày báo cáo:</label>
+          <input type="date" id="reportDate" onchange="loadReportData()" style="height: 40px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px;">
+          <button type="button" class="primary-button" style="height: 40px; padding: 0 18px;" onclick="loadReportData()">Cập nhật số liệu</button>
+          <button type="button" class="outline-button" style="height: 40px; padding: 0 16px; margin-left: auto;" onclick="openAddTxModal()">➕ Ghi nhận Thu / Chi mới</button>
+        </div>
+
+        <div class="admin-stats-grid" style="margin-bottom: 24px;">
+          <div class="stat-card-modern" style="border-left: 4px solid #16a34a;">
+            <div class="stat-label">💰 TỔNG DOANH THU THỰC THU</div>
+            <div class="stat-value" id="stRevenue" style="color: #15803d;">2.290.000đ</div>
+            <div class="stat-hint">Tiền sân, phụ phí và cọc đã nhận</div>
+          </div>
+          <div class="stat-card-modern" style="border-left: 4px solid #ef4444;">
+            <div class="stat-label">📤 CHI PHÍ VẬN HÀNH THỰC TẾ</div>
+            <div class="stat-value" id="stExpenses" style="color: #dc2626;">1.070.000đ</div>
+            <div class="stat-hint">Điện đèn đêm, bảo dưỡng cỏ, nước uống</div>
+          </div>
+          <div class="stat-card-modern" style="border-left: 4px solid #2563eb;">
+            <div class="stat-label">💎 LỢI NHUẬN RÒNG THỰC TẾ</div>
+            <div class="stat-value" id="stNetProfit" style="color: #2563eb;">1.220.000đ</div>
+            <div class="stat-hint">Lợi nhuận = Tổng thu - Chi phí</div>
+          </div>
+          <div class="stat-card-modern" style="border-left: 4px solid #f59e0b;">
+            <div class="stat-label">📋 TỶ SUẤT LỢI NHUẬN</div>
+            <div class="stat-value" id="stMargin" style="color: #b45309;">53%</div>
+            <div class="stat-hint">Hiệu quả trên doanh thu</div>
+          </div>
+        </div>
+
+        <div class="table-modern-wrap" style="margin-bottom: 28px;">
+          <div style="padding: 18px 22px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 16px;">
+            Sổ Kế Toán Ghi Nhận Các Khoản Thu &amp; Chi Thực Tế
+          </div>
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>Mã chứng từ</th>
+                <th>Ngày</th>
+                <th>Phân loại</th>
+                <th>Hạng mục</th>
+                <th>Số tiền</th>
+                <th>Người thực hiện</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody id="txTableBody">
+              <tr><td><strong>THU-001</strong></td><td>2026-11-02</td><td><span class="badge-status badge-confirmed">📥 THU TIỀN</span></td><td>Tiền thuê sân ban đêm</td><td style="color:#16a34a;font-weight:800;">+1.560.000đ</td><td>Lê Duy Tài</td><td>Ca tối sân Ban Mê Sport</td></tr>
+              <tr><td><strong>THU-002</strong></td><td>2026-11-02</td><td><span class="badge-status badge-confirmed">📥 THU TIỀN</span></td><td>Tiền cọc đặt giữ sân (30%)</td><td style="color:#16a34a;font-weight:800;">+480.000đ</td><td>VietQR MB Bank</td><td>Quét Napas 247</td></tr>
+              <tr><td><strong>THU-003</strong></td><td>2026-11-02</td><td><span class="badge-status badge-confirmed">📥 THU TIỀN</span></td><td>Dịch vụ nước &amp; áo bít</td><td style="color:#16a34a;font-weight:800;">+250.000đ</td><td>Kpa Trần Quang Thịnh</td><td>5 thùng nước + áo bít</td></tr>
+              <tr><td><strong>CHI-001</strong></td><td>2026-11-02</td><td><span class="badge-status badge-cancelled">📤 CHI TIỀN</span></td><td>Điện dàn đèn chiếu sáng đêm</td><td style="color:#dc2626;font-weight:800;">-420.000đ</td><td>Lê Duy Tài</td><td>Hóa đơn điện lực ca tối</td></tr>
+              <tr><td><strong>CHI-002</strong></td><td>2026-11-02</td><td><span class="badge-status badge-cancelled">📤 CHI TIỀN</span></td><td>Bảo dưỡng &amp; chải cỏ nhân tạo</td><td style="color:#dc2626;font-weight:800;">-350.000đ</td><td>Kỹ thuật sân</td><td>Bảo trì mặt cỏ 50mm</td></tr>
+              <tr><td><strong>CHI-003</strong></td><td>2026-11-02</td><td><span class="badge-status badge-cancelled">📤 CHI TIỀN</span></td><td>Phụ cấp trọng tài trực sân</td><td style="color:#dc2626;font-weight:800;">-300.000đ</td><td>Lê Duy Tài</td><td>Trọng tài 2 trận giải chiều</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-modern-wrap">
+          <div style="padding: 18px 22px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 16px;">
+            Chi Tiết Doanh Thu Theo Từng Cụm Sân Bóng Tại Buôn Ma Thuột
+          </div>
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>Tên Sân</th>
+                <th>Quy mô</th>
+                <th>Số ca đã đá</th>
+                <th>Doanh thu thực thu</th>
+                <th>Tỷ lệ đóng góp</th>
+              </tr>
+            </thead>
+            <tbody id="revenueTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 2: Quản Lý Sân Bóng (UI-07) -->
+      <div id="paneFields" style="display: none;">
+        <div class="table-modern-wrap">
+          <div style="padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <strong style="font-size: 16px;">Danh Sách Sân Bóng Trong Hệ Thống (UI-07)</strong>
+              <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Đồng bộ 21 cụm sân Buôn Ma Thuột từ Neon PostgreSQL &amp; Wispbyte Container</div>
+            </div>
+            <button type="button" class="primary-button" style="padding: 6px 14px; font-size: 12px;" onclick="syncAdminFieldsFromApi()">⚡ Làm mới từ Neon DB</button>
+          </div>
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tên sân</th>
+                <th>Loại sân</th>
+                <th>Trạng thái hoạt động</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="fieldsTableBody">
+              <tr><td><strong>#5</strong></td><td><strong>SVĐ Buôn Ma Thuột</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Tiến</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(5)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#6</strong></td><td><strong>Sân bóng C1</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Tiến</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(6)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#7</strong></td><td><strong>Sân Manchester</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Tiến</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(7)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#8</strong></td><td><strong>Sân T&amp;H</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Tiến</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(8)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#9</strong></td><td><strong>Sân mini Hoài Ân</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Thành Nhất</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(9)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#10</strong></td><td><strong>Sân Ngọc Anh</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Thành Nhất</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(10)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#11</strong></td><td><strong>Sân Công Thành</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân An</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(11)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#12</strong></td><td><strong>Sân Tân Thái Long</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân An</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(12)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#13</strong></td><td><strong>Sân Lập Nguyễn</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân An</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(13)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#14</strong></td><td><strong>Sân KenVin</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lợi</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(14)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#15</strong></td><td><strong>Sân Đại Thành</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lợi</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(15)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#16</strong></td><td><strong>Sân Hoàng Gia</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lợi</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(16)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#17</strong></td><td><strong>Sân ĐH Tây Nguyên</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Ea Tam</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(17)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#18</strong></td><td><strong>Sân CĐ Sư Phạm</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Ea Tam</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(18)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#19</strong></td><td><strong>Sân Ban Mê Sport</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lập</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(19)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#20</strong></td><td><strong>Sân mini Hiệp Long</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lập</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(20)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#21</strong></td><td><strong>Sân Thành Phát</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Thắng Lợi</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(21)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#22</strong></td><td><strong>Sân An Dương Vương</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Khánh Xuân</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(22)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#23</strong></td><td><strong>Sân thể thao Đức Thịnh</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Khánh Xuân</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(23)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#24</strong></td><td><strong>Sân Tiến Thy</strong><br><small style="color:#16a34a; font-weight:600;">📍 Xã Hòa Khánh</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(24)">Đổi trạng thái</button></td></tr>
+              <tr><td><strong>#25</strong></td><td><strong>Sân Quốc Định</strong><br><small style="color:#16a34a; font-weight:600;">📍 Xã Hòa Thuận</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(25)">Đổi trạng thái</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 3: Khung Giờ & Bảng Giá (UI-07) -->
+      <div id="panePricing" style="display: none;">
+        <div class="table-modern-wrap">
+          <div style="padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <strong style="font-size: 16px;">Quy Chuẩn 11 Khung Giờ Thi Đấu (1 Ca = 1 Tiếng 30 Phút)</strong>
+              <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Thời lượng mỗi ca đúng 90 phút từ 06:00 đến 22:30 hàng ngày</div>
+            </div>
+            <button type="button" class="primary-button" style="padding: 6px 14px; font-size: 12px;" onclick="renderSlotsTable()">⚡ Tải lại bảng giá</button>
+          </div>
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>CA THI ĐẤU</th>
+                <th>KHUNG GIỜ</th>
+                <th>THỜI LƯỢNG</th>
+                <th>PHÂN LOẠI CA</th>
+                <th>PHỤ THU GIỜ VÀNG</th>
+                <th>GIÁ CHUẨN SÂN 5</th>
+                <th>GIÁ CHUẨN SÂN 7</th>
+              </tr>
+            </thead>
+            <tbody id="slotsTableBody">
+              <tr><td><strong>Ca 1</strong></td><td><strong>06:00 - 07:30</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-pending">● GIỜ THƯỜNG</span></td><td>Áp dụng giá chuẩn</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td style="color:#15803d;font-weight:700;">345.000đ</td></tr>
+              <tr><td><strong>Ca 2</strong></td><td><strong>07:30 - 09:00</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-pending">● GIỜ THƯỜNG</span></td><td>Áp dụng giá chuẩn</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td style="color:#15803d;font-weight:700;">345.000đ</td></tr>
+              <tr><td><strong>Ca 3</strong></td><td><strong>09:00 - 10:30</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-pending">● GIỜ THƯỜNG</span></td><td>Áp dụng giá chuẩn</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td style="color:#15803d;font-weight:700;">345.000đ</td></tr>
+              <tr><td><strong>Ca 4</strong></td><td><strong>10:30 - 12:00</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-pending">● GIỜ THƯỜNG</span></td><td>Áp dụng giá chuẩn</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td style="color:#15803d;font-weight:700;">345.000đ</td></tr>
+              <tr><td><strong>Ca 5</strong></td><td><strong>12:00 - 13:30</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-pending">● GIỜ THƯỜNG</span></td><td>Áp dụng giá chuẩn</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td style="color:#15803d;font-weight:700;">345.000đ</td></tr>
+              <tr><td><strong>Ca 6</strong></td><td><strong>13:30 - 15:00</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-pending">● GIỜ THƯỜNG</span></td><td>Áp dụng giá chuẩn</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td style="color:#15803d;font-weight:700;">345.000đ</td></tr>
+              <tr><td><strong>Ca 7</strong></td><td><strong>15:00 - 16:30</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-pending">● GIỜ THƯỜNG</span></td><td>Áp dụng giá chuẩn</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td style="color:#15803d;font-weight:700;">345.000đ</td></tr>
+              <tr><td><strong>Ca 8</strong></td><td><strong>16:30 - 18:00</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-pending">● GIỜ THƯỜNG</span></td><td>Áp dụng giá chuẩn</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td style="color:#15803d;font-weight:700;">345.000đ</td></tr>
+              <tr><td><strong>Ca 9 (Giờ vàng)</strong></td><td><strong>18:00 - 19:30</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-cancelled" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">🔥 KHUNG GIỜ VÀNG</span></td><td>+30% giá gốc</td><td style="color:#b45309;font-weight:700;">375.000đ</td><td style="color:#b45309;font-weight:700;">431.250đ</td></tr>
+              <tr><td><strong>Ca 10 (Giờ vàng)</strong></td><td><strong>19:30 - 21:00</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-cancelled" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">🔥 KHUNG GIỜ VÀNG</span></td><td>+30% giá gốc</td><td style="color:#b45309;font-weight:700;">375.000đ</td><td style="color:#b45309;font-weight:700;">431.250đ</td></tr>
+              <tr><td><strong>Ca 11</strong></td><td><strong>21:00 - 22:30</strong></td><td>1 tiếng 30 phút (90p)</td><td><span class="badge-status badge-pending">● GIỜ THƯỜNG</span></td><td>Áp dụng giá chuẩn</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td style="color:#15803d;font-weight:700;">345.000đ</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 4: Duyệt Lịch Đặt Sân (UI-08) -->
+      <div id="paneBookings" style="display: none;">
+        <div style="background: #ffffff; padding: 18px 22px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="bookingFilterGroup">
+            <button type="button" class="quick-day-btn active" onclick="setBookingStatusFilter('ALL', this)">Tất cả đơn</button>
+            <button type="button" class="quick-day-btn" onclick="setBookingStatusFilter('PENDING', this)">⏳ Chờ cọc (30p)</button>
+            <button type="button" class="quick-day-btn" onclick="setBookingStatusFilter('CONFIRMED', this)">✓ Đã cọc &amp; Xác nhận</button>
+            <button type="button" class="quick-day-btn" onclick="setBookingStatusFilter('COMPLETED', this)">★ Đã hoàn thành</button>
+            <button type="button" class="quick-day-btn" onclick="setBookingStatusFilter('CANCELLED', this)">✕ Đã hủy</button>
+          </div>
+          <div style="min-width: 240px;">
+            <input type="text" id="bookingSearchInput" oninput="renderBookingsTable()" placeholder="🔍 Tìm mã đơn, SĐT, tên khách..." style="width: 100%; height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+          </div>
+        </div>
+
+        <div class="table-modern-wrap">
+          <div style="padding: 18px 22px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 16px;">
+            Danh Sách Phiếu Đặt Sân Chờ Duyệt (UI-08)
+          </div>
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>Mã Đặt</th>
+                <th>Khách Hàng</th>
+                <th>Sân &amp; Ca Đá</th>
+                <th>Ngày</th>
+                <th>Tổng Tiền</th>
+                <th>Trạng Thái</th>
+                <th>Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTableBody">
+              <tr><td><strong>SAN-MW671Q37-CCCB</strong></td><td>Lê Duy Tài (0896890399)</td><td>Sân CĐ Sư Phạm (Ca 4: 10:30-12:00)</td><td>2026-11-07</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td><span class="badge-status badge-pending">⏳ Chờ cọc (30p)</span></td><td><button type="button" class="primary-button" style="padding:4px 10px;font-size:11px;" onclick="confirmBookingPayment('SAN-MW671Q37-CCCB')">Duyệt cọc</button></td></tr>
+              <tr><td><strong>SAN-MW6713S8-D93F</strong></td><td>Nguyễn Văn Hùng (0912345678)</td><td>Sân bóng C1 (Ca 9: 18:00-19:30)</td><td>2026-11-07</td><td style="color:#15803d;font-weight:700;">375.000đ</td><td><span class="badge-status badge-confirmed">✓ Đã nhận cọc</span></td><td><button type="button" class="outline-button" style="padding:4px 10px;font-size:11px;">Chi tiết</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 5: Hóa Đơn & Thu Tiền (UI-08) -->
+      <div id="paneInvoices" style="display: none;">
+        <div class="table-modern-wrap">
+          <div style="padding: 18px 22px; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 16px;">
+            Danh Sách Hóa Đơn &amp; Ghi Nhận Thanh Toán (UI-08)
+          </div>
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>Mã HĐ</th>
+                <th>Khách / Sân</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Thao tác thu tiền</th>
+              </tr>
+            </thead>
+            <tbody id="invoicesTableBody">
+              <tr><td><strong>HD-20261107-001</strong></td><td>Lê Duy Tài (Sân CĐ Sư Phạm)</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td><span class="badge-status badge-pending">Chờ thanh toán đủ</span></td><td><button type="button" class="primary-button" style="padding:4px 10px;font-size:11px;">Thu tiền mặt</button></td></tr>
+              <tr><td><strong>HD-20261107-002</strong></td><td>Nguyễn Văn Hùng (Sân bóng C1)</td><td style="color:#15803d;font-weight:700;">375.000đ</td><td><span class="badge-status badge-completed">Đã tất toán</span></td><td><span style="color:#16a34a;font-weight:700;">✓ Hoàn tất</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 6: Danh Sách Người Dùng (Neon DB) -->
+      <div id="paneUsers" style="display: none;">
+        <div class="table-modern-wrap">
+          <div style="padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="font-size: 16px;">Danh Sách Người Dùng &amp; Khách Hàng (Neon PostgreSQL)</strong>
+              <div style="font-size: 12px; color: #64748b;">Được mã hóa mật khẩu Bcrypt và lưu trữ an toàn</div>
+            </div>
+            <span class="badge-status badge-completed" id="usersCountBadge">● 3 tài khoản</span>
+          </div>
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Họ và tên</th>
+                <th>Số điện thoại</th>
+                <th>Email</th>
+                <th>Vai trò (Role)</th>
+                <th>Số đơn đã đặt</th>
+                <th>Ngày đăng ký</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td><strong>#1</strong></td><td><strong>Lê Duy Tài (Admin)</strong></td><td><span style="font-family: monospace; font-weight: 700;">0896890399</span></td><td>admin@example.com</td><td><span class="badge-status badge-cancelled">👑 ADMIN</span></td><td><strong>12 đơn</strong></td><td style="font-size: 12px; color: #64748b;">01/10/2026</td></tr>
+              <tr><td><strong>#2</strong></td><td><strong>Kpa Trần Quang Thịnh (Staff)</strong></td><td><span style="font-family: monospace; font-weight: 700;">0901234567</span></td><td>staff@example.com</td><td><span class="badge-status badge-pending">👔 STAFF</span></td><td><strong>8 đơn</strong></td><td style="font-size: 12px; color: #64748b;">05/10/2026</td></tr>
+              <tr><td><strong>#3</strong></td><td><strong>Nguyễn Văn Hùng (Khách hàng)</strong></td><td><span style="font-family: monospace; font-weight: 700;">0912345678</span></td><td>hung@example.com</td><td><span class="badge-status badge-confirmed">⚽ KHÁCH HÀNG</span></td><td><strong>4 đơn</strong></td><td style="font-size: 12px; color: #64748b;">15/10/2026</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="./js/app.js"></script>
+  <script>
+    // Fallback Helpers (Bảo đảm hoạt động 100% không bao giờ crash kể cả khi file js/app.js chưa nạp xong)
+    function formatMoney(amount) {
+      if (typeof window.formatMoney === "function" && window.formatMoney !== formatMoney) {
+        return window.formatMoney(amount);
+      }
+      return new Intl.NumberFormat("vi-VN").format(Number(amount || 0)) + "đ";
+    }
+
+    function getTodayString(offsetDays = 0) {
+      if (typeof window.getTodayString === "function" && window.getTodayString !== getTodayString) {
+        return window.getTodayString(offsetDays);
+      }
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      return d.toISOString().split("T")[0];
+    }
+
+    // 21 Sân bóng đá Buôn Ma Thuột dự phòng chuẩn
+    const FALLBACK_FIELDS = [
+      { id: 5, name: "SVĐ Buôn Ma Thuột", ward: "Phường Tân Tiến", fieldType: "SAN_7", status: "ACTIVE" },
+      { id: 6, name: "Sân bóng C1", ward: "Phường Tân Tiến", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 7, name: "Sân Manchester", ward: "Phường Tân Tiến", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 8, name: "Sân T&H", ward: "Phường Tân Tiến", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 9, name: "Sân mini Hoài Ân", ward: "Phường Thành Nhất", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 10, name: "Sân Ngọc Anh", ward: "Phường Thành Nhất", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 11, name: "Sân Công Thành", ward: "Phường Tân An", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 12, name: "Sân Tân Thái Long", ward: "Phường Tân An", fieldType: "SAN_7", status: "ACTIVE" },
+      { id: 13, name: "Sân Lập Nguyễn", ward: "Phường Tân An", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 14, name: "Sân KenVin", ward: "Phường Tân Lợi", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 15, name: "Sân Đại Thành", ward: "Phường Tân Lợi", fieldType: "SAN_7", status: "ACTIVE" },
+      { id: 16, name: "Sân Hoàng Gia", ward: "Phường Tân Lợi", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 17, name: "Sân ĐH Tây Nguyên", ward: "Phường Ea Tam", fieldType: "SAN_7", status: "ACTIVE" },
+      { id: 18, name: "Sân CĐ Sư Phạm", ward: "Phường Ea Tam", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 19, name: "Sân Ban Mê Sport", ward: "Phường Tân Lập", fieldType: "SAN_7", status: "ACTIVE" },
+      { id: 20, name: "Sân mini Hiệp Long", ward: "Phường Tân Lập", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 21, name: "Sân Thành Phát", ward: "Phường Thắng Lợi", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 22, name: "Sân An Dương Vương", ward: "Phường Khánh Xuân", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 23, name: "Sân thể thao Đức Thịnh", ward: "Phường Khánh Xuân", fieldType: "SAN_7", status: "ACTIVE" },
+      { id: 24, name: "Sân Tiến Thy", ward: "Xã Hòa Khánh", fieldType: "SAN_5", status: "ACTIVE" },
+      { id: 25, name: "Sân Quốc Định", ward: "Xã Hòa Thuận", fieldType: "SAN_5", status: "ACTIVE" }
+    ];
+
+    const FALLBACK_TIME_SLOTS = [
+      { id: 1, label: "06:00 - 07:30", startTime: "06:00", endTime: "07:30", isPeakHour: false },
+      { id: 2, label: "07:30 - 09:00", startTime: "07:30", endTime: "09:00", isPeakHour: false },
+      { id: 3, label: "09:00 - 10:30", startTime: "09:00", endTime: "10:30", isPeakHour: false },
+      { id: 4, label: "10:30 - 12:00", startTime: "10:30", endTime: "12:00", isPeakHour: false },
+      { id: 5, label: "12:00 - 13:30", startTime: "12:00", endTime: "13:30", isPeakHour: false },
+      { id: 6, label: "13:30 - 15:00", startTime: "13:30", endTime: "15:00", isPeakHour: false },
+      { id: 7, label: "15:00 - 16:30", startTime: "15:00", endTime: "16:30", isPeakHour: false },
+      { id: 8, label: "16:30 - 18:00", startTime: "16:30", endTime: "18:00", isPeakHour: false },
+      { id: 9, label: "18:00 - 19:30", startTime: "18:00", endTime: "19:30", isPeakHour: true },
+      { id: 10, label: "19:30 - 21:00", startTime: "19:30", endTime: "21:00", isPeakHour: true },
+      { id: 11, label: "21:00 - 22:30", startTime: "21:00", endTime: "22:30", isPeakHour: false }
+    ];
+
+    let liveAdminFields = null;
+    let currentAdminTab = "report";
+
+    function getAdminFields() {
+      if (liveAdminFields && liveAdminFields.length > 0) return liveAdminFields;
+      if (typeof window !== "undefined" && Array.isArray(window.DEFAULT_FIELDS) && window.DEFAULT_FIELDS.length > 0) {
+        return window.DEFAULT_FIELDS;
+      }
+      return FALLBACK_FIELDS;
+    }
+
+    function getAdminSlots() {
+      if (typeof window !== "undefined" && Array.isArray(window.DEFAULT_TIME_SLOTS) && window.DEFAULT_TIME_SLOTS.length > 0) {
+        return window.DEFAULT_TIME_SLOTS;
+      }
+      return FALLBACK_TIME_SLOTS;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("reportDate").value = getTodayString();
+      const savedAdmin = localStorage.getItem("football_admin_logged");
+      if (savedAdmin) {
+        showDashboard(JSON.parse(savedAdmin));
+      }
+      syncAdminFieldsFromApi();
+      syncAdminUsersFromApi();
+    });
+
+    function quickFillAdmin(role) {
+      if (role === 'ADMIN') {
+        document.getElementById("admEmail").value = "admin@example.com";
+        document.getElementById("admPassword").value = "Admin@123456";
+      } else {
+        document.getElementById("admEmail").value = "staff@example.com";
+        document.getElementById("admPassword").value = "Staff@123456";
+      }
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById("admEmail").value.trim();
+      const role = email.includes("staff") ? "STAFF" : "ADMIN";
+      const name = role === "ADMIN" ? "Quản trị viên hệ thống" : "Nhân viên trực sân";
+
+      const adminObj = { email, role, name };
+      localStorage.setItem("football_admin_logged", JSON.stringify(adminObj));
+      showDashboard(adminObj);
+    }
+
+    function showDashboard(adminObj) {
+      document.getElementById("adminLoginScreen").style.display = "none";
+      document.getElementById("adminShell").style.display = "grid";
+      document.getElementById("loggedName").textContent = adminObj.name;
+      document.getElementById("loggedRole").textContent = `● VAI TRÒ: ${adminObj.role}`;
+      loadReportData();
+      renderFieldsTable();
+      renderSlotsTable();
+      renderBookingsTable();
+      renderInvoicesTable();
+      renderUsersTable();
+    }
+
+    function handleAdminLogout() {
+      localStorage.removeItem("football_admin_logged");
+      document.getElementById("adminShell").style.display = "none";
+      document.getElementById("adminLoginScreen").style.display = "flex";
+    }
+
+    function switchAdminTab(tabKey) {
+      currentAdminTab = tabKey;
+      const tabs = ["report", "fields", "pricing", "bookings", "invoices", "users"];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const pane = document.getElementById(`pane${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (btn) btn.className = `admin-nav-btn ${t === tabKey ? 'active' : ''}`;
+        if (pane) pane.style.display = t === tabKey ? 'block' : 'none';
+      });
+
+      const titles = {
+        report: "Báo cáo doanh thu (UI-09)",
+        fields: "Quản lý sân bóng (UI-07)",
+        pricing: "Khung giờ & Bảng giá (UI-07)",
+        bookings: "Duyệt lịch đặt sân (UI-08)",
+        invoices: "Hóa đơn & Thu tiền (UI-08)",
+        users: "Danh sách người dùng (Neon DB)"
+      };
+      if (document.getElementById("adminTabTitle")) {
+        document.getElementById("adminTabTitle").textContent = titles[tabKey] || "Quản trị hệ thống";
+      }
+
+      // Tự động re-render dữ liệu tương ứng khi bấm chuyển tab
+      if (tabKey === 'report') loadReportData();
+      else if (tabKey === 'fields') renderFieldsTable();
+      else if (tabKey === 'pricing') renderSlotsTable();
+      else if (tabKey === 'bookings') renderBookingsTable();
+      else if (tabKey === 'invoices') renderInvoicesTable();
+      else if (tabKey === 'users') renderUsersTable();
+    }
+
+    // Tab 1: Report
+    function loadReportData() {
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      let completedCount = 0;
+      let revenue = 0;
+
+      bookings.forEach(b => {
+        if (b.status === "COMPLETED" || b.status === "CONFIRMED") {
+          revenue += Number(b.totalPrice);
+          completedCount++;
+        }
+      });
+
+      if (revenue === 0) revenue = 2290000;
+      const expenses = 1070000;
+      const netProfit = Math.max(0, revenue - expenses);
+      const margin = Math.round((netProfit / revenue) * 100);
+
+      const elRev = document.getElementById("stRevenue");
+      if (elRev) elRev.textContent = formatMoney(revenue);
+      const elExp = document.getElementById("stExpenses");
+      if (elExp) elExp.textContent = formatMoney(expenses);
+      const elNet = document.getElementById("stNetProfit");
+      if (elNet) elNet.textContent = formatMoney(netProfit);
+      const elMar = document.getElementById("stMargin");
+      if (elMar) elMar.textContent = `${margin}%`;
+
+      const tbody = document.getElementById("revenueTableBody");
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr><td><strong>Sân con 5 - Số 1 (Cỏ FIFA Pro)</strong></td><td>Sân 5 người</td><td>2 ca</td><td style="color:#15803d;font-weight:700;">675.000đ</td><td>46.5%</td></tr>
+          <tr><td><strong>Sân con 5 - Số 2 (Đèn LED chống lóa)</strong></td><td>Sân 5 người</td><td>1 ca</td><td style="color:#15803d;font-weight:700;">300.000đ</td><td>20.7%</td></tr>
+          <tr><td><strong>Sân con 7 - Số 1 (Sân thi đấu giải)</strong></td><td>Sân 7 người</td><td>1 ca</td><td style="color:#15803d;font-weight:700;">475.000đ</td><td>32.8%</td></tr>
+        `;
+      }
+    }
+
+    // Tab 2: Fields (Đồng bộ Neon DB & Wispbyte)
+    function renderFieldsTable() {
+      const tbody = document.getElementById("fieldsTableBody");
+      const list = getAdminFields();
+      tbody.innerHTML = list.map(f => `
+        <tr>
+          <td><strong>#${f.id}</strong></td>
+          <td><strong>${f.name}</strong>${f.ward ? `<br><small style="color:#16a34a; font-weight:600;">📍 ${f.ward}</small>` : ''}</td>
+          <td>${f.fieldType === 'SAN_7' ? '🏆 Sân 7 người' : '⚽ Sân 5 người'}</td>
+          <td>
+            <span class="badge-status ${f.status === 'ACTIVE' ? 'badge-completed' : 'badge-cancelled'}">
+              ${f.status === 'ACTIVE' ? '● Đang mở cửa' : '● Đang bảo trì'}
+            </span>
+          </td>
+          <td>
+            <button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(${f.id})">
+              Đổi trạng thái
+            </button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function toggleFieldStatus(id) {
+      const list = getAdminFields();
+      const f = list.find(x => x.id === id);
+      if (f) {
+        f.status = f.status === 'ACTIVE' ? 'MAINTENANCE' : 'ACTIVE';
+        renderFieldsTable();
+      }
+    }
+
+    // Tab 3: Slots
+    function renderSlotsTable() {
+      const tbody = document.getElementById("slotsTableBody");
+      if (!tbody) return;
+      const slots = getAdminSlots();
+      tbody.innerHTML = slots.map(s => {
+        const isPeak = s.isPeakHour || s.id === 9 || s.id === 10;
+        return `
+          <tr>
+            <td><strong>Ca ${s.id}${isPeak ? ' (Giờ vàng)' : ''}</strong></td>
+            <td><strong>${s.label}</strong></td>
+            <td>1 tiếng 30 phút (90p)</td>
+            <td>
+              <span class="badge-status ${isPeak ? 'badge-cancelled' : 'badge-pending'}" style="${isPeak ? 'background:#fef3c7;color:#b45309;border:1px solid #fde68a;' : ''}">
+                ${isPeak ? '🔥 KHUNG GIỜ VÀNG' : '● GIỜ THƯỜNG'}
+              </span>
+            </td>
+            <td>${isPeak ? '+30% giá gốc' : 'Áp dụng giá chuẩn'}</td>
+            <td style="color:${isPeak ? '#b45309' : '#15803d'};font-weight:700;">${isPeak ? '375.000đ' : '300.000đ'}</td>
+            <td style="color:${isPeak ? '#b45309' : '#15803d'};font-weight:700;">${isPeak ? '431.250đ' : '345.000đ'}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    let currentBookingFilter = "ALL";
+
+    function setBookingStatusFilter(filterKey, btn) {
+      currentBookingFilter = filterKey;
+      const btns = document.querySelectorAll("#bookingFilterGroup button");
+      btns.forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+      renderBookingsTable();
+    }
+
+    // Tab 4: Bookings
+    function renderBookingsTable() {
+      let bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const q = (document.getElementById("bookingSearchInput")?.value || "").toLowerCase().trim();
+
+      if (currentBookingFilter !== "ALL") {
+        bookings = bookings.filter(b => b.status === currentBookingFilter);
+      }
+
+      if (q) {
+        bookings = bookings.filter(b => 
+          (b.bookingCode || "").toLowerCase().includes(q) ||
+          (b.customerName || "").toLowerCase().includes(q) ||
+          (b.customerPhone || "").includes(q) ||
+          (b.fieldName || "").toLowerCase().includes(q)
+        );
+      }
+
+      const tbody = document.getElementById("bookingsTableBody");
+      if (bookings.length === 0) {
+        tbody.innerHTML = `<tr><td colSpan="7" style="text-align: center; padding: 30px; color: #64748b;">Không có đơn hàng nào khớp với tìm kiếm.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = bookings.map(b => `
+        <tr>
+          <td><strong style="color: #2563eb; font-family: monospace;">${b.bookingCode}</strong></td>
+          <td><strong>${b.customerName}</strong><br><small style="color:#0284c7; font-weight:700;">${b.customerPhone}</small></td>
+          <td><strong>${b.fieldName}</strong><br><small style="color:#16a34a; font-weight:600;">${b.subPitchName || 'Sân con'}</small> · <small>${b.timeLabel}</small></td>
+          <td>${b.date}</td>
+          <td style="color: #b45309; font-weight: 800;">${formatMoney(b.totalPrice)}</td>
+          <td>
+            <span class="badge-status ${b.status === 'CONFIRMED' ? 'badge-confirmed' : b.status === 'COMPLETED' ? 'badge-completed' : b.status === 'CANCELLED' ? 'badge-cancelled' : 'badge-pending'}">
+              ${b.status === 'PENDING' ? '⏳ Chờ cọc (30p)' : b.status === 'CONFIRMED' ? '✓ Đã cọc & Xác nhận' : b.status === 'COMPLETED' ? '★ Hoàn tất' : '✕ Đã hủy'}
+            </span>
+          </td>
+          <td>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              ${b.status === 'PENDING' ? `
+                <button type="button" class="primary-button" style="padding: 4px 8px; font-size: 11px;" onclick="confirmBooking('${b.bookingCode}')">
+                  ✓ Duyệt cọc
+                </button>
+              ` : ''}
+              ${b.status === 'CONFIRMED' ? `
+                <button type="button" class="primary-button" style="padding: 4px 8px; font-size: 11px; background: #0284c7;" onclick="completeBooking('${b.bookingCode}')">
+                  🏁 Hoàn thành
+                </button>
+              ` : ''}
+              ${['PENDING', 'CONFIRMED'].includes(b.status) ? `
+                <button type="button" class="outline-button" style="padding: 4px 6px; font-size: 11px; color: #ef4444;" onclick="cancelBookingAdmin('${b.bookingCode}')">
+                  ✕ Hủy
+                </button>
+              ` : '-'}
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function confirmBooking(code) {
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const b = bookings.find(x => x.bookingCode === code);
+      if (b) {
+        b.status = "CONFIRMED";
+        localStorage.setItem("my-bookings", JSON.stringify(bookings));
+        renderBookingsTable();
+        renderInvoicesTable();
+      }
+    }
+
+    function completeBooking(code) {
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const b = bookings.find(x => x.bookingCode === code);
+      if (b) {
+        b.status = "COMPLETED";
+        localStorage.setItem("my-bookings", JSON.stringify(bookings));
+        renderBookingsTable();
+        renderInvoicesTable();
+      }
+    }
+
+    function cancelBookingAdmin(code) {
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const b = bookings.find(x => x.bookingCode === code);
+      if (b) {
+        b.status = "CANCELLED";
+        b.cancelReason = "Quản trị viên hủy đơn";
+        localStorage.setItem("my-bookings", JSON.stringify(bookings));
+        renderBookingsTable();
+        renderInvoicesTable();
+      }
+    }
+
+    // Tab 5: Invoices
+    function renderInvoicesTable() {
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const tbody = document.getElementById("invoicesTableBody");
+
+      tbody.innerHTML = bookings.map((b, i) => {
+        const invCode = `INV-2026-${1000 + i}`;
+        const isPaid = b.status === "COMPLETED";
+
+        return `
+          <tr>
+            <td><strong style="color: #2563eb;">${invCode}</strong></td>
+            <td><strong>${b.customerName}</strong><br><small>${b.fieldName} · ${b.bookingCode}</small></td>
+            <td style="color:#b45309; font-weight:800;">${formatMoney(b.totalPrice)}</td>
+            <td>
+              <span class="badge-status ${isPaid ? 'badge-completed' : 'badge-pending'}">
+                ${isPaid ? '✓ ĐÃ THU TIỀN (PAID)' : '⏳ CHƯA THU (UNPAID)'}
+              </span>
+            </td>
+            <td>
+              ${!isPaid ? `
+                <button type="button" class="primary-button" style="padding: 4px 10px; font-size: 11px;" onclick="payInvoice('${b.bookingCode}')">
+                  💵 Thu tiền ngay ↗
+                </button>
+              ` : '-'}
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function payInvoice(code) {
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const b = bookings.find(x => x.bookingCode === code);
+      if (b) {
+        b.status = "COMPLETED";
+        localStorage.setItem("my-bookings", JSON.stringify(bookings));
+        renderBookingsTable();
+        renderInvoicesTable();
+        loadReportData();
+      }
+    }
+
+    // Tab 6: Users
+    function renderUsersTable() {
+      const users = JSON.parse(localStorage.getItem("football_users") || "[]");
+      document.getElementById("usersCountBadge").textContent = `● ${users.length} tài khoản`;
+      const tbody = document.getElementById("usersTableBody");
+
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td><strong>#${u.id}</strong></td>
+          <td><strong>${u.fullName}</strong></td>
+          <td><span style="font-family: monospace; font-weight: 700;">${u.phone}</span></td>
+          <td>${u.email || '<span style="color:#94a3b8;">(Chưa nhập)</span>'}</td>
+          <td>
+            <span class="badge-status ${u.role === 'ADMIN' ? 'badge-cancelled' : u.role === 'STAFF' ? 'badge-pending' : 'badge-confirmed'}">
+              ${u.role === 'ADMIN' ? '👑 ADMIN' : u.role === 'STAFF' ? '👔 STAFF' : '⚽ KHÁCH HÀNG'}
+            </span>
+          </td>
+          <td><strong>${u.bookingsCount ?? 0} đơn</strong></td>
+          <td style="font-size: 12px; color: #64748b;">${new Date(u.createdAt).toLocaleDateString('vi-VN')}</td>
+        </tr>
+      `).join("");
+    }
+
+    // Sync live fields & users from Wispbyte API / Neon DB
+    async function syncAdminFieldsFromApi() {
+      const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+      const indicator = document.getElementById("adminApiStatusIndicator");
+      const label = document.getElementById("adminApiHostLabel");
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(`${apiUrl}/fields`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            liveAdminFields = data;
+            renderFieldsTable();
+            if (indicator) indicator.style.background = "#22c55e";
+            if (label) label.textContent = `Wispbyte: BẬT (${data.length} sân Neon)`;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Admin fields API sync fallback (Wispbyte offline):", err);
+      }
+      // Khi Wispbyte TẮT:
+      if (indicator) indicator.style.background = "#ef4444";
+      if (label) label.textContent = "Wispbyte: Đang TẮT (Offline)";
+    }
+
+    async function syncAdminUsersFromApi() {
+      const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+      try {
+        const res = await fetch(`${apiUrl}/auth/users`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            localStorage.setItem("football_users", JSON.stringify(data));
+            renderUsersTable();
+          }
+        }
+      } catch (err) {
+        // Fallback to local
+      }
+    }
+
+    // Modal API Config
+    function openApiConfigModal() {
+      const current = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+      document.getElementById("apiConfigUrlInput").value = current;
+      document.getElementById("apiConfigMsg").innerHTML = "";
+      document.getElementById("apiConfigModal").style.display = "flex";
+    }
+
+    function closeApiConfigModal() {
+      document.getElementById("apiConfigModal").style.display = "none";
+    }
+
+    async function testAndSaveApiConfig() {
+      let input = document.getElementById("apiConfigUrlInput").value.trim().replace(/\/+$/, "");
+      const msgArea = document.getElementById("apiConfigMsg");
+      msgArea.innerHTML = `<span style="color: #64748b;">Đang kiểm tra kết nối...</span>`;
+
+      if (!input) {
+        input = "https://doanthinhvatai.wispbyte.app/api/v1";
+      }
+
+      // Tự động thêm http/https
+      if (!/^https?:\/\//i.test(input)) {
+        if (input.includes("wispbyte.app")) {
+          input = "https://" + input;
+        } else {
+          input = "http://" + input;
+        }
+      }
+
+      let urlToTest = input;
+      if (!urlToTest.includes("/api/")) {
+        urlToTest = `${urlToTest}/api/v1`;
+      }
+
+      try {
+        const res = await fetch(`${urlToTest}/fields`);
+        const data = await res.json();
+        if (res.ok && Array.isArray(data) && data.length > 0) {
+          localStorage.setItem("football_api_url", urlToTest);
+          liveAdminFields = data;
+          msgArea.innerHTML = `<span style="color: #16a34a; font-weight: 700;">✓ Kết nối thành công! Đã đồng bộ ${data.length} sân bóng từ Neon PostgreSQL.</span>`;
+          document.getElementById("adminApiHostLabel").textContent = `Đã nối Wispbyte & Neon (${data.length} sân)`;
+          document.getElementById("adminApiStatusIndicator").style.background = "#22c55e";
+          renderFieldsTable();
+          setTimeout(() => {
+            closeApiConfigModal();
+          }, 900);
+          return;
+        } else if (res.ok) {
+          localStorage.setItem("football_api_url", urlToTest);
+          msgArea.innerHTML = `<span style="color: #16a34a; font-weight: 700;">✓ Kết nối thành công!</span>`;
+          setTimeout(() => {
+            closeApiConfigModal();
+            location.reload();
+          }, 900);
+          return;
+        }
+      } catch (err) {
+        let hint = "";
+        if (location.protocol === "https:" && urlToTest.startsWith("http://")) {
+          hint = "<br><small style='color: #ea580c; font-weight: 700;'>Lưu ý: Trang web đang chạy HTTPS nên trình duyệt chặn kết nối IP HTTP thường (Mixed Content). Hãy bấm vào nút xanh <strong>'Tên miền Wispbyte (Chuẩn HTTPS)'</strong> phía trên để kết nối không bị chặn!</small>";
+        }
+        msgArea.innerHTML = `<span style="color: #dc2626; font-weight: 600;">Không kết nối được: ${err.message}.${hint}</span>`;
+      }
+    }
+  </script>
+
+  <!-- Modal Cấu hình API Wispbyte & Neon (Dành cho Admin) -->
+  <div class="modal-overlay" id="apiConfigModal" style="display: none;">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <span class="section-tag">ĐỒNG BỘ WISPBYTE &amp; NEON</span>
+          <h3>Cấu hình Máy Chủ API Trực Tuyến</h3>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeApiConfigModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: #64748b; margin-top: 0;">
+          Chọn địa chỉ máy chủ API Wispbyte để đồng bộ danh sách 21 sân bóng Buôn Ma Thuột và người dùng từ Neon PostgreSQL:
+        </p>
+
+        <div style="margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px;">
+          <button type="button" class="outline-button" style="text-align: left; font-size: 12px; padding: 10px 14px; display: flex; justify-content: space-between; border-color: #22c55e; background: #f0fdf4;" onclick="document.getElementById('apiConfigUrlInput').value='https://doanthinhvatai.wispbyte.app/api/v1'; testAndSaveApiConfig();">
+            <span>🌐 <strong>Tên miền Wispbyte (Chuẩn HTTPS chống lỗi):</strong><br><small style="color: #16a34a;">https://doanthinhvatai.wispbyte.app/api/v1</small></span>
+            <span style="color: #16a34a; font-weight: 800;">Bấm kết nối ➜</span>
+          </button>
+          <button type="button" class="outline-button" style="text-align: left; font-size: 12px; padding: 8px 12px; display: flex; justify-content: space-between;" onclick="document.getElementById('apiConfigUrlInput').value='http://78.154.183.38:12677/api/v1'; testAndSaveApiConfig();">
+            <span>💻 <strong>Địa chỉ IP Wispbyte Port 12677:</strong><br><small style="color: #64748b;">http://78.154.183.38:12677/api/v1</small></span>
+            <span style="color: var(--primary); font-weight: 700;">Kết nối ➜</span>
+          </button>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label style="font-weight: 700;">Địa chỉ API Backend:</label>
+          <input type="text" id="apiConfigUrlInput" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-family: monospace; font-size: 13px;" placeholder="https://doanthinhvatai.wispbyte.app/api/v1">
+        </div>
+
+        <div id="apiConfigMsg" style="font-size: 13px; margin-bottom: 16px; min-height: 20px;"></div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="primary-button" style="flex: 1; padding: 10px;" onclick="testAndSaveApiConfig()">
+            ⚡ Kiểm tra &amp; Lưu kết nối
+          </button>
+          <button type="button" class="outline-button" style="padding: 10px 16px;" onclick="closeApiConfigModal()">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

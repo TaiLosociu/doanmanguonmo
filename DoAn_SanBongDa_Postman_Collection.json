@@ -1,0 +1,525 @@
+{
+  "info": {
+    "name": "ĐỒ ÁN MÃ NGUỒN MỞ 2 - HỆ THỐNG ĐẶT SÂN BÓNG ĐÁ BUÔN MA THUỘT",
+    "_postman_id": "7f4c9c28-98e1-45a7-9e73-sanbongda-bmt-2026",
+    "description": "Bộ sưu tập Postman kiểm thử toàn bộ REST API hệ thống Đặt sân bóng đá Buôn Ma Thuột (Lê Duy Tài & Kpa Trần Quang Thịnh). Đầy đủ CRUD trên 8 bảng cơ sở dữ liệu, JWT Auth, Role Guards, ApiKeyGuard, thanh toán VietQR và báo cáo doanh thu.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "SAN_NHA_BMT_SECRET_API_KEY_2026",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Xác thực & Bảo mật (Auth & Security)",
+      "item": [
+        {
+          "name": "POST Đăng nhập Admin (Lấy JWT Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin@123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Đăng ký Khách hàng Mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyễn Văn Test\",\n  \"phone\": \"0912345678\",\n  \"email\": \"khachtest@example.com\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Thông tin cá nhân (JWT Guard)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Danh sách người dùng (Role Guard: Admin/Staff)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Kiểm tra ApiKeyGuard (x-api-key Header)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/verify-api-key",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-api-key"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Quản lý Cụm sân bóng (Fields - CRUD)",
+      "item": [
+        {
+          "name": "GET Danh sách 21 cụm sân Buôn Ma Thuột",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fields"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Chi tiết cụm sân",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fields",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Thêm mới cụm sân (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sân Bóng Đá Mới Buôn Ma Thuột\",\n  \"fieldType\": \"SAN_7\",\n  \"address\": \"Ea Kao, TP. Buôn Ma Thuột\",\n  \"ward\": \"Xã Ea Kao\",\n  \"phone\": \"0896890399\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fields"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Cập nhật cụm sân (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0896890399\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fields",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE Xóa cụm sân (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fields",
+                "999"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Lịch thi đấu & Khung giờ (1h30m / Ca)",
+      "item": [
+        {
+          "name": "GET Danh sách 11 Khung giờ tiêu chuẩn",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/time-slots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "time-slots"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Lịch trống theo ngày & quy mô sân",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/1/schedule?date=2026-11-08&pitchSize=SAN_5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fields",
+                "1",
+                "schedule"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-11-08"
+                },
+                {
+                  "key": "pitchSize",
+                  "value": "SAN_5"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Đặt sân, VietQR 30 phút & Tra cứu (Bookings & VietQR)",
+      "item": [
+        {
+          "name": "POST Tạo đơn đặt sân con & sinh VietQR Napas 247",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Lê Duy Tài\",\n  \"customerPhone\": \"0896890399\",\n  \"slotId\": 4,\n  \"date\": \"2026-11-08\",\n  \"pitchSize\": \"SAN_5\",\n  \"subPitchName\": \"Sân 5 số 1 (Đạt chuẩn FIFA)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/fields/1/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "fields",
+                "1",
+                "bookings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Tra cứu đơn đặt & kiểm tra hiệu lực QR 30 phút",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/lookup?bookingCode=SAN-9999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "lookup"
+              ],
+              "query": [
+                {
+                  "key": "bookingCode",
+                  "value": "SAN-9999"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Admin - Danh sách đơn hàng đặt sân",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "bookings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Admin - Xác nhận thanh toán cọc",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/bookings/1/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "bookings",
+                "1",
+                "confirm"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Admin - Hủy đơn đặt sân",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/bookings/1/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "bookings",
+                "1",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Báo cáo Tài chính & Thu - Chi (Finance & Reports)",
+      "item": [
+        {
+          "name": "GET Báo cáo tài chính thu chi & lợi nhuận ròng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/finance-report",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "finance-report"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Báo cáo doanh thu hệ thống",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/revenue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "revenue"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

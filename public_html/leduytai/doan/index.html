@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sân Nhà FC - Hệ Thống Đặt Sân Bóng Đá Mini (Lê Duy Tài - leduytai/doan)</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+</head>
+<body>
+  <!-- Top announcement bar -->
+  <div class="top-announcement">
+    <span>⚡ Hệ thống đặt sân bóng đá mini tự động snapshot giá &amp; chống trùng lịch bằng Database Transaction</span>
+    <span>📞 Hotline hỗ trợ: <strong>0901.234.567</strong> · Mở cửa 06:00 - 23:00</span>
+  </div>
+
+  <!-- Main Navigation Topbar -->
+  <header class="topbar-wrapper">
+    <div class="topbar">
+      <a class="brand" href="./index.html">
+        <div class="brand-icon">⚽</div>
+        <div>SÂN<span>NHÀ</span> <small style="font-size: 11px; color: #64748b; font-weight: 700;">FOOTBALL CLUB</small></div>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#danh-sach-san">🏟️ Danh sách sân</a>
+        <a href="#dat-san">📅 Lịch sân trống</a>
+        <a href="#bang-gia">💰 Bảng giá</a>
+        <a href="#danh-gia">⭐ Đánh giá</a>
+        <a href="#hoi-dap">❓ Hỏi &amp; Đáp</a>
+        <a href="./lookup.html">🔍 Tra cứu vé</a>
+      </nav>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" class="outline-button" style="padding: 6px 12px; font-size: 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px;" onclick="openApiConfigModal()">
+          <span id="apiStatusIndicator" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span>
+          <span id="apiHostLabel">Wispbyte / Neon</span>
+        </button>
+
+        <div id="userHeaderArea">
+          <button type="button" class="primary-button" style="padding: 8px 16px; font-size: 13px;" onclick="openAuthModal('LOGIN')">
+            <span>👤</span> Đăng nhập / Đăng ký
+          </button>
+        </div>
+        <a class="btn-nav-admin" href="./admin.html">⚙️ Cổng Quản trị</a>
+      </div>
+
+      <button type="button" class="mobile-menu-btn" style="display: none; background: none; border: none; font-size: 24px;" onclick="toggleMobileMenu()">
+        ☰
+      </button>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobileMenu" style="display: none; background: #ffffff; padding: 16px 24px; border-top: 1px solid var(--border); flex-direction: column; gap: 12px;">
+      <div id="userMobileArea" style="padding-bottom: 8px; border-bottom: 1px solid var(--border);"></div>
+      <a href="#danh-sach-san" onclick="toggleMobileMenu()">🏟️ Danh sách sân</a>
+      <a href="#dat-san" onclick="toggleMobileMenu()">📅 Lịch sân trống</a>
+      <a href="#bang-gia" onclick="toggleMobileMenu()">💰 Bảng giá</a>
+      <a href="#danh-gia" onclick="toggleMobileMenu()">⭐ Đánh giá khách hàng</a>
+      <a href="#hoi-dap" onclick="toggleMobileMenu()">❓ Câu hỏi thường gặp</a>
+      <a href="./lookup.html">🔍 Tra cứu vé đặt sân</a>
+      <a href="./admin.html" style="color: var(--primary); font-weight: 700;">⚙️ Cổng Quản trị / Nhân viên</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-container">
+    <div class="hero">
+      <div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <div class="hero-pill" style="margin: 0;">
+            <span class="dot"></span>
+            <span>HỆ THỐNG ĐẶT SÂN BÓNG ĐÁ TRỰC TUYẾN CHUẨN FIFA</span>
+          </div>
+          <div class="weather-widget">
+            <span class="weather-icon">🌤️</span>
+            <span>28°C · Nắng nhẹ, mặt cỏ khô ráo, lý tưởng thi đấu</span>
+          </div>
+        </div>
+
+        <h1>
+          Trận cầu đỉnh cao<br>bắt đầu từ <em>một cuộc hẹn.</em>
+        </h1>
+        <p class="hero-sub">
+          Trực quan hóa ca đá còn trống theo thời gian thực, bảng giá snapshot minh bạch, kiểm tra xung đột lịch tức thì và quản lý thanh toán chuyên nghiệp.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#dat-san" class="primary-button">
+            <span>⚡</span> Chọn sân &amp; Đặt lịch ngay
+          </a>
+          <a href="./lookup.html" class="outline-button">
+            <span>🔍</span> Tra cứu phiếu đặt sân
+          </a>
+        </div>
+
+        <!-- Quick Booking Search Bar -->
+        <div class="hero-quick-bar">
+          <div class="quick-bar-item">
+            <label>📅 Chọn ngày thi đấu</label>
+            <input type="date" id="heroDateInput" onchange="onDateChanged(this.value)">
+          </div>
+          <div class="quick-bar-item">
+            <label>⚽ Quy mô sân</label>
+            <select id="heroTypeSelect" onchange="onTypeFilterChanged(this.value)">
+              <option value="ALL">Tất cả sân (5 &amp; 7)</option>
+              <option value="SAN_5">Sân 5 người (300k - 375k)</option>
+              <option value="SAN_7">Sân 7 người (500k - 625k)</option>
+            </select>
+          </div>
+          <div class="quick-bar-item" style="flex: 0 0 auto; min-width: auto; justify-content: flex-end;">
+            <a href="#dat-san" class="primary-button" style="padding: 10px 20px; font-size: 14px; height: 42px; display: inline-flex; align-items: center;">
+              Kiểm tra ca trống ⚡
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-stats" style="margin-top: 28px;">
+          <div class="hero-stat-item">
+            <b>4 Sân</b>
+            <span>Cỏ nhân tạo đạt chuẩn</span>
+          </div>
+          <div class="hero-stat-item">
+            <b>11 Ca/Ngày</b>
+            <span>Khung giờ linh hoạt</span>
+          </div>
+          <div class="hero-stat-item">
+            <b>100%</b>
+            <span>Chống trùng lịch tự động</span>
+          </div>
+          <div class="hero-stat-item">
+            <b>4.9/5 ⭐</b>
+            <span>Hơn 1.200 lượt đánh giá</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Football Pitch Diagram Graphic Art -->
+      <div class="pitch-card-art">
+        <div class="pitch-graphic">
+          <div class="pitch-center-line"></div>
+          <div class="pitch-center-circle"></div>
+        </div>
+        <div class="pitch-art-info">
+          <div>
+            <strong style="font-size: 16px; display: block;">SÂN BÓNG ĐÁ MINI TIÊU CHUẨN</strong>
+            <small style="color: #94a3b8;">Hệ thống đèn LED 400W chống chói ban đêm</small>
+          </div>
+          <span class="pitch-art-tag">CHUẨN QUỐC TẾ</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Amenities Bar -->
+  <div class="amenities-bar">
+    <div class="amenities-content">
+      <div class="amenity-item">
+        <i>💡</i>
+        <div>
+          <strong>Đèn LED hiện đại</strong>
+          <div style="font-size: 11px; color: #64748b;">Chiếu sáng chuẩn giải đấu</div>
+        </div>
+      </div>
+      <div class="amenity-item">
+        <i>🚿</i>
+        <div>
+          <strong>Phòng tắm nóng lạnh</strong>
+          <div style="font-size: 11px; color: #64748b;">Tủ đồ cá nhân an toàn</div>
+        </div>
+      </div>
+      <div class="amenity-item">
+        <i>🚗</i>
+        <div>
+          <strong>Bãi đỗ xe miễn phí</strong>
+          <div style="font-size: 11px; color: #64748b;">Trông giữ xe máy &amp; ô tô 50 chỗ</div>
+        </div>
+      </div>
+      <div class="amenity-item">
+        <i>🥤</i>
+        <div>
+          <strong>Căng tin phục vụ</strong>
+          <div style="font-size: 11px; color: #64748b;">Nước tăng lực &amp; áo bib</div>
+        </div>
+      </div>
+      <div class="amenity-item">
+        <i>👨‍⚖️</i>
+        <div>
+          <strong>Dịch vụ trọng tài</strong>
+          <div style="font-size: 11px; color: #64748b;">Bắt trận công tâm, chuẩn luật</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI-01 & UI-03: Danh mục sân bóng -->
+  <section class="section-wrap" id="danh-sach-san">
+    <div class="section-head-modern">
+      <div>
+        <span class="section-tag">DANH MỤC CƠ SỞ VẬT CHẤT (UI-01, UI-03)</span>
+        <h2>Danh sách cụm sân bóng đá</h2>
+      </div>
+
+      <div class="filter-tabs" style="margin: 0;">
+        <button class="filter-tab active" id="tabAll" onclick="setFieldTypeFilter('ALL')">Tất cả (4)</button>
+        <button class="filter-tab" id="tab5" onclick="setFieldTypeFilter('SAN_5')">Sân 5 người</button>
+        <button class="filter-tab" id="tab7" onclick="setFieldTypeFilter('SAN_7')">Sân 7 người</button>
+      </div>
+    </div>
+
+    <div class="pitches-grid" id="pitchesGrid">
+      <!-- Sẽ được render tự động qua JS -->
+    </div>
+  </section>
+
+  <!-- UI-04: Lịch sân trống theo ngày (Interactive Matrix) -->
+  <section class="section-wrap" id="dat-san" style="background: #ffffff; border-radius: 24px; padding: 48px 36px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+    <div class="section-head-modern">
+      <div>
+        <span class="section-tag">LỊCH SÂN THỜI GIAN THỰC (UI-04)</span>
+        <h2>Lịch các ca thi đấu trong ngày</h2>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="hero-pill" style="margin: 0;">
+          <span class="dot"></span>
+          <span>CẬP NHẬT TRỰC TIẾP</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Date selector & quick days -->
+    <div class="schedule-filter-bar">
+      <label>
+        Chọn ngày thi đấu:
+        <input type="date" id="scheduleDateInput" onchange="onDateChanged(this.value)">
+      </label>
+
+      <label>
+        Lọc loại sân:
+        <select id="scheduleTypeSelect" onchange="onTypeFilterChanged(this.value)">
+          <option value="ALL">Tất cả loại sân</option>
+          <option value="SAN_5">Sân 5 người</option>
+          <option value="SAN_7">Sân 7 người</option>
+        </select>
+      </label>
+
+      <div class="quick-days">
+        <button type="button" class="quick-day-btn" onclick="setQuickDay(0)">Hôm nay</button>
+        <button type="button" class="quick-day-btn" onclick="setQuickDay(1)">Ngày mai</button>
+        <button type="button" class="quick-day-btn" onclick="setQuickDay(2)">Hôm sau</button>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend-bar">
+      <div class="legend-item">
+        <span class="legend-box legend-available"></span>
+        <span>Còn trống (Click để đặt)</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-box legend-booked"></span>
+        <span>Đã có người đặt</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-box legend-peak"></span>
+        <span>🔥 Giờ vàng cao điểm</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-box legend-past"></span>
+        <span>Hết ca / Quá giờ</span>
+      </div>
+    </div>
+
+    <!-- Grid ca đá từng sân -->
+    <div class="schedule-fields-list" id="scheduleRowsContainer">
+      <!-- Render động qua JS -->
+    </div>
+  </section>
+
+  <!-- Reference Pricing Table Section -->
+  <section class="section-wrap" id="bang-gia">
+    <div class="section-head-modern">
+      <div>
+        <span class="section-tag">BẢNG GIÁ NIÊM YẾT</span>
+        <h2>Quy tắc tính giá thuê sân theo ca</h2>
+      </div>
+      <span style="font-size: 13px; color: #64748b;">* Đã bao gồm hệ thống chiếu sáng LED 400W</span>
+    </div>
+
+    <table class="pricing-matrix-table">
+      <thead>
+        <tr>
+          <th>Loại sân</th>
+          <th>Khung giờ thi đấu</th>
+          <th>Ngày thường (Thứ 2 - Thứ 6)</th>
+          <th>Cuối tuần (Thứ 7 - CN)</th>
+          <th>Ghi chú</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>⚽ Sân 5 người</strong></td>
+          <td>Giờ thường (06:00 - 17:00, 21:00 - 22:30)</td>
+          <td style="color: #b45309; font-weight: 800;">300.000đ / ca</td>
+          <td style="color: #b45309; font-weight: 800;">345.000đ / ca</td>
+          <td>Mỗi ca 90 phút thi đấu</td>
+        </tr>
+        <tr>
+          <td><strong>⚽ Sân 5 người</strong></td>
+          <td>Giờ vàng cao điểm (17:00 - 21:00)</td>
+          <td style="color: #b45309; font-weight: 800;">375.000đ / ca</td>
+          <td style="color: #b45309; font-weight: 800;">431.250đ / ca</td>
+          <td>Giờ cao điểm sau giờ làm việc</td>
+        </tr>
+        <tr>
+          <td><strong>🏆 Sân 7 người</strong></td>
+          <td>Giờ thường (06:00 - 17:00, 21:00 - 22:30)</td>
+          <td style="color: #b45309; font-weight: 800;">500.000đ / ca</td>
+          <td style="color: #b45309; font-weight: 800;">575.000đ / ca</td>
+          <td>Sân 7 người cỏ FIFA cao cấp</td>
+        </tr>
+        <tr>
+          <td><strong>🏆 Sân 7 người</strong></td>
+          <td>Giờ vàng cao điểm (17:00 - 21:00)</td>
+          <td style="color: #b45309; font-weight: 800;">625.000đ / ca</td>
+          <td style="color: #b45309; font-weight: 800;">718.750đ / ca</td>
+          <td>Khán đài và cabin trọng tài</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 3 Steps Guide -->
+  <section class="section-wrap" style="background: #f1f5f9; border-radius: 20px; margin: 40px auto 60px;">
+    <div style="text-align: center; max-width: 600px; margin: 0 auto 36px;">
+      <span class="section-tag">QUY TRÌNH RA SÂN</span>
+      <h2>Đặt sân đơn giản chỉ trong 3 bước</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+      <div style="background: #ffffff; padding: 24px; borderRadius: 14px; border: 1px solid var(--border);">
+        <span style="font-size: 28px;">01</span>
+        <h4 style="margin: 12px 0 8px; font-size: 18px;">Chọn sân &amp; ca đá</h4>
+        <p style="font-size: 13px; color: #64748b; margin: 0;">Kiểm tra lịch sân trống trực tiếp theo ngày, loại sân 5 hoặc 7 và xem trước giá tạm tính.</p>
+      </div>
+      <div style="background: #ffffff; padding: 24px; border-radius: 14px; border: 1px solid var(--border);">
+        <span style="font-size: 28px;">02</span>
+        <h4 style="margin: 12px 0 8px; font-size: 18px;">Xác nhận &amp; Giữ chỗ</h4>
+        <p style="font-size: 13px; color: #64748b; margin: 0;">Khóa chỗ trong Transaction chống trùng lặp, tự động snapshot biểu giá cố định.</p>
+      </div>
+      <div style="background: #ffffff; padding: 24px; border-radius: 14px; border: 1px solid var(--border);">
+        <span style="font-size: 28px;">03</span>
+        <h4 style="margin: 12px 0 8px; font-size: 18px;">Nhận vé &amp; Ra sân</h4>
+        <p style="font-size: 13px; color: #64748b; margin: 0;">Lưu mã đặt sân SAN-XXXX để check-in tại quầy hoặc tra cứu/hủy trực tuyến bất kỳ lúc nào.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="section-wrap" id="danh-gia">
+    <div class="section-head-modern">
+      <div>
+        <span class="section-tag">ĐÁNH GIÁ TỪ CỘNG ĐỒNG CẦU THỦ</span>
+        <h2>Khách hàng nói gì về Sân Nhà FC</h2>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px; color: #f59e0b; font-weight: 700;">
+        <span>⭐⭐⭐⭐⭐</span>
+        <span style="color: #0f172a;">4.9/5 (1.200+ đánh giá)</span>
+      </div>
+    </div>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div>
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-quote">“Sân con 5 người cỏ mới thay đá rất bám giày, không bị trơn trượt khi trời mưa nhỏ. Dàn đèn LED chiếu sáng đều, không bị chói mắt khi đỡ bóng bổng. Đặt xong hệ thống tự động báo ngay cho chủ sân giữ chỗ rất yên tâm!”</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background: #dcfce7; color: #15803d;">MT</div>
+          <div class="author-info">
+            <h4>Minh Tuấn</h4>
+            <span>Đội trưởng FC Bách Khoa Warriors</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div>
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-quote">“Thích nhất là tính năng xem lịch ca trống trực tiếp theo thời gian thực. Không còn phải gọi điện thoại hỏi đi hỏi lại như các sân khác. Hệ thống snapshot giá rõ ràng minh bạch.”</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background: #e0f2fe; color: #0284c7;">TN</div>
+          <div class="author-info">
+            <h4>Trọng Nghĩa</h4>
+            <span>Chủ nhiệm CLB Real Madrid Fan Sài Gòn</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div>
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-quote">“Bãi đỗ xe máy và ô tô siêu rộng, hoàn toàn miễn phí có bảo vệ dắt xe. Phòng tắm nóng lạnh và tủ locker riêng cho từng đội rất văn minh và an toàn.”</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background: #fef3c7; color: #b45309;">QH</div>
+          <div class="author-info">
+            <h4>Quang Huy</h4>
+            <span>Đại diện FC Công Nghệ Phần Mềm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Accordion Section -->
+  <section class="section-wrap" id="hoi-dap">
+    <div style="text-align: center; max-width: 680px; margin: 0 auto 10px;">
+      <span class="section-tag">GIẢI ĐÁP THẮC MẮC (FAQ)</span>
+      <h2>Câu hỏi thường gặp của các đội bóng</h2>
+      <p style="font-size: 14px; color: #64748b; margin: 8px 0 0;">Tất cả những thông tin bạn cần biết trước khi đặt sân và thi đấu tại cơ sở của chúng tôi.</p>
+    </div>
+
+    <div class="faq-grid">
+      <div class="faq-card open" onclick="toggleFaq(this)">
+        <button type="button" class="faq-question-btn">
+          <span>Tôi có thể hủy lịch đặt sân và hoàn cọc không?</span>
+          <span class="faq-toggle-icon">▲</span>
+        </button>
+        <div class="faq-answer-content">
+          Có! Bạn hoàn toàn có thể chủ động hủy phiếu đặt sân trực tuyến tại trang Tra Cứu Vé trước giờ thi đấu ít nhất 02 tiếng. Hệ thống sẽ tiếp nhận lý do hủy và hoàn trả 100% tiền cọc hoặc hỗ trợ dời lịch sang ngày khác miễn phí.
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <button type="button" class="faq-question-btn">
+          <span>Sân có những tiện ích và dịch vụ đi kèm nào?</span>
+          <span class="faq-toggle-icon">▼</span>
+        </button>
+        <div class="faq-answer-content" style="display: none;">
+          Chúng tôi trang bị đầy đủ: Hệ thống chiếu sáng LED 400W tiêu chuẩn thi đấu, bãi đỗ xe máy và ô tô miễn phí có bảo vệ 24/7, phòng thay đồ &amp; tắm nóng lạnh, nước uống giải khát bù điện giải, bóng thi đấu FIFA tiêu chuẩn, và dịch vụ trọng tài chuyên nghiệp.
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <button type="button" class="faq-question-btn">
+          <span>Quy trình thanh toán và giữ sân hoạt động như thế nào?</span>
+          <span class="faq-toggle-icon">▼</span>
+        </button>
+        <div class="faq-answer-content" style="display: none;">
+          Khi bạn chọn khung giờ trống và gửi phiếu đặt, hệ thống backend sử dụng Database Transaction để khóa chỗ tức thì, ngăn chặn hoàn toàn việc đặt trùng. Bạn có thể chuyển khoản cọc 100.000đ qua mã VietQR hoặc thanh toán trực tiếp tại quầy check-in khi đến sân.
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <button type="button" class="faq-question-btn">
+          <span>Nếu trời mưa lớn hoặc thời tiết xấu thì xử lý ra sao?</span>
+          <span class="faq-toggle-icon">▼</span>
+        </button>
+        <div class="faq-answer-content" style="display: none;">
+          Hệ thống sân bóng đá của chúng tôi được trang bị hạ tầng thoát nước ngầm Monofilament hiện đại, đảm bảo mặt sân không bị ứ đọng nước sau 5 phút. Trong trường hợp mưa bão bất khả kháng, ban quản lý sẽ liên hệ để dời lịch hoặc hoàn lại 100% tiền cho đội của bạn.
+        </div>
+      </div>
+
+      <div class="faq-card" onclick="toggleFaq(this)">
+        <button type="button" class="faq-question-btn">
+          <span>Đội bóng có thể đặt sân cố định hàng tuần (gói tháng) không?</span>
+          <span class="faq-toggle-icon">▼</span>
+        </button>
+        <div class="faq-answer-content" style="display: none;">
+          Hoàn toàn được! Chúng tôi cung cấp chính sách ưu đãi giảm 10% - 15% tổng hóa đơn cho các đội đặt lịch cố định hàng tuần theo tháng hoặc quý. Vui lòng liên hệ trực tiếp hotline 0901.234.567 để ký hợp đồng giữ giờ vàng ưu tiên.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location and Contact Map Section -->
+  <section class="section-wrap" style="background: #ffffff; border-radius: 24px; padding: 40px 36px; border: 1px solid var(--border); margin: 40px auto 60px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center;">
+      <div>
+        <span class="section-tag">ĐỊA ĐIỂM &amp; CHỈ ĐƯỜNG</span>
+        <h2 style="margin: 10px 0 16px;">Ghé thăm cụm sân bóng đá mini Sân Nhà FC</h2>
+        <p style="font-size: 14px; color: #64748b; line-height: 1.7; margin-bottom: 20px;">
+          Nằm tại vị trí trung tâm thuận tiện kết nối các quận, bãi đỗ xe ô tô 50 chỗ và xe máy rộng rãi, an ninh 24/7.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span>📍</span>
+            <span><strong>Địa chỉ:</strong> Khu Liên Hợp Thể Thao Mini Football, TP. Hồ Chí Minh</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span>📞</span>
+            <span><strong>Hotline hỗ trợ:</strong> <a href="tel:0901234567" style="color: var(--primary); font-weight: 700;">0901.234.567</a> (06:00 - 23:00)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span>💬</span>
+            <span><strong>Hỗ trợ Zalo:</strong> 0901.234.567 (Chat trực tiếp)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span>⏰</span>
+            <span><strong>Giờ mở cửa:</strong> 06:00 - 23:00 tất cả các ngày trong tuần (kể cả Lễ, Tết)</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
+          <a href="#dat-san" class="primary-button" style="padding: 10px 20px;">Xem ca trống hôm nay ⚽</a>
+          <a href="tel:0901234567" class="outline-button" style="padding: 10px 20px;">Gọi Hotline tư vấn 📞</a>
+        </div>
+      </div>
+
+      <div style="background: #f8fafc; border-radius: 18px; padding: 20px; border: 1px solid var(--border); text-align: center;">
+        <div style="width: 100%; height: 260px; background: linear-gradient(135deg, #052e16, #14532d); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffffff; padding: 20px;">
+          <span style="font-size: 48px; margin-bottom: 8px;">🗺️</span>
+          <strong style="font-size: 18px;">BẢN ĐỒ CHỈ ĐƯỜNG TRỰC QUAN</strong>
+          <p style="font-size: 13px; color: #86efac; max-width: 320px; margin: 6px 0 16px;">
+            Cách trung tâm thành phố 10 phút di chuyển. Thuận tiện cho xe hơi và xe máy.
+          </p>
+          <a href="https://maps.google.com" target="_blank" rel="noreferrer" class="primary-button" style="background: #ffffff; color: #15803d; border: none;">
+            Mở chỉ đường trên Google Maps ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal UI-05: Đặt Sân Chuyên Nghiệp -->
+  <div class="modal-overlay" id="bookingModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <span class="section-tag">PHIẾU ĐẶT SÂN (UI-05)</span>
+          <h3 style="margin: 0;">Xác nhận thông tin đặt sân</h3>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeBookingModal()">✕</button>
+      </div>
+
+      <form onsubmit="handleBookingSubmit(event)" class="modal-body">
+        <div id="bookingNoticeArea"></div>
+
+        <div class="booking-summary-box">
+          <div class="summary-row"><span>Sân con thi đấu:</span><strong id="bmFieldName">Sân con 5 - Số 1</strong></div>
+          <div class="summary-row"><span>Khung giờ đá:</span><strong id="bmTimeLabel">18:00 - 19:30</strong></div>
+          <div class="summary-row"><span>Ngày thi đấu:</span><strong id="bmDate">2026-10-31</strong></div>
+          <div class="summary-row"><span>Giá thuê sân (Snapshot):</span><strong id="bmBasePrice">375.000đ</strong></div>
+          
+          <div id="extraSummaryArea"></div>
+
+          <div class="summary-row total">
+            <span>Tổng tiền thanh toán dự tính:</span>
+            <strong id="bmTotalPrice">375.000đ</strong>
+          </div>
+        </div>
+
+        <!-- Extra services options -->
+        <div class="extra-services">
+          <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 8px;">DỊCH VỤ THUÊ THÊM (TÙY CHỌN):</div>
+          <div class="extra-service-item">
+            <label>
+              <input type="checkbox" id="chkBibs" onchange="recalcBookingTotal()">
+              <span>🎽 Bộ áo bib phân biệt 2 đội (+50.000đ)</span>
+            </label>
+          </div>
+          <div class="extra-service-item">
+            <label>
+              <input type="checkbox" id="chkBall" onchange="recalcBookingTotal()">
+              <span>⚽ Thêm bóng tập &amp; thi đấu FIFA (+30.000đ)</span>
+            </label>
+          </div>
+          <div class="extra-service-item">
+            <label>
+              <input type="checkbox" id="chkWater" onchange="recalcBookingTotal()">
+              <span>🧊 Thùng 24 chai nước suối ướp đá (+60.000đ)</span>
+            </label>
+          </div>
+          <div class="extra-service-item">
+            <label>
+              <input type="checkbox" id="chkReferee" onchange="recalcBookingTotal()">
+              <span>👨‍⚖️ Trọng tài phong trào bắt chính (+150.000đ)</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="authAutoFillNotice"></div>
+
+        <div class="form-group">
+          <label>Họ và tên người đặt sân *</label>
+          <input type="text" id="bmCustomerName" required minlength="2" placeholder="Ví dụ: Nguyễn Văn Hoàng">
+        </div>
+
+        <div class="form-group">
+          <label>Số điện thoại liên hệ *</label>
+          <input type="tel" id="bmCustomerPhone" required placeholder="Ví dụ: 0901234567">
+        </div>
+
+        <div class="form-group">
+          <label>Ghi chú cho ban quản lý (tùy chọn)</label>
+          <textarea id="bmCustomerNote" rows="2" placeholder="Ví dụ: Đội đến sớm 15 phút khởi động..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+          <button type="button" class="outline-button" style="flex: 1;" onclick="closeBookingModal()">Hủy bỏ</button>
+          <button type="submit" class="primary-button" style="flex: 2;">✓ Xác nhận gửi phiếu đặt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Thành Công & Mã Vé Điện Tử VietQR -->
+  <div class="modal-overlay" id="successTicketModal" style="display: none;">
+    <div class="modal-content" style="max-width: 520px; text-align: center;">
+      <div style="padding: 36px 28px 24px;">
+        <div style="width: 60px; height: 60px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px;">
+          ✓
+        </div>
+        <h2 style="font-size: 22px; margin: 0 0 8px;">Đặt Sân Thành Công!</h2>
+        <p style="font-size: 14px; color: #64748b; margin: 0;">Yêu cầu đặt sân của bạn đã được ghi nhận vào hệ thống với mã vé điện tử:</p>
+
+        <div id="stCloudNotice" style="margin-top: 14px;"></div>
+
+        <div style="background: #f0fdf4; border: 2px dashed #86efac; border-radius: 12px; padding: 16px; margin: 16px 0;">
+          <div style="font-size: 12px; color: #166534; font-weight: 700;">MÃ VÉ ĐẶT SÂN:</div>
+          <div id="stBookingCode" style="font-size: 26px; font-weight: 900; color: #15803d; letter-spacing: 1px;">SAN-XXXX</div>
+          <div id="stDetails" style="font-size: 13px; color: #475569; margin-top: 8px;">Sân con 5 - Số 1 · 18:00 - 19:30 · Ngày 2026-10-31</div>
+          <div id="stPrice" style="font-size: 15px; font-weight: 800; color: #b45309; margin-top: 4px;">Tổng tiền: 375.000đ</div>
+        </div>
+
+        <div id="modalCountdownBox" style="background: rgba(234, 88, 12, 0.12); border: 1px solid #fdba74; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px;">
+          <div style="font-size: 15px; font-weight: 900; color: #c2410c;">
+            ⏳ MÃ QR CÒN HIỆU LỰC: <span id="modalCountdownTimer">30:00</span>
+          </div>
+          <div style="font-size: 12px; color: #7c2d12; margin-top: 3px;">
+            Vui lòng chuyển cọc <strong>100.000đ</strong> trong 30 phút để giữ chỗ. Quá hạn hệ thống sẽ tự động hủy lịch!
+          </div>
+        </div>
+
+        <button type="button" class="outline-button" style="width: 100%; padding: 10px; font-size: 13px;" onclick="toggleVietQrInModal()">
+          📱 <span id="btnVietQrLabel">Ẩn / Hiện mã VietQR chuyển cọc</span>
+        </button>
+
+        <div id="vietQrBox" class="vietqr-card" style="display: block;">
+          <span style="font-size: 12px; font-weight: 700; color: #15803d; text-transform: uppercase;">
+            QUÉT MÃ VIETQR QUA APP NGÂN HÀNG (MB / NAPAS 247)
+          </span>
+          <div class="qr-image-wrapper">
+            <img id="vietQrImg" src="" alt="Mã QR thanh toán đặt cọc" style="width: 220px; height: 220px; display: block; margin: 0 auto; border-radius: 10px; border: 1px solid #cbd5e1;">
+          </div>
+          <div style="font-size: 12px; color: #475569; line-height: 1.6; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div>Ngân hàng: <strong>MB Bank (Napas 247)</strong></div>
+            <div>Số tài khoản: <strong>02304200699999</strong></div>
+            <div>Chủ tài khoản: <strong>LE DUY TAI</strong></div>
+            <div>Số tiền cọc giữ sân: <strong style="color: #b45309;">100.000đ</strong></div>
+            <div>Nội dung CK: <strong id="vietQrAddInfo" style="color: #15803d; font-size: 14px;">SAN-XXXX</strong></div>
+          </div>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: 8px; font-size: 12px; color: #166534; line-height: 1.6; margin: 14px 0; text-align: left;">
+          💡 <strong>Nếu lỡ đóng cửa sổ:</strong> Bạn chỉ cần vào mục <a href="./lookup.html" style="color: #15803d; font-weight: 800; text-decoration: underline;">Tra cứu vé</a> và nhập mã đơn để mở lại mã QR thanh toán trong vòng 30 phút!
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 24px;">
+          <a href="./lookup.html" class="primary-button" style="flex: 1;">Xem vé tại trang Tra cứu ↗</a>
+          <button type="button" class="outline-button" style="flex: 1;" onclick="closeSuccessModal()">Đóng cửa sổ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Chi Tiết Sân Lightbox -->
+  <div class="modal-overlay" id="galleryModal" style="display: none;" onclick="closeGalleryModal()">
+    <div class="gallery-modal-content" onclick="event.stopPropagation()">
+      <div style="position: relative;">
+        <img id="gmImage" src="" alt="Chi tiết sân" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+        <button type="button" class="modal-close-btn" style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.6); color: #fff;" onclick="closeGalleryModal()">✕</button>
+      </div>
+
+      <div style="padding: 28px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+          <div>
+            <span class="pitch-type-pill" id="gmTypePill" style="margin-bottom: 6px; display: inline-block;">⚽ Sân 5 người</span>
+            <h2 id="gmName" style="margin: 0; font-size: 22px;">Sân con 5 - Số 1</h2>
+          </div>
+          <span id="gmPriceTag" style="font-size: 16px; font-weight: 800; color: #b45309;">Từ 300.000đ / ca</span>
+        </div>
+
+        <p id="gmDesc" style="font-size: 14px; color: #475569; line-height: 1.7; margin: 10px 0 20px;"></p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; font-size: 13px;">
+          <div><strong>Kích thước:</strong> <span id="gmSize">20m x 40m</span></div>
+          <div><strong>Chất lượng mặt cỏ:</strong> <span id="gmTurf">Cỏ Monofilament 50mm FIFA</span></div>
+          <div><strong>Hệ thống đèn:</strong> 8 bóng LED Philips 400W chống chói</div>
+          <div><strong>Khán đài &amp; Cabin:</strong> Ghế ngồi có mái che mát mẻ</div>
+          <div><strong>Tiện ích đi kèm:</strong> Phòng tắm nóng lạnh &amp; tủ locker</div>
+          <div><strong>Sức chứa lý tưởng:</strong> <span id="gmCapacity">5 - 7 cầu thủ mỗi bên</span></div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <button type="button" class="outline-button" style="flex: 1;" onclick="closeGalleryModal()">Đóng cửa sổ</button>
+          <a href="#dat-san" class="primary-button" style="flex: 2; text-align: center;" onclick="closeGalleryModal()">Xem các ca trống của sân này ⚡</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Auth Modal (Đăng nhập / Đăng ký) -->
+  <div class="modal-overlay" id="authModal" style="display: none;" onclick="closeAuthModal()">
+    <div class="modal-content" style="max-width: 460px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="section-tag">TÀI KHOẢN KHÁCH HÀNG</span>
+          <h3 id="authModalTitle" style="margin: 0;">Đăng nhập hệ thống</h3>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeAuthModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab-btn active" id="tabAuthLogin" onclick="switchAuthTab('LOGIN')">Đăng nhập</button>
+          <button type="button" class="auth-tab-btn" id="tabAuthRegister" onclick="switchAuthTab('REGISTER')">Đăng ký tài khoản</button>
+        </div>
+
+        <div id="authNoticeArea"></div>
+
+        <!-- Form Đăng Nhập -->
+        <form id="formLogin" onsubmit="handleAuthLogin(event)" style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="form-group">
+            <label>Email hoặc Số điện thoại *</label>
+            <input type="text" id="loginEmailOrPhone" required placeholder="Ví dụ: 0901234567 hoặc customer@example.com">
+          </div>
+          <div class="form-group">
+            <label>Mật khẩu *</label>
+            <input type="password" id="loginPassword" required placeholder="Nhập mật khẩu...">
+          </div>
+          <button type="submit" class="primary-button" style="width: 100%; padding: 12px; margin-top: 8px;">Đăng nhập ngay</button>
+          <div style="text-align: center; font-size: 13px; color: #64748b;">
+            Chưa có tài khoản? <a href="javascript:void(0)" onclick="switchAuthTab('REGISTER')" style="color: var(--primary); font-weight: 700;">Đăng ký ngay (Miễn phí)</a>
+          </div>
+        </form>
+
+        <!-- Form Đăng Ký -->
+        <form id="formRegister" onsubmit="handleAuthRegister(event)" style="display: none; flex-direction: column; gap: 14px;">
+          <div class="form-group">
+            <label>Họ và tên *</label>
+            <input type="text" id="regFullName" required minlength="2" placeholder="Ví dụ: Lê Hoàng Nam">
+          </div>
+          <div class="form-group">
+            <label>Số điện thoại *</label>
+            <input type="tel" id="regPhone" required placeholder="Ví dụ: 0912345678">
+          </div>
+          <div class="form-group">
+            <label>Email (tùy chọn)</label>
+            <input type="email" id="regEmail" placeholder="Ví dụ: hoangnam@example.com">
+          </div>
+          <div class="form-group">
+            <label>Mật khẩu khởi tạo * (tối thiểu 6 ký tự)</label>
+            <input type="password" id="regPassword" required minlength="6" placeholder="Tạo mật khẩu an toàn...">
+          </div>
+          <button type="submit" class="primary-button" style="width: 100%; padding: 12px; margin-top: 8px;">Tạo tài khoản &amp; Lưu hệ thống</button>
+          <div style="text-align: center; font-size: 13px; color: #64748b;">
+            Đã có tài khoản? <a href="javascript:void(0)" onclick="switchAuthTab('LOGIN')" style="color: var(--primary); font-weight: 700;">Đăng nhập tại đây</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Cấu hình API Wispbyte & Neon -->
+  <div class="modal-overlay" id="apiConfigModal" style="display: none;">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <span class="section-tag">ĐỒNG BỘ WISPBYTE &amp; NEON</span>
+          <h3>Cấu hình Máy Chủ API Trực Tuyến</h3>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeApiConfigModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: #64748b; margin-top: 0;">
+          Nhập địa chỉ máy chủ Wispbyte của bạn (Ví dụ: <code>http://78.154.183.38:11199</code> hoặc IP server mới trên Wispbyte) để đồng bộ dữ liệu 21 sân bóng Buôn Ma Thuột từ Neon PostgreSQL:
+        </p>
+
+        <div style="margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-weight: 700; font-size: 12px; color: #334155;">CHỌN NHANH ĐỊA CHỈ SERVER WISPBYTE (BẤM VÀO ĐỂ KẾT NỐI):</label>
+          <button type="button" class="outline-button" style="text-align: left; font-size: 12px; padding: 10px 14px; display: flex; justify-content: space-between; border-color: #22c55e; background: #f0fdf4;" onclick="document.getElementById('apiConfigUrlInput').value='https://doanthinhvatai.wispbyte.app/api/v1'; testAndSaveApiConfig();">
+            <span>🌐 <strong>Tên miền Wispbyte (Chuẩn HTTPS chống lỗi):</strong> https://doanthinhvatai.wispbyte.app/api/v1</span>
+            <span style="color: #16a34a; font-weight: 800;">Bấm kết nối ➜</span>
+          </button>
+          <button type="button" class="outline-button" style="text-align: left; font-size: 12px; padding: 8px 12px; display: flex; justify-content: space-between;" onclick="document.getElementById('apiConfigUrlInput').value='http://78.154.183.38:12677/api/v1'; testAndSaveApiConfig();">
+            <span>💻 <strong>Địa chỉ IP Wispbyte Port 12677:</strong> http://78.154.183.38:12677/api/v1</span>
+            <span style="color: var(--primary); font-weight: 700;">Kết nối ➜</span>
+          </button>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label style="font-weight: 700;">Địa chỉ API Backend (Wispbyte / Localhost):</label>
+          <input type="text" id="apiConfigUrlInput" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-family: monospace; font-size: 13px;" placeholder="https://doanthinhvatai.wispbyte.app/api/v1">
+        </div>
+
+        <div id="apiConfigMsg" style="font-size: 13px; margin-bottom: 16px; min-height: 20px;"></div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="primary-button" style="flex: 1; padding: 10px;" onclick="testAndSaveApiConfig()">
+            ⚡ Kiểm tra &amp; Lưu kết nối
+          </button>
+          <button type="button" class="outline-button" style="padding: 10px 16px;" onclick="closeApiConfigModal()">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Hotline/Zalo FAB -->
+  <div class="floating-contact-fab">
+    <a href="tel:0901234567" class="fab-main-btn" title="Gọi ngay hotline hỗ trợ đặt sân 24/7">
+      <span style="font-size: 18px;">📞</span>
+      <span>Hotline: 0901.234.567</span>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background: #0f172a; color: #94a3b8; padding: 50px 20px 30px; margin-top: auto;">
+    <div style="max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 40px;">
+      <div>
+        <div class="brand" style="color: #ffffff; margin-bottom: 16px;">
+          <div class="brand-icon">⚽</div>
+          <div>SÂN<span>NHÀ</span> FC</div>
+        </div>
+        <p style="font-size: 13px; line-height: 1.8; max-width: 400px;">
+          Cụm sân bóng đá mini cỏ nhân tạo tiêu chuẩn VFF. Phục vụ các giải đấu phong trào, hội đồng hương và các câu lạc bộ sinh viên.
+        </p>
+        <div style="font-size: 13px; margin-top: 12px; color: #e2e8f0;">
+          📍 Địa chỉ: Khu liên hợp Thể Thao Mini Football, TP. Hồ Chí Minh
+        </div>
+      </div>
+
+      <div>
+        <h4 style="color: #ffffff; font-size: 15px; margin-bottom: 16px;">Liên Kết Nhanh</h4>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+          <a href="#danh-sach-san" style="color: #cbd5e1;">Danh mục sân bóng</a>
+          <a href="#dat-san" style="color: #cbd5e1;">Lịch sân trống hôm nay</a>
+          <a href="#bang-gia" style="color: #cbd5e1;">Bảng giá chi tiết</a>
+          <a href="./lookup.html" style="color: #cbd5e1;">Tra cứu vé đặt sân</a>
+        </div>
+      </div>
+
+      <div>
+        <h4 style="color: #ffffff; font-size: 15px; margin-bottom: 16px;">Hệ Thống Đồ Án</h4>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+          <a href="https://it24m.dak.edu.vn/leduytai/baitap1/" target="_blank" style="color: #22c55e; font-weight: 700;">👨‍💻 CV Lê Duy Tài (it24m.dak.edu.vn) ↗</a>
+          <a href="https://cv-landing-page-peach.vercel.app/" target="_blank" style="color: #38bdf8; font-weight: 700;">👨‍💻 CV Kpa Trần Quang Thịnh (Vercel) ↗</a>
+          <a href="./cv.html" style="color: #a7f3d0; font-weight: 600;">📑 Hồ Sơ Đồng Sáng Lập 2 Tác Giả ↗</a>
+          <a href="./admin.html" style="color: #cbd5e1; font-weight: 600;">⚙️ Cổng Quản Trị Viên / Staff</a>
+          <span style="color: #94a3b8;">Nhóm sinh viên: <strong>Lê Duy Tài</strong> &amp; <strong>Kpa Trần Quang Thịnh</strong></span>
+          <span style="color: #94a3b8;">Thư mục nộp: <code>public_html/leduytai/doan/</code></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="max-width: 1240px; margin: 24px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: 13px; flex-wrap: wrap; gap: 16px;">
+      <div>
+        © 2026 Sân Nhà Football Booking System · Đồ Án Chuyên Ngành CNTT.
+      </div>
+      <div style="background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.35); padding: 8px 18px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <span>🚀 Dự án được phát triển bởi</span>
+        <a href="https://it24m.dak.edu.vn/leduytai/baitap1/" target="_blank" style="color: #22c55e; font-weight: 800; text-decoration: underline;" title="Nhấn để xem CV của Lê Duy Tài">Lê Duy Tài</a>
+        <span>và</span>
+        <a href="https://cv-landing-page-peach.vercel.app/" target="_blank" style="color: #38bdf8; font-weight: 800; text-decoration: underline;" title="Nhấn để xem CV của Kpa Trần Quang Thịnh">Kpa Trần Quang Thịnh</a>
+        <a href="./cv.html" style="background: #22c55e; color: #052e16; font-weight: 800; font-size: 11px; padding: 3px 10px; border-radius: 999px; text-decoration: none; margin-left: 4px;">Xem hồ sơ 2 tác giả ➜</a>
+      </div>
+      <div>
+        Neon PostgreSQL · Wispbyte Server · DirectAdmin
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="./js/app.js"></script>
+  <script>
+    // State quản lý trên UI
+    let selectedDate = getTodayString();
+    let currentFieldFilter = "ALL";
+    let selectedPitchId = 5;
+    let selectedPitchSize = "SAN_5"; // SAN_5, SAN_7, SAN_11
+    let scheduleViewMode = "SELECTED_ONLY"; // "SELECTED_ONLY" hoặc "ALL_PITCHES"
+    let activeBookingTarget = null; // { field, slot, basePrice, pitchSize }
+
+    function setScheduleViewMode(mode) {
+      scheduleViewMode = mode;
+      renderSchedule();
+    }
+
+    function selectPitch(fieldId, pitchSize) {
+      selectedPitchId = fieldId;
+      scheduleViewMode = "SELECTED_ONLY";
+      if (pitchSize) {
+        selectedPitchSize = pitchSize;
+      } else {
+        const f = DEFAULT_FIELDS.find(x => x.id === fieldId);
+        selectedPitchSize = (f && f.fieldType === "SAN_7") ? "SAN_7" : "SAN_5";
+      }
+      renderFields();
+      renderSchedule();
+      const el = document.getElementById("dat-san");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function selectPitchSize(size) {
+      selectedPitchSize = size;
+      scheduleViewMode = "SELECTED_ONLY";
+      renderFields();
+      renderSchedule();
+    }
+
+    // Init Page
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("heroDateInput").value = selectedDate;
+      document.getElementById("scheduleDateInput").value = selectedDate;
+      renderUserAuthArea();
+      renderFields();
+      renderSchedule();
+      syncBackendStatusAndFields();
+    });
+
+    // Toggle Mobile Menu
+    function toggleMobileMenu() {
+      const el = document.getElementById("mobileMenu");
+      el.style.display = el.style.display === "none" ? "flex" : "none";
+    }
+
+    // Auth Header Area
+    function renderUserAuthArea() {
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      const headArea = document.getElementById("userHeaderArea");
+      const mobArea = document.getElementById("userMobileArea");
+
+      if (savedUser) {
+        headArea.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="user-badge-topbar">
+              <span>👤</span>
+              <span>${savedUser.fullName}</span>
+            </div>
+            <button type="button" class="outline-button" style="padding: 6px 12px; font-size: 12px; border-radius: 999px;" onclick="handleLogout()">Đăng xuất</button>
+          </div>
+        `;
+        mobArea.innerHTML = `
+          <div>Đang đăng nhập: <strong>${savedUser.fullName}</strong> (${savedUser.phone})</div>
+          <button type="button" onclick="handleLogout()" style="margin-top: 6px; color: red; background: none; border: none; padding: 0; font-weight: 700; cursor: pointer;">Đăng xuất</button>
+        `;
+      } else {
+        headArea.innerHTML = `
+          <button type="button" class="primary-button" style="padding: 8px 16px; font-size: 13px;" onclick="openAuthModal('LOGIN')">
+            <span>👤</span> Đăng nhập / Đăng ký
+          </button>
+        `;
+        mobArea.innerHTML = `
+          <button type="button" class="primary-button" style="padding: 8px 14px; width: 100%; text-align: center;" onclick="openAuthModal('LOGIN')">
+            👤 Đăng nhập / Đăng ký tài khoản
+          </button>
+        `;
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem("football_auth_user");
+      renderUserAuthArea();
+    }
+
+    // Modal Auth Handlers
+    function openAuthModal(tab) {
+      document.getElementById("authModal").style.display = "flex";
+      switchAuthTab(tab);
+    }
+
+    function closeAuthModal() {
+      document.getElementById("authModal").style.display = "none";
+      document.getElementById("authNoticeArea").innerHTML = "";
+    }
+
+    function switchAuthTab(tab) {
+      const isLogin = tab === "LOGIN";
+      document.getElementById("tabAuthLogin").className = `auth-tab-btn ${isLogin ? "active" : ""}`;
+      document.getElementById("tabAuthRegister").className = `auth-tab-btn ${!isLogin ? "active" : ""}`;
+      document.getElementById("formLogin").style.display = isLogin ? "flex" : "none";
+      document.getElementById("formRegister").style.display = !isLogin ? "flex" : "none";
+      document.getElementById("authModalTitle").textContent = isLogin ? "Đăng nhập hệ thống" : "Đăng ký thành viên mới";
+      document.getElementById("authNoticeArea").innerHTML = "";
+    }
+
+    async function handleAuthLogin(e) {
+      e.preventDefault();
+      const val = document.getElementById("loginEmailOrPhone").value.trim();
+      const pass = document.getElementById("loginPassword").value;
+      const notice = document.getElementById("authNoticeArea");
+      notice.innerHTML = `<div style="color: #64748b; font-size: 13px;">Đang xác thực...</div>`;
+
+      // Try API first
+      try {
+        const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+        const res = await fetch(`${apiUrl}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: val, password: pass })
+        });
+        const data = await res.json();
+        if (res.ok && data.user) {
+          localStorage.setItem("football_auth_user", JSON.stringify(data.user));
+          notice.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px;">✓ Đăng nhập thành công! Đã kết nối tài khoản Neon.</div>`;
+          setTimeout(() => { closeAuthModal(); renderUserAuthArea(); }, 600);
+          return;
+        }
+      } catch (err) {}
+
+      // Fallback local check
+      const users = JSON.parse(localStorage.getItem("football_users") || "[]");
+      const found = users.find(u => u.phone === val || u.email === val);
+      if (found) {
+        localStorage.setItem("football_auth_user", JSON.stringify(found));
+        notice.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px;">✓ Đăng nhập thành công! Chào mừng ${found.fullName}.</div>`;
+        setTimeout(() => { closeAuthModal(); renderUserAuthArea(); }, 600);
+      } else {
+        notice.innerHTML = `<div style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px;">Sai email/số điện thoại hoặc mật khẩu.</div>`;
+      }
+    }
+
+    async function handleAuthRegister(e) {
+      e.preventDefault();
+      const fullName = document.getElementById("regFullName").value.trim();
+      const phone = document.getElementById("regPhone").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const pass = document.getElementById("regPassword").value;
+      const notice = document.getElementById("authNoticeArea");
+      notice.innerHTML = `<div style="color: #64748b; font-size: 13px;">Đang tạo tài khoản...</div>`;
+
+      // Try API first
+      try {
+        const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+        const res = await fetch(`${apiUrl}/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fullName, phone, email, password: pass })
+        });
+        const data = await res.json();
+        if (res.ok && data.user) {
+          localStorage.setItem("football_auth_user", JSON.stringify(data.user));
+          notice.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px;">✓ Đăng ký thành công! Đã lưu trực tiếp vào Neon Database.</div>`;
+          setTimeout(() => { closeAuthModal(); renderUserAuthArea(); }, 700);
+          return;
+        }
+      } catch (err) {}
+
+      // Fallback local
+      const users = JSON.parse(localStorage.getItem("football_users") || "[]");
+      if (users.some(u => u.phone === phone)) {
+        notice.innerHTML = `<div style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px;">Số điện thoại này đã được đăng ký.</div>`;
+        return;
+      }
+      const newUser = { id: users.length + 1, fullName, phone, email: email || null, role: "CUSTOMER", createdAt: new Date().toISOString(), bookingsCount: 0 };
+      users.unshift(newUser);
+      localStorage.setItem("football_users", JSON.stringify(users));
+      localStorage.setItem("football_auth_user", JSON.stringify(newUser));
+      notice.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px;">✓ Đăng ký tài khoản thành công!</div>`;
+      setTimeout(() => { closeAuthModal(); renderUserAuthArea(); }, 700);
+    }
+
+    // Filter fields & render
+    function setFieldTypeFilter(type) {
+      currentFieldFilter = type;
+      document.getElementById("tabAll").className = `filter-tab ${type === 'ALL' ? 'active' : ''}`;
+      document.getElementById("tab5").className = `filter-tab ${type === 'SAN_5' ? 'active' : ''}`;
+      document.getElementById("tab7").className = `filter-tab ${type === 'SAN_7' ? 'active' : ''}`;
+      renderFields();
+      renderSchedule();
+    }
+
+    function onTypeFilterChanged(val) {
+      setFieldTypeFilter(val);
+    }
+
+    function onDateChanged(val) {
+      selectedDate = val;
+      document.getElementById("heroDateInput").value = val;
+      document.getElementById("scheduleDateInput").value = val;
+      renderSchedule();
+    }
+
+    function setQuickDay(offset) {
+      const d = getTodayString(offset);
+      onDateChanged(d);
+    }
+
+    // Render Field Cards
+    function renderFields() {
+      const grid = document.getElementById("pitchesGrid");
+      const fields = DEFAULT_FIELDS.filter(f => currentFieldFilter === "ALL" || f.fieldType === currentFieldFilter);
+
+      grid.innerHTML = fields.map(field => {
+        const isSelected = selectedPitchId === field.id;
+        return `
+        <article class="pitch-card" onclick="selectPitch(${field.id})" style="${isSelected ? 'border: 2.5px solid #22c55e; box-shadow: 0 12px 30px rgba(34, 197, 94, 0.25); transform: translateY(-4px);' : ''} cursor: pointer; position: relative; transition: all 0.25s ease;">
+          <div class="pitch-thumb">
+            <img src="${field.imageUrl}" alt="${field.name}">
+            <span class="pitch-badge ${field.status === 'ACTIVE' ? 'badge-active' : 'badge-maintenance'}">
+              ${field.status === 'ACTIVE' ? '● Đang mở cửa' : '● Đang bảo trì'}
+            </span>
+            ${isSelected ? `<span style="position: absolute; bottom: 12px; left: 12px; background: #16a34a; color: #fff; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">✓ ĐANG CHỌN SÂN NÀY</span>` : ''}
+          </div>
+
+          <div class="pitch-body">
+            <div class="pitch-meta">
+              <span class="pitch-type-pill">${field.fieldType === 'SAN_5' ? '⚽ Sân 5 người' : '🏆 Sân 7 người'}</span>
+              ${field.ward ? `<span style="font-size: 11px; background: #f0fdf4; color: #166534; padding: 2px 8px; border-radius: 6px; font-weight: 700;">📍 ${field.ward}</span>` : ''}
+            </div>
+
+            <h3 style="${isSelected ? 'color: #15803d;' : ''}">${field.name}</h3>
+            ${field.address ? `<div style="font-size: 12px; color: #475569; margin-bottom: 4px;">🏠 ${field.address}</div>` : ''}
+            ${field.phone ? `<div style="font-size: 12px; color: #15803d; font-weight: 700; margin-bottom: 6px;">📞 ${field.phone}</div>` : ''}
+            <p class="pitch-desc">${field.description}</p>
+
+            <!-- Quy mô sân con: Sân 5, Sân 7, Sân 11 -->
+            <div style="margin: 8px 0; display: flex; flex-wrap: wrap; gap: 6px;">
+              <span onclick="event.stopPropagation(); selectPitch(${field.id}, 'SAN_5');" style="font-size: 11px; background: ${isSelected && selectedPitchSize === 'SAN_5' ? '#22c55e' : '#f1f5f9'}; color: ${isSelected && selectedPitchSize === 'SAN_5' ? '#ffffff' : '#334155'}; padding: 4px 8px; border-radius: 6px; font-weight: 700; cursor: pointer;">⚽ Sân 5</span>
+              <span onclick="event.stopPropagation(); selectPitch(${field.id}, 'SAN_7');" style="font-size: 11px; background: ${isSelected && selectedPitchSize === 'SAN_7' ? '#0284c7' : '#f1f5f9'}; color: ${isSelected && selectedPitchSize === 'SAN_7' ? '#ffffff' : '#334155'}; padding: 4px 8px; border-radius: 6px; font-weight: 700; cursor: pointer;">🏆 Sân 7</span>
+              <span onclick="event.stopPropagation(); selectPitch(${field.id}, 'SAN_11');" style="font-size: 11px; background: ${isSelected && selectedPitchSize === 'SAN_11' ? '#b45309' : '#f1f5f9'}; color: ${isSelected && selectedPitchSize === 'SAN_11' ? '#ffffff' : '#334155'}; padding: 4px 8px; border-radius: 6px; font-weight: 700; cursor: pointer;">⭐ Sân 11</span>
+            </div>
+
+            <div class="pitch-amenities">
+              <span>✓ Mặt cỏ êm</span>
+              <span>✓ Đèn LED 400W</span>
+              <span>✓ Bóng chuẩn FIFA</span>
+            </div>
+
+            <div class="pitch-footer">
+              <div class="pitch-price-tag">
+                <span>GIÁ THAM KHẢO</span>
+                <strong>${field.fieldType === 'SAN_7' ? 'Từ 400.000đ' : 'Từ 250.000đ'}</strong>
+              </div>
+
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="outline-button" style="padding: 8px 12px; font-size: 12px;" onclick="event.stopPropagation(); openGalleryModal(${field.id})">
+                  📷 Chi tiết
+                </button>
+                ${field.status === 'ACTIVE' 
+                  ? `<button type="button" class="primary-button" style="padding: 8px 16px; font-size: 13px;" onclick="event.stopPropagation(); selectPitch(${field.id})">${isSelected ? 'Đang chọn ✓' : 'Chọn sân này →'}</button>`
+                  : `<button disabled class="outline-button" style="padding: 8px 16px; font-size: 13px;">Bảo trì</button>`
+                }
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+      }).join("");
+    }
+
+    // Render Schedule Grid
+    function renderSchedule() {
+      const container = document.getElementById("scheduleRowsContainer");
+      const activeFields = DEFAULT_FIELDS.filter(f => f.status === "ACTIVE" && (currentFieldFilter === "ALL" || f.fieldType === currentFieldFilter));
+      const isWeekend = new Date(selectedDate + "T12:00:00").getDay() % 6 === 0;
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const activeField = DEFAULT_FIELDS.find(f => f.id === selectedPitchId) || activeFields[0];
+
+      let headerHtml = "";
+      if (activeField) {
+        const sizePriceText = selectedPitchSize === 'SAN_11' ? 'Từ 800.000đ / ca' : selectedPitchSize === 'SAN_7' ? 'Từ 400.000đ / ca' : 'Từ 250.000đ / ca';
+        headerHtml = `
+          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-radius: 20px; padding: 24px 28px; margin-bottom: 28px; border: 2px solid #22c55e; box-shadow: 0 12px 30px rgba(34, 197, 94, 0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+                  <span style="background: #16a34a; color: #ffffff; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800;">🎯 CỤM SÂN ĐANG ĐƯỢC CHỌN</span>
+                  <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px; color: #38bdf8; font-family: monospace;">🔗 API riêng: /api/v1/fields/${activeField.id}/schedule?pitchSize=${selectedPitchSize}</span>
+                </div>
+                <h2 style="margin: 4px 0; font-size: 26px; color: #ffffff;">${activeField.name}</h2>
+                <div style="font-size: 13px; color: #94a3b8; display: flex; flex-wrap: wrap; gap: 14px; margin-top: 6px;">
+                  ${activeField.ward ? `<span>📍 ${activeField.ward}</span>` : ''}
+                  ${activeField.address ? `<span>🏠 ${activeField.address}</span>` : ''}
+                  ${activeField.phone ? `<span style="color: #4ade80; font-weight: 700;">📞 ${activeField.phone}</span>` : ''}
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 12px; color: #94a3b8;">GIÁ THUÊ CA NÀY</div>
+                <div style="font-size: 22px; font-weight: 900; color: #4ade80;">
+                  ${sizePriceText}
+                </div>
+              </div>
+            </div>
+
+            <!-- Cơ chế vận hành sân mẹ và sân con -->
+            <div style="background: rgba(22, 101, 52, 0.35); border: 1px solid rgba(74, 222, 128, 0.4); border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: #dcfce7; line-height: 1.6;">
+              📢 <strong>CƠ CHẾ VẬN HÀNH:</strong> Sân Nhà là nền tảng quản lý tập trung 21 cụm sân tại Buôn Ma Thuột.
+              Sân mẹ là cơ sở chung, quý khách <strong>chỉ được đặt các SÂN CON cụ thể bên dưới</strong>. Sau khi hoàn tất đặt sân con, hệ thống sẽ <strong>tự động gửi thông báo trực tiếp đến Chủ sân (${activeField.ownerName || "Ban quản lý"} - ${activeField.phone || "0896890399"})</strong> để giữ sân và chuẩn bị sẵn sàng trước giờ đá!
+            </div>
+
+            <!-- Ảnh thực tế mô tả cụm sân mẹ (Real Pitch Gallery) -->
+            <div style="margin-bottom: 22px;">
+              <div style="font-size: 12px; font-weight: 800; color: #94a3b8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                <span>📸</span> HÌNH ẢNH MÔ TẢ THỰC TẾ CỤM SÂN (${activeField.name}):
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;">
+                <div style="position: relative; border-radius: 10px; overflow: hidden; height: 115px; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                  <img src="${activeField.imageUrl}" alt="${activeField.name} - Toàn cảnh" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                  <span style="position: absolute; bottom: 4px; left: 6px; background: rgba(0,0,0,0.7); color: #4ade80; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">Toàn cảnh cụm sân</span>
+                </div>
+                <div style="position: relative; border-radius: 10px; overflow: hidden; height: 115px; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                  <img src="https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=600&auto=format&fit=crop&q=80" alt="Mặt cỏ nhân tạo 50mm mới" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                  <span style="position: absolute; bottom: 4px; left: 6px; background: rgba(0,0,0,0.7); color: #38bdf8; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">Cỏ nhân tạo 50mm</span>
+                </div>
+                <div style="position: relative; border-radius: 10px; overflow: hidden; height: 115px; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                  <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&auto=format&fit=crop&q=80" alt="Dàn đèn chiếu sáng ban đêm" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                  <span style="position: absolute; bottom: 4px; left: 6px; background: rgba(0,0,0,0.7); color: #facc15; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">Đèn LED 400W đêm</span>
+                </div>
+                <div style="position: relative; border-radius: 10px; overflow: hidden; height: 115px; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                  <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=600&auto=format&fit=crop&q=80" alt="Cầu môn & Khán đài" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                  <span style="position: absolute; bottom: 4px; left: 6px; background: rgba(0,0,0,0.7); color: #f472b6; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">Cầu môn & Khán đài</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="background: rgba(15, 23, 42, 0.65); padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+              <div style="font-size: 12px; font-weight: 800; color: #94a3b8; margin-bottom: 12px; text-transform: uppercase;">
+                ⚡ CHỌN QUY MÔ SÂN (SÂN 5, SÂN 7 HOẶC SÂN 11) ĐỂ ĐẶT LỊCH:
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px;">
+                <button type="button" onclick="selectPitchSize('SAN_5')" style="background: ${selectedPitchSize === 'SAN_5' ? '#16a34a' : 'rgba(255,255,255,0.06)'}; border: ${selectedPitchSize === 'SAN_5' ? '2px solid #4ade80' : '1px solid rgba(255,255,255,0.15)'}; color: #ffffff; padding: 14px 18px; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.2s;">
+                  <div style="font-weight: 800; font-size: 15px; display: flex; justify-content: space-between;">
+                    <span>⚽ Sân 5 người (Mini)</span>
+                    ${selectedPitchSize === 'SAN_5' ? '<span style=\"color:#4ade80;\">✓ Đang chọn</span>' : ''}
+                  </div>
+                  <div style="font-size: 12px; opacity: 0.85; margin-top: 4px;">5 - 7 người / đội · Cỏ nhân tạo 50mm</div>
+                  <div style="font-size: 14px; font-weight: 700; color: #4ade80; margin-top: 6px;">Từ 250.000đ / ca</div>
+                </button>
+
+                <button type="button" onclick="selectPitchSize('SAN_7')" style="background: ${selectedPitchSize === 'SAN_7' ? '#0284c7' : 'rgba(255,255,255,0.06)'}; border: ${selectedPitchSize === 'SAN_7' ? '2px solid #38bdf8' : '1px solid rgba(255,255,255,0.15)'}; color: #ffffff; padding: 14px 18px; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.2s;">
+                  <div style="font-weight: 800; font-size: 15px; display: flex; justify-content: space-between;">
+                    <span>🏆 Sân 7 người (Bán chuyên)</span>
+                    ${selectedPitchSize === 'SAN_7' ? '<span style=\"color:#38bdf8;\">✓ Đang chọn</span>' : ''}
+                  </div>
+                  <div style="font-size: 12px; opacity: 0.85; margin-top: 4px;">7 - 9 người / đội · Khán đài &amp; Cỏ FIFA</div>
+                  <div style="font-size: 14px; font-weight: 700; color: #38bdf8; margin-top: 6px;">Từ 400.000đ / ca</div>
+                </button>
+
+                <button type="button" onclick="selectPitchSize('SAN_11')" style="background: ${selectedPitchSize === 'SAN_11' ? '#b45309' : 'rgba(255,255,255,0.06)'}; border: ${selectedPitchSize === 'SAN_11' ? '2px solid #f59e0b' : '1px solid rgba(255,255,255,0.15)'}; color: #ffffff; padding: 14px 18px; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.2s;">
+                  <div style="font-weight: 800; font-size: 15px; display: flex; justify-content: space-between;">
+                    <span>⭐ Sân 11 người (Chuẩn VFF)</span>
+                    ${selectedPitchSize === 'SAN_11' ? '<span style=\"color:#f59e0b;\">✓ Đang chọn</span>' : ''}
+                  </div>
+                  <div style="font-size: 12px; opacity: 0.85; margin-top: 4px;">11 - 14 người / đội · Sân đại 60x100m</div>
+                  <div style="font-size: 14px; font-weight: 700; color: #fbbf24; margin-top: 6px;">Từ 800.000đ / ca</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. Danh sách các sân con cụ thể thuộc cụm sân được chọn (Sân 5, Sân 7, Sân 11)
+      const sizeLabel = selectedPitchSize === 'SAN_11' ? '⭐ Sân 11 người' : selectedPitchSize === 'SAN_7' ? '🏆 Sân 7 người' : '⚽ Sân 5 người';
+      let subPitches = [];
+      if (selectedPitchSize === 'SAN_7') {
+        subPitches = [
+          { name: `${activeField.name} - Sân 7 (Số 1)`, tag: "Sân 7 Số 1", desc: "Mặt cỏ FIFA Pro 50mm, dàn đèn LED chiếu sáng ban đêm" },
+          { name: `${activeField.name} - Sân 7 (Số 2)`, tag: "Sân 7 Số 2", desc: "Khán đài có mái che, đèn LED chống lóa đạt chuẩn" }
+        ];
+      } else if (selectedPitchSize === 'SAN_11') {
+        subPitches = [
+          { name: `${activeField.name} - Sân 11 (Toàn sân)`, tag: "Sân 11 Chuẩn VFF", desc: "Kích thước đại 60m x 100m chuẩn thi đấu liên đoàn" }
+        ];
+      } else {
+        // SAN_5
+        subPitches = [
+          { name: `${activeField.name} - Sân 5 (Số 1)`, tag: "Sân 5 Số 1", desc: "Cỏ nhân tạo 50mm êm chân, vạch kẻ thi đấu rõ nét" },
+          { name: `${activeField.name} - Sân 5 (Số 2)`, tag: "Sân 5 Số 2", desc: "Dàn đèn LED 400W siêu sáng không chói mắt" },
+          { name: `${activeField.name} - Sân 5 (Số 3)`, tag: "Sân 5 Số 3", desc: "Không gian thoáng mát, gần khu vực nước giải khát" }
+        ];
+      }
+
+      // Thanh chuyển đổi chế độ xem: Chỉ xem sân đang chọn HOẶC xem tất cả 21 sân
+      const filterBarHtml = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; background: #ffffff; border: 1px solid var(--border); padding: 14px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="quick-day-btn" style="${scheduleViewMode === 'SELECTED_ONLY' ? 'background: #16a34a; color: #ffffff; font-weight: 800; border-color: #16a34a;' : 'background: #f8fafc; color: #334155;'}" onclick="setScheduleViewMode('SELECTED_ONLY')">
+              🎯 Chỉ hiển thị lịch [ ${activeField.name} ] (${subPitches.length} sân con)
+            </button>
+            <button type="button" class="quick-day-btn" style="${scheduleViewMode === 'ALL_PITCHES' ? 'background: #16a34a; color: #ffffff; font-weight: 800; border-color: #16a34a;' : 'background: #f8fafc; color: #334155;'}" onclick="setScheduleViewMode('ALL_PITCHES')">
+              🌐 Xem lịch toàn bộ 21 sân BMT
+            </button>
+          </div>
+          <div style="font-size: 13px; color: #475569;">
+            Lịch thi đấu ngày: <strong style="color: #15803d;">${selectedDate}</strong> · <span style="font-weight: 700; color: #0284c7;">${sizeLabel}</span>
+          </div>
+        </div>
+      `;
+
+      let rowsHtml = "";
+      if (scheduleViewMode === 'SELECTED_ONLY') {
+        // Chỉ hiển thị các sân con cụ thể thuộc chính cụm sân được chọn (Ví dụ: Sân bóng C1)
+        rowsHtml = subPitches.map((sp, idx) => {
+          const slotButtons = DEFAULT_TIME_SLOTS.map(slot => {
+            const base = selectedPitchSize === 'SAN_11' ? 800000 : selectedPitchSize === 'SAN_7' ? 400000 : 250000;
+            const peakMult = slot.isPeakHour ? 1.3 : 1.0;
+            const weekendMult = isWeekend ? 1.2 : 1.0;
+            const finalPrice = Math.round(base * peakMult * weekendMult);
+
+            const isBooked = bookings.some(b => 
+              b.date === selectedDate && 
+              (b.fieldName === sp.name || (b.fieldName.includes(activeField.name) && b.fieldName.includes(sp.tag))) && 
+              b.timeLabel.includes(slot.label) && 
+              b.status !== "CANCELLED"
+            );
+
+            return `
+              <button
+                type="button"
+                ${isBooked ? "disabled" : ""}
+                class="slot-btn ${isBooked ? 'booked' : 'available'}"
+                onclick="openBookingModal(${activeField.id}, ${slot.id}, ${finalPrice}, '${sp.name}')"
+              >
+                <b>${slot.label}</b>
+                <span>${isBooked ? 'ĐÃ CÓ NGƯỜI ĐẶT' : formatMoney(finalPrice)}</span>
+                ${slot.isPeakHour ? '<small>🔥 Giờ vàng</small>' : ''}
+              </button>
+            `;
+          }).join("");
+
+          return `
+            <div class="schedule-field-row" style="border: 2px solid #22c55e; border-radius: 16px; margin-bottom: 22px; background: #ffffff; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.03);">
+              <div class="schedule-field-header" style="background: #f0fdf4; border-bottom: 1px solid #dcfce7; padding: 14px 22px;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span style="font-size: 20px;">🏟️</span>
+                    <h3 style="margin: 0; font-size: 18px; color: #166534;">${sp.name}</h3>
+                    <span style="font-size: 11px; background: #16a34a; color: #ffffff; padding: 2px 10px; border-radius: 999px; font-weight: 800;">${sizeLabel}</span>
+                    <span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-weight: 700;">📍 ${activeField.ward || 'Buôn Ma Thuột'}</span>
+                  </div>
+                  <span style="font-size: 12px; color: #64748b; font-weight: 600; display: block; margin-top: 4px;">
+                    🏠 ${activeField.address || 'Đắk Lắk'} · 📞 Hotline sân: <strong style="color: #16a34a;">${activeField.phone || '0896890399'}</strong> · ${sp.desc}
+                  </span>
+                </div>
+                <span style="font-size: 12px; color: #16a34a; font-weight: 800; background: #dcfce7; padding: 4px 10px; border-radius: 999px;">● Sẵn sàng đón khách</span>
+              </div>
+              <div class="slots-grid-container" style="padding: 18px 22px;">${slotButtons}</div>
+            </div>
+          `;
+        }).join("");
+      } else {
+        // Chế độ xem toàn bộ 21 cụm sân
+        rowsHtml = activeFields.map(field => {
+          const slotButtons = DEFAULT_TIME_SLOTS.map(slot => {
+            const base = selectedPitchSize === 'SAN_11' ? 800000 : selectedPitchSize === 'SAN_7' ? 400000 : 250000;
+            const peakMult = slot.isPeakHour ? 1.3 : 1.0;
+            const weekendMult = isWeekend ? 1.2 : 1.0;
+            const finalPrice = Math.round(base * peakMult * weekendMult);
+
+            const isBooked = bookings.some(b => 
+              b.date === selectedDate && 
+              b.fieldName.includes(field.name) && 
+              b.timeLabel.includes(slot.label) && 
+              b.status !== "CANCELLED"
+            );
+
+            return `
+              <button
+                type="button"
+                ${isBooked ? "disabled" : ""}
+                class="slot-btn ${isBooked ? 'booked' : 'available'}"
+                onclick="openBookingModal(${field.id}, ${slot.id}, ${finalPrice}, '${field.name} (${sizeLabel})')"
+              >
+                <b>${slot.label}</b>
+                <span>${isBooked ? 'ĐÃ CÓ NGƯỜI ĐẶT' : formatMoney(finalPrice)}</span>
+                ${slot.isPeakHour ? '<small>🔥 Giờ vàng</small>' : ''}
+              </button>
+            `;
+          }).join("");
+
+          return `
+            <div class="schedule-field-row" style="${field.id === selectedPitchId ? 'border: 2px solid #22c55e; border-radius: 16px;' : ''}">
+              <div class="schedule-field-header">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <h3 style="margin: 0;">${field.name}</h3>
+                    <span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-weight: 700;">${sizeLabel}</span>
+                  </div>
+                  <span style="font-size: 12px; color: #64748b; font-weight: 600;">
+                    ${sizeLabel} · ${isWeekend ? 'Cuối tuần (T7, CN)' : 'Ngày thường (T2 - T6)'}
+                    ${field.address ? ` · 🏠 ${field.address}` : ''}
+                    ${field.phone ? ` · 📞 ${field.phone}` : ''}
+                  </span>
+                </div>
+                <span style="font-size: 12px; color: #16a34a; font-weight: 700;">● Sân sẵn sàng đón khách</span>
+              </div>
+              <div class="slots-grid-container">${slotButtons}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      container.innerHTML = headerHtml + filterBarHtml + rowsHtml;
+    }
+
+    // Modal Gallery Lightbox
+    function openGalleryModal(fieldId) {
+      const field = DEFAULT_FIELDS.find(f => f.id === fieldId);
+      if (!field) return;
+
+      document.getElementById("gmImage").src = field.imageUrl;
+      document.getElementById("gmName").textContent = field.name;
+      document.getElementById("gmTypePill").textContent = field.fieldType === 'SAN_5' ? '⚽ Sân 5 người' : '🏆 Sân 7 người';
+      document.getElementById("gmPriceTag").textContent = field.fieldType === 'SAN_7' ? 'Từ 500.000đ / ca' : 'Từ 300.000đ / ca';
+      document.getElementById("gmDesc").textContent = field.description;
+      document.getElementById("gmSize").textContent = field.size;
+      document.getElementById("gmTurf").textContent = field.turf;
+      document.getElementById("gmCapacity").textContent = field.capacity;
+
+      document.getElementById("galleryModal").style.display = "flex";
+    }
+
+    function closeGalleryModal() {
+      document.getElementById("galleryModal").style.display = "none";
+    }
+
+    // Booking Modal Handling (UI-05)
+    function openBookingModal(fieldId, slotId, price, subPitchName) {
+      const field = DEFAULT_FIELDS.find(f => f.id === fieldId);
+      const slot = DEFAULT_TIME_SLOTS.find(s => s.id === slotId);
+      if (!field || !slot) return;
+
+      const sizeLabel = selectedPitchSize === 'SAN_11' ? 'Sân 11 người' : selectedPitchSize === 'SAN_7' ? 'Sân 7 người' : 'Sân 5 người';
+      const actualDisplayName = subPitchName || `${field.name} (${sizeLabel})`;
+      activeBookingTarget = { field, slot, basePrice: price, pitchSize: selectedPitchSize, sizeLabel, subPitchName: actualDisplayName };
+
+      document.getElementById("bmFieldName").textContent = actualDisplayName;
+      document.getElementById("bmTimeLabel").textContent = slot.label;
+      document.getElementById("bmDate").textContent = selectedDate;
+      document.getElementById("bmBasePrice").textContent = formatMoney(price);
+
+      // Reset extra checkboxes
+      document.getElementById("chkBibs").checked = false;
+      document.getElementById("chkBall").checked = false;
+      document.getElementById("chkWater").checked = false;
+      document.getElementById("chkReferee").checked = false;
+      recalcBookingTotal();
+
+      // Pre-fill user if logged in
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      const noticeArea = document.getElementById("authAutoFillNotice");
+      if (savedUser) {
+        document.getElementById("bmCustomerName").value = savedUser.fullName;
+        document.getElementById("bmCustomerPhone").value = savedUser.phone;
+        noticeArea.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #86efac; padding: 8px 12px; border-radius: 8px; font-size: 12px; color: #166534; margin-bottom: 12px;">✓ Đã tự động điền từ tài khoản đăng nhập của bạn (<strong>${savedUser.fullName}</strong>).</div>`;
+      } else {
+        document.getElementById("bmCustomerName").value = "";
+        document.getElementById("bmCustomerPhone").value = "";
+        noticeArea.innerHTML = "";
+      }
+
+      document.getElementById("bookingNoticeArea").innerHTML = "";
+      document.getElementById("bookingModal").style.display = "flex";
+    }
+
+    function closeBookingModal() {
+      document.getElementById("bookingModal").style.display = "none";
+    }
+
+    function recalcBookingTotal() {
+      if (!activeBookingTarget) return;
+      let total = activeBookingTarget.basePrice;
+      let extraHtml = "";
+
+      if (document.getElementById("chkBibs").checked) {
+        total += 50000;
+        extraHtml += `<div class="summary-row"><span>Áo bib 2 đội:</span><strong>+50.000đ</strong></div>`;
+      }
+      if (document.getElementById("chkBall").checked) {
+        total += 30000;
+        extraHtml += `<div class="summary-row"><span>Bóng thi đấu thêm:</span><strong>+30.000đ</strong></div>`;
+      }
+      if (document.getElementById("chkWater").checked) {
+        total += 60000;
+        extraHtml += `<div class="summary-row"><span>Nước suối ướp lạnh:</span><strong>+60.000đ</strong></div>`;
+      }
+      if (document.getElementById("chkReferee").checked) {
+        total += 150000;
+        extraHtml += `<div class="summary-row"><span>Trọng tài phong trào:</span><strong>+150.000đ</strong></div>`;
+      }
+
+      document.getElementById("extraSummaryArea").innerHTML = extraHtml;
+      document.getElementById("bmTotalPrice").textContent = formatMoney(total);
+      activeBookingTarget.computedTotal = total;
+    }
+
+    async function handleBookingSubmit(e) {
+      e.preventDefault();
+      if (!activeBookingTarget) return;
+
+      const customerName = document.getElementById("bmCustomerName").value.trim();
+      const customerPhone = document.getElementById("bmCustomerPhone").value.trim();
+      const noticeArea = document.getElementById("bookingNoticeArea");
+      noticeArea.innerHTML = `<div style="color: #64748b; font-size: 13px;">Đang gửi đơn lên máy chủ và lưu vào Neon Database...</div>`;
+
+      // Try API first (Wispbyte / Neon)
+      try {
+        const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+        const res = await fetch(`${apiUrl}/fields/${activeBookingTarget.field.id}/bookings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pitchSize: activeBookingTarget.pitchSize,
+            timeSlotId: activeBookingTarget.slot.id,
+            bookingDate: selectedDate,
+            customerName: customerName,
+            customerPhone: customerPhone,
+          })
+        });
+        const result = await res.json();
+        if (res.ok && result.bookingCode) {
+          const newBooking = {
+            bookingCode: result.bookingCode,
+            fieldName: activeBookingTarget.subPitchName || `${activeBookingTarget.field.name} (${activeBookingTarget.sizeLabel})`,
+            subPitchName: activeBookingTarget.subPitchName,
+            timeLabel: activeBookingTarget.slot.label,
+            date: selectedDate,
+            customerName,
+            customerPhone,
+            totalPrice: activeBookingTarget.computedTotal,
+            status: "PENDING",
+            source: "NEON_DATABASE",
+            createdAt: new Date().toISOString()
+          };
+          const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+          bookings.unshift(newBooking);
+          localStorage.setItem("my-bookings", JSON.stringify(bookings));
+
+          closeBookingModal();
+          showSuccessTicket(newBooking);
+          renderSchedule();
+          return;
+        } else if (res.status === 409) {
+          noticeArea.innerHTML = `
+            <div style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;">
+              <strong>Lỗi 409 Xung đột:</strong> ${result.message || 'Khung giờ này vừa có người khác đặt. Vui lòng chọn ca khác!'}
+            </div>
+          `;
+          return;
+        }
+      } catch (err) {}
+
+      // Fallback local booking simulation
+      const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      const conflict = bookings.some(b => 
+        b.date === selectedDate && 
+        (b.fieldName === activeBookingTarget.subPitchName || (b.fieldName.includes(activeBookingTarget.field.name) && b.fieldName.includes(activeBookingTarget.sizeLabel))) &&
+        b.timeLabel.includes(activeBookingTarget.slot.label) && 
+        b.status !== "CANCELLED"
+      );
+
+      if (conflict) {
+        noticeArea.innerHTML = `
+          <div style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;">
+            <strong>Lỗi 409 Conflict:</strong> Khung giờ này vừa có người khác đặt. Vui lòng chọn ca khác!
+          </div>
+        `;
+        return;
+      }
+
+      const code = `SAN-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+      const newBooking = {
+        bookingCode: code,
+        fieldName: activeBookingTarget.subPitchName || `${activeBookingTarget.field.name} (${activeBookingTarget.sizeLabel})`,
+        subPitchName: activeBookingTarget.subPitchName,
+        timeLabel: activeBookingTarget.slot.label,
+        date: selectedDate,
+        customerName,
+        customerPhone,
+        totalPrice: activeBookingTarget.computedTotal,
+        status: "PENDING",
+        source: "LOCAL_STORAGE",
+        createdAt: new Date().toISOString()
+      };
+
+      bookings.unshift(newBooking);
+      localStorage.setItem("my-bookings", JSON.stringify(bookings));
+
+      closeBookingModal();
+      showSuccessTicket(newBooking);
+      renderSchedule();
+    }
+
+    let successModalCountdownInterval = null;
+
+    // Modal Vé Thành Công & VietQR với đồng hồ đếm ngược 30 phút
+    function showSuccessTicket(booking) {
+      document.getElementById("stBookingCode").textContent = booking.bookingCode;
+      document.getElementById("stDetails").textContent = `${booking.fieldName} · ${booking.timeLabel} · Ngày ${booking.date}`;
+      document.getElementById("stPrice").textContent = `Tổng tiền: ${formatMoney(booking.totalPrice)}`;
+
+      // Hiển thị trạng thái lưu vào Neon Database hay LocalStorage
+      const cloudNotice = document.getElementById("stCloudNotice");
+      if (cloudNotice) {
+        if (booking.source === "NEON_DATABASE") {
+          cloudNotice.innerHTML = `
+            <div style="font-size: 12px; color: #166534; background: #dcfce7; border: 1px solid #86efac; padding: 8px 12px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>☁️</span> ĐÃ LƯU TRỰC TIẾP VÀO NEON POSTGRESQL (Qua máy chủ Wispbyte)!
+            </div>
+          `;
+        } else {
+          cloudNotice.innerHTML = `
+            <div style="font-size: 12px; color: #9a3412; background: #ffedd5; border: 1px solid #fdba74; padding: 8px 12px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>⚠️</span> MÁY CHỦ WISPBYTE ĐANG TẮT: Đơn chỉ lưu tạm vào bộ nhớ trình duyệt LocalStorage (Chưa vào Database đám mây).
+            </div>
+          `;
+        }
+      }
+
+      // Setup VietQR Image - MB Bank 02304200699999 LE DUY TAI
+      const qrUrl = `https://img.vietqr.io/image/970422-02304200699999-compact2.png?amount=100000&addInfo=${encodeURIComponent(booking.bookingCode)}&accountName=LE%20DUY%20TAI`;
+      document.getElementById("vietQrImg").src = qrUrl;
+      document.getElementById("vietQrAddInfo").textContent = booking.bookingCode;
+      document.getElementById("vietQrBox").style.display = "block";
+      document.getElementById("btnVietQrLabel").textContent = "Ẩn / Hiện mã VietQR";
+
+      // 30-minute countdown
+      if (successModalCountdownInterval) clearInterval(successModalCountdownInterval);
+      let secLeft = 1800;
+      function tick() {
+        if (secLeft <= 0) {
+          clearInterval(successModalCountdownInterval);
+          document.getElementById("modalCountdownTimer").textContent = "00:00 (Hết hạn)";
+          document.getElementById("vietQrBox").style.display = "none";
+          return;
+        }
+        const m = Math.floor(secLeft / 60).toString().padStart(2, "0");
+        const s = (secLeft % 60).toString().padStart(2, "0");
+        document.getElementById("modalCountdownTimer").textContent = `${m}:${s}`;
+        secLeft--;
+      }
+      tick();
+      successModalCountdownInterval = setInterval(tick, 1000);
+
+      document.getElementById("successTicketModal").style.display = "flex";
+    }
+
+    function closeSuccessModal() {
+      if (successModalCountdownInterval) clearInterval(successModalCountdownInterval);
+      document.getElementById("successTicketModal").style.display = "none";
+    }
+
+    function toggleVietQrInModal() {
+      const box = document.getElementById("vietQrBox");
+      const isHidden = box.style.display === "none";
+      box.style.display = isHidden ? "block" : "none";
+      document.getElementById("btnVietQrLabel").textContent = isHidden ? "Ẩn mã VietQR" : "Hiện mã VietQR";
+    }
+
+    // API Configuration Modal (Wispbyte & Neon)
+    function openApiConfigModal() {
+      const current = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+      document.getElementById("apiConfigUrlInput").value = current;
+      document.getElementById("apiConfigMsg").innerHTML = "";
+      document.getElementById("apiConfigModal").style.display = "flex";
+    }
+
+    function closeApiConfigModal() {
+      document.getElementById("apiConfigModal").style.display = "none";
+    }
+
+    async function syncBackendStatusAndFields() {
+      const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+      const indicator = document.getElementById("apiStatusIndicator");
+      const label = document.getElementById("apiHostLabel");
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(`${apiUrl}/fields`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            data.forEach(apiF => {
+              const idx = DEFAULT_FIELDS.findIndex(x => x.id === apiF.id);
+              if (idx !== -1) {
+                DEFAULT_FIELDS[idx] = { ...DEFAULT_FIELDS[idx], ...apiF };
+              } else {
+                DEFAULT_FIELDS.push(apiF);
+              }
+            });
+            renderFields();
+            renderSchedule();
+            if (indicator) indicator.style.background = "#22c55e";
+            if (label) label.textContent = "Wispbyte: Đang BẬT (Online)";
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Backend API sync fallback (Wispbyte offline):", e);
+      }
+      // Khi Wispbyte bị TẮT hoặc không gọi được:
+      if (indicator) indicator.style.background = "#ef4444";
+      if (label) label.textContent = "Wispbyte: Đang TẮT (Offline)";
+    }
+
+    async function testAndSaveApiConfig() {
+      let input = document.getElementById("apiConfigUrlInput").value.trim().replace(/\/+$/, "");
+      const msgArea = document.getElementById("apiConfigMsg");
+      msgArea.innerHTML = `<span style="color: #64748b;">Đang kiểm tra kết nối...</span>`;
+
+      if (!input) {
+        input = "https://doanthinhvatai.wispbyte.app/api/v1";
+      }
+
+      // Tự động thêm http:// hoặc https:// nếu người dùng chỉ gõ IP hoặc domain
+      if (!/^https?:\/\//i.test(input)) {
+        if (input.includes("wispbyte.app")) {
+          input = "https://" + input;
+        } else {
+          input = "http://" + input;
+        }
+      }
+
+      // Tự động thêm /api/v1 nếu thiếu
+      let urlToTest = input;
+      if (!urlToTest.includes("/api/")) {
+        urlToTest = `${urlToTest}/api/v1`;
+      }
+
+      try {
+        const res = await fetch(`${urlToTest}/fields`);
+        const data = await res.json();
+        if (res.ok && Array.isArray(data) && data.length > 0) {
+          localStorage.setItem("football_api_url", urlToTest);
+          msgArea.innerHTML = `<span style="color: #16a34a; font-weight: 700;">✓ Kết nối thành công! Đã đồng bộ ${data.length} sân bóng từ Neon PostgreSQL.</span>`;
+          document.getElementById("apiHostLabel").textContent = "Đã nối Wispbyte & Neon";
+          document.getElementById("apiStatusIndicator").style.background = "#22c55e";
+          setTimeout(() => {
+            closeApiConfigModal();
+            location.reload();
+          }, 900);
+          return;
+        } else if (res.ok) {
+          localStorage.setItem("football_api_url", urlToTest);
+          msgArea.innerHTML = `<span style="color: #16a34a; font-weight: 700;">✓ Kết nối thành công tới máy chủ API!</span>`;
+          setTimeout(() => {
+            closeApiConfigModal();
+            location.reload();
+          }, 900);
+          return;
+        }
+      } catch (err) {
+        let hint = "";
+        if (location.protocol === "https:" && urlToTest.startsWith("http://")) {
+          hint = "<br><small style='color: #ea580c; font-weight: 700;'>Lưu ý quan trọng: Trang web đang chạy HTTPS nên trình duyệt chặn kết nối IP HTTP thường (Mixed Content). Hãy bấm vào nút xanh <strong>'Tên miền Wispbyte (Chuẩn HTTPS)'</strong> phía trên để kết nối không bị chặn!</small>";
+        }
+        msgArea.innerHTML = `<span style="color: #dc2626; font-weight: 600;">Không kết nối được: ${err.message}.${hint}</span>`;
+      }
+    }
+
+    // FAQ Accordion
+    function toggleFaq(card) {
+      const isOpen = card.classList.contains("open");
+      document.querySelectorAll(".faq-card").forEach(c => {
+        c.classList.remove("open");
+        c.querySelector(".faq-toggle-icon").textContent = "▼";
+        c.querySelector(".faq-answer-content").style.display = "none";
+      });
+      if (!isOpen) {
+        card.classList.add("open");
+        card.querySelector(".faq-toggle-icon").textContent = "▲";
+        card.querySelector(".faq-answer-content").style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
+

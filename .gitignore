@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.local
+.next/
+web/.next/
+coverage/
+*.log
+node.exe
+.DS_Store
+Thumbs.db
+
