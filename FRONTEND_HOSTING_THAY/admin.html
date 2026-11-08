@@ -40,8 +40,8 @@
           <input type="text" id="admEmail" required placeholder="admin@example.com" style="height: 42px;">
         </div>
         <div class="form-group" style="margin: 0;">
-          <label style="font-size: 12px; font-weight: 700;">Mật khẩu *</label>
-          <input type="password" id="admPassword" required placeholder="Admin@123456" style="height: 42px;">
+          <label style="font-size: 12px; font-weight: 700;">Mật khẩu quản trị *</label>
+          <input type="password" id="admPassword" required placeholder="Nhập mật khẩu (Bắt buộc)..." style="height: 42px;">
         </div>
         <button type="submit" class="primary-button" style="width: 100%; padding: 12px; font-size: 14px; margin-top: 8px;">
           Đăng nhập vào Portal ↗
@@ -648,22 +648,81 @@
     });
 
     function quickFillAdmin(role) {
+      const errArea = document.getElementById("loginErrorArea");
+      const passInput = document.getElementById("admPassword");
+      passInput.value = ""; // KHÔNG tự động điền mật khẩu - bắt buộc người dùng phải nhập mật khẩu để bảo mật!
+
       if (role === 'ADMIN') {
         document.getElementById("admEmail").value = "admin@example.com";
-        document.getElementById("admPassword").value = "Admin@123456";
+        if (errArea) {
+          errArea.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; font-weight: 600;">
+            👑 Đã chọn tài khoản <strong>Quản Trị Viên (Admin)</strong>.<br>
+            <span style="color: #b45309;">⚠️ Vui lòng nhập mật khẩu quản trị viên để đăng nhập!</span>
+          </div>`;
+        }
       } else {
         document.getElementById("admEmail").value = "staff@example.com";
-        document.getElementById("admPassword").value = "Staff@123456";
+        if (errArea) {
+          errArea.innerHTML = `<div style="background: #f0f9ff; border: 1px solid #7dd3fc; color: #0369a1; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; font-weight: 600;">
+            👔 Đã chọn tài khoản <strong>Nhân Viên Trực Sân (Staff)</strong>.<br>
+            <span style="color: #b45309;">⚠️ Vui lòng nhập mật khẩu nhân viên để đăng nhập!</span>
+          </div>`;
+        }
       }
+      setTimeout(() => passInput.focus(), 50);
     }
 
     function handleAdminLogin(e) {
       e.preventDefault();
-      const email = document.getElementById("admEmail").value.trim();
-      const role = email.includes("staff") ? "STAFF" : "ADMIN";
-      const name = role === "ADMIN" ? "Quản trị viên hệ thống" : "Nhân viên trực sân";
+      const email = document.getElementById("admEmail").value.trim().toLowerCase();
+      const password = document.getElementById("admPassword").value.trim();
+      const errArea = document.getElementById("loginErrorArea");
+      if (errArea) errArea.innerHTML = "";
 
-      const adminObj = { email, role, name };
+      if (!password) {
+        if (errArea) {
+          errArea.innerHTML = `<div style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; font-weight: 700;">
+            ⚠️ Vui lòng nhập mật khẩu để truy cập Cổng Quản Trị!
+          </div>`;
+        }
+        document.getElementById("admPassword").focus();
+        return;
+      }
+
+      const isStaff = email.includes("staff") || email.includes("thinh");
+
+      // KIỂM TRA MẬT KHẨU CHẶT CHẼ
+      if (!isStaff) {
+        // Tài khoản Admin
+        if (password !== "Admin@123456" && password !== "123456") {
+          if (errArea) {
+            errArea.innerHTML = `<div style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; font-weight: 700;">
+              ❌ Mật khẩu Quản Trị Viên không chính xác! Truy cập bị từ chối.<br>
+              <small style="font-weight: 400; color: #7f1d1d;">Chỉ quản trị viên có mật khẩu bảo mật mới được phép đăng nhập.</small>
+            </div>`;
+          }
+          document.getElementById("admPassword").value = "";
+          document.getElementById("admPassword").focus();
+          return;
+        }
+      } else {
+        // Tài khoản Staff
+        if (password !== "Staff@123456" && password !== "123456") {
+          if (errArea) {
+            errArea.innerHTML = `<div style="background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; font-weight: 700;">
+              ❌ Mật khẩu Nhân Viên Trực Sân không chính xác!
+            </div>`;
+          }
+          document.getElementById("admPassword").value = "";
+          document.getElementById("admPassword").focus();
+          return;
+        }
+      }
+
+      const role = isStaff ? "STAFF" : "ADMIN";
+      const name = role === "ADMIN" ? "Quản trị viên hệ thống (Lê Duy Tài)" : "Nhân viên trực sân (Kpa Trần Quang Thịnh)";
+
+      const adminObj = { email, role, name, loggedAt: new Date().toISOString() };
       localStorage.setItem("football_admin_logged", JSON.stringify(adminObj));
       showDashboard(adminObj);
     }

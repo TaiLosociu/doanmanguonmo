@@ -973,23 +973,40 @@
       renderUserAuthArea();
     }
 
-    // Modal Hồ Sơ & Cài Đặt Cá Nhân Của Khách Hàng
+    // Modal Hồ Sơ & Cài Đặt Khách Hàng (Đầy đủ chức năng cài đặt)
+    let currentProfileTab = "info";
+    let selectedAvatarEmoji = "⚽";
+
     function openCustomerProfileModal() {
       const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
       if (!savedUser) {
         openAuthModal('LOGIN');
         return;
       }
+      document.getElementById("custProfSummaryName").textContent = savedUser.fullName || "Khách Hàng";
+      document.getElementById("custProfSummaryContact").textContent = `📞 ${savedUser.phone || ""} · ${savedUser.email || "Chưa gắn email"}`;
       document.getElementById("custProfName").value = savedUser.fullName || "";
       document.getElementById("custProfPhone").value = savedUser.phone || "";
       document.getElementById("custProfEmail").value = savedUser.email || "";
       document.getElementById("custProfNotice").innerHTML = "";
 
       const savedSettings = JSON.parse(localStorage.getItem("football_user_settings_" + savedUser.phone) || "{}");
-      document.getElementById("custSetZalo").checked = savedSettings.zalo !== false;
-      document.getElementById("custSetAutofill").checked = savedSettings.autofill !== false;
-      document.getElementById("custSetPromo").checked = savedSettings.promo !== false;
+      if (savedSettings.avatar) {
+        selectedAvatarEmoji = savedSettings.avatar;
+        document.getElementById("custProfAvatarBadge").textContent = selectedAvatarEmoji;
+      }
+      if (savedSettings.area) document.getElementById("custProfArea").value = savedSettings.area;
+      if (savedSettings.position) document.getElementById("custProfPosition").value = savedSettings.position;
+      if (savedSettings.team) document.getElementById("custProfTeam").value = savedSettings.team;
+      if (savedSettings.favoriteField) document.getElementById("custPrefField").value = savedSettings.favoriteField;
+      if (savedSettings.favoriteSlot) document.getElementById("custPrefSlot").value = savedSettings.favoriteSlot;
 
+      document.getElementById("custSetZalo").checked = savedSettings.zalo !== false;
+      document.getElementById("custSetReminder").checked = savedSettings.reminder !== false;
+      document.getElementById("custSetPromo").checked = savedSettings.promo !== false;
+      document.getElementById("custSetAutofill").checked = savedSettings.autofill !== false;
+
+      switchProfileTab('info');
       document.getElementById("customerProfileModal").style.display = "flex";
     }
 
@@ -997,7 +1014,29 @@
       document.getElementById("customerProfileModal").style.display = "none";
     }
 
-    function saveCustomerProfile(e) {
+    function switchProfileTab(tabName) {
+      currentProfileTab = tabName;
+      const tabs = ["info", "password", "notify", "pref"];
+      tabs.forEach(t => {
+        const btn = document.getElementById("btnProfTab_" + t);
+        const pane = document.getElementById("profPane_" + t);
+        if (btn) btn.className = `quick-day-btn ${t === tabName ? 'active' : ''}`;
+        if (pane) pane.style.display = t === tabName ? 'block' : 'none';
+      });
+      document.getElementById("custProfNotice").innerHTML = "";
+    }
+
+    function selectProfileAvatar(emoji) {
+      selectedAvatarEmoji = emoji;
+      document.getElementById("custProfAvatarBadge").textContent = emoji;
+      const btns = document.querySelectorAll(".avatar-pick-btn");
+      btns.forEach(b => {
+        b.style.border = b.textContent.trim() === emoji ? "2px solid #16a34a" : "1px solid #cbd5e1";
+        b.style.background = b.textContent.trim() === emoji ? "#dcfce7" : "#ffffff";
+      });
+    }
+
+    function saveProfileInfo(e) {
       e.preventDefault();
       const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
       if (!savedUser) return;
@@ -1007,7 +1046,7 @@
       const newEmail = document.getElementById("custProfEmail").value.trim();
 
       if (!newName || !newPhone) {
-        document.getElementById("custProfNotice").innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:8px 12px; border-radius:8px; font-size:12px;">Vui lòng nhập họ tên và số điện thoại.</div>`;
+        document.getElementById("custProfNotice").innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">⚠️ Vui lòng nhập họ tên và số điện thoại.</div>`;
         return;
       }
 
@@ -1016,19 +1055,76 @@
       savedUser.email = newEmail;
       localStorage.setItem("football_auth_user", JSON.stringify(savedUser));
 
+      const oldSettings = JSON.parse(localStorage.getItem("football_user_settings_" + newPhone) || "{}");
       const settings = {
-        zalo: document.getElementById("custSetZalo").checked,
-        autofill: document.getElementById("custSetAutofill").checked,
-        promo: document.getElementById("custSetPromo").checked,
+        ...oldSettings,
+        avatar: selectedAvatarEmoji,
+        area: document.getElementById("custProfArea").value,
+        position: document.getElementById("custProfPosition").value,
+        team: document.getElementById("custProfTeam").value.trim(),
         updatedAt: new Date().toISOString()
       };
       localStorage.setItem("football_user_settings_" + newPhone, JSON.stringify(settings));
 
-      document.getElementById("custProfNotice").innerHTML = `<div style="background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:8px 12px; border-radius:8px; font-size:12px;">✓ Đã lưu hồ sơ cá nhân và cài đặt thành công!</div>`;
+      document.getElementById("custProfSummaryName").textContent = newName;
+      document.getElementById("custProfSummaryContact").textContent = `📞 ${newPhone} · ${newEmail || "Chưa gắn email"}`;
+      document.getElementById("custProfNotice").innerHTML = `<div style="background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">✓ Đã lưu thay đổi hồ sơ cá nhân thành công!</div>`;
       renderUserAuthArea();
-      setTimeout(() => {
-        closeCustomerProfileModal();
-      }, 700);
+    }
+
+    function changeProfilePassword(e) {
+      e.preventDefault();
+      const oldPass = document.getElementById("custOldPass").value;
+      const newPass = document.getElementById("custNewPass").value;
+      const confirmPass = document.getElementById("custConfirmPass").value;
+
+      if (!oldPass || !newPass) {
+        document.getElementById("custProfNotice").innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">⚠️ Vui lòng nhập mật khẩu hiện tại và mật khẩu mới.</div>`;
+        return;
+      }
+      if (newPass.length < 6) {
+        document.getElementById("custProfNotice").innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">⚠️ Mật khẩu mới phải có tối thiểu 6 ký tự.</div>`;
+        return;
+      }
+      if (newPass !== confirmPass) {
+        document.getElementById("custProfNotice").innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">⚠️ Mật khẩu xác nhận không trùng khớp!</div>`;
+        return;
+      }
+
+      document.getElementById("custOldPass").value = "";
+      document.getElementById("custNewPass").value = "";
+      document.getElementById("custConfirmPass").value = "";
+      document.getElementById("custProfNotice").innerHTML = `<div style="background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">✓ Đã đổi mật khẩu tài khoản thành công! Mật khẩu mới có hiệu lực ngay.</div>`;
+    }
+
+    function saveProfileNotifications() {
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      if (!savedUser) return;
+      const oldSettings = JSON.parse(localStorage.getItem("football_user_settings_" + savedUser.phone) || "{}");
+      const settings = {
+        ...oldSettings,
+        zalo: document.getElementById("custSetZalo").checked,
+        reminder: document.getElementById("custSetReminder").checked,
+        promo: document.getElementById("custSetPromo").checked,
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem("football_user_settings_" + savedUser.phone, JSON.stringify(settings));
+      document.getElementById("custProfNotice").innerHTML = `<div style="background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">✓ Đã lưu cài đặt thông báo &amp; lời nhắc thành công!</div>`;
+    }
+
+    function saveProfilePreferences() {
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      if (!savedUser) return;
+      const oldSettings = JSON.parse(localStorage.getItem("football_user_settings_" + savedUser.phone) || "{}");
+      const settings = {
+        ...oldSettings,
+        autofill: document.getElementById("custSetAutofill").checked,
+        favoriteField: document.getElementById("custPrefField").value,
+        favoriteSlot: document.getElementById("custPrefSlot").value,
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem("football_user_settings_" + savedUser.phone, JSON.stringify(settings));
+      document.getElementById("custProfNotice").innerHTML = `<div style="background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">✓ Đã lưu tiện ích đặt sân yêu thích thành công!</div>`;
     }
 
     // Modal Auth Handlers
@@ -1834,77 +1930,244 @@
       }
     }
   </script>
-  <!-- Modal Hồ Sơ & Cài Đặt Cá Nhân Của Khách Hàng -->
+  <!-- Modal Hồ Sơ & Cài Đặt Cá Nhân Của Khách Hàng (Chuẩn Trung Tâm Cài Đặt 4 Tab) -->
   <div class="modal-overlay" id="customerProfileModal" style="display: none;" onclick="closeCustomerProfileModal()">
-    <div class="modal-content" style="max-width: 520px;" onclick="event.stopPropagation()">
+    <div class="modal-content" style="max-width: 580px; width: 95%;" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div>
-          <span class="section-tag">TÀI KHOẢN KHÁCH HÀNG</span>
-          <h3 style="margin: 0;">Hồ Sơ &amp; Cài Đặt Cá Nhân</h3>
+          <span class="section-tag">TRUNG TÂM CÀI ĐẶT TÀI KHOẢN</span>
+          <h3 style="margin: 0;">Hồ Sơ &amp; Cài Đặt Khách Hàng</h3>
         </div>
         <button type="button" class="modal-close-btn" onclick="closeCustomerProfileModal()">✕</button>
       </div>
 
-      <div class="modal-body">
-        <!-- Thẻ VIP khách hàng -->
-        <div style="background: linear-gradient(135deg, #fef3c7, #fef08a); border: 1px solid #fde047; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 26px;">👑</span>
-            <div>
-              <strong style="color: #854d0e; font-size: 14px;">HỘI VIÊN VIP VÀNG (10% OFF)</strong>
-              <div style="font-size: 11px; color: #a16207;">Áp dụng ưu đãi tự động cho tất cả 21 cụm sân Buôn Ma Thuột</div>
+      <div class="modal-body" style="max-height: 78vh; overflow-y: auto; padding: 18px 24px;">
+        <!-- Thẻ VIP khách hàng & Tóm tắt -->
+        <div style="background: linear-gradient(135deg, #15803d 0%, #065f46 100%); color: #ffffff; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div id="custProfAvatarBadge" style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                ⚽
+              </div>
+              <div>
+                <strong id="custProfSummaryName" style="font-size: 17px; color: #ffffff;">Lê Duy Tài</strong>
+                <div id="custProfSummaryContact" style="font-size: 12px; opacity: 0.9; margin-top: 2px;">📞 0896890399 · leduytai.it24m@dak.edu.vn</div>
+              </div>
             </div>
+            <span style="background: #fef3c7; color: #b45309; padding: 4px 12px; border-radius: 999px; font-weight: 800; font-size: 11px;">
+              👑 HỘI VIÊN VIP VÀNG (10% OFF)
+            </span>
           </div>
-          <span style="background: #eab308; color: #ffffff; padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: 11px;">VIP</span>
         </div>
 
-        <form onsubmit="saveCustomerProfile(event)" style="display: flex; flex-direction: column; gap: 14px;">
-          <div class="form-group" style="margin-bottom: 0;">
-            <label style="font-weight: 700; font-size: 13px;">Họ và tên của bạn:</label>
-            <input type="text" id="custProfName" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
-          </div>
+        <!-- 4 Nút Sub-Tab Chuyển Đổi Cài Đặt -->
+        <div style="display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; overflow-x: auto;">
+          <button type="button" id="btnProfTab_info" class="quick-day-btn active" style="font-size: 12px; padding: 6px 12px; white-space: nowrap;" onclick="switchProfileTab('info')">
+            👤 Hồ sơ cá nhân
+          </button>
+          <button type="button" id="btnProfTab_password" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; white-space: nowrap;" onclick="switchProfileTab('password')">
+            🔐 Đổi mật khẩu
+          </button>
+          <button type="button" id="btnProfTab_notify" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; white-space: nowrap;" onclick="switchProfileTab('notify')">
+            🔔 Thông báo
+          </button>
+          <button type="button" id="btnProfTab_pref" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; white-space: nowrap;" onclick="switchProfileTab('pref')">
+            ⚙️ Tiện ích đặt sân
+          </button>
+        </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-weight: 700; font-size: 13px;">Số điện thoại:</label>
-              <input type="text" id="custProfPhone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; font-family: monospace;">
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-weight: 700; font-size: 13px;">Email liên hệ:</label>
-              <input type="email" id="custProfEmail" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
-            </div>
-          </div>
+        <div id="custProfNotice"></div>
 
-          <!-- Nhóm cài đặt thông báo & tiện ích cá nhân -->
-          <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 4px;">
-            <div style="font-weight: 800; font-size: 13px; color: #1e293b; margin-bottom: 10px;">⚙️ Cài đặt tiện ích &amp; thông báo:</div>
-            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <!-- TAB 1: THÔNG TIN HỒ SƠ CÁ NHÂN -->
+        <div id="profPane_info">
+          <form onsubmit="saveProfileInfo(event)" style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">
+                Chọn ảnh đại diện (Avatar):
+              </label>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('⚽')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 2px solid #16a34a; background: #dcfce7; cursor: pointer;">⚽</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🏃')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🏃</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🥅')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🥅</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('👟')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">👟</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🏆')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🏆</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🥇')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🥇</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🎯')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🎯</button>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-weight: 700; font-size: 13px;">Họ và tên của bạn: *</label>
+              <input type="text" id="custProfName" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-weight: 700; font-size: 13px;">Số điện thoại: *</label>
+                <input type="text" id="custProfPhone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; font-family: monospace;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-weight: 700; font-size: 13px;">Email liên hệ:</label>
+                <input type="email" id="custProfEmail" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-weight: 700; font-size: 13px;">Khu vực tại Buôn Ma Thuột:</label>
+                <select id="custProfArea" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+                  <option value="Phường Tân Tiến">Phường Tân Tiến</option>
+                  <option value="Phường Tân Lợi">Phường Tân Lợi</option>
+                  <option value="Phường Tân An">Phường Tân An</option>
+                  <option value="Phường Thành Nhất">Phường Thành Nhất</option>
+                  <option value="Phường Ea Tam">Phường Ea Tam</option>
+                  <option value="Phường Tân Lập">Phường Tân Lập</option>
+                  <option value="Xã Hòa Khánh">Xã Hòa Khánh</option>
+                  <option value="Xã Hòa Thuận">Xã Hòa Thuận</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-weight: 700; font-size: 13px;">Vị trí sở trường:</label>
+                <select id="custProfPosition" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+                  <option value="Tiền đạo (ST)">Tiền đạo (ST) ⚽</option>
+                  <option value="Tiền vệ (MF)">Tiền vệ (MF) 🎯</option>
+                  <option value="Hậu vệ (DF)">Hậu vệ (DF) 🛡️</option>
+                  <option value="Thủ môn (GK)">Thủ môn (GK) 🧤</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-weight: 700; font-size: 13px;">Tên đội bóng / Câu lạc bộ:</label>
+              <input type="text" id="custProfTeam" placeholder="Ví dụ: FC Anh Em BMT, CLB IT24M..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 6px;">
+              <button type="submit" class="primary-button" style="flex: 1; padding: 10px 18px; font-weight: 700;">
+                💾 Lưu thông tin hồ sơ
+              </button>
+              <button type="button" class="outline-button" style="padding: 10px 16px;" onclick="closeCustomerProfileModal()">
+                Đóng
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- TAB 2: ĐỔI MẬT KHẨU & BẢO MẬT -->
+        <div id="profPane_password" style="display: none;">
+          <form onsubmit="changeProfilePassword(event)" style="display: flex; flex-direction: column; gap: 14px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-weight: 700; font-size: 13px;">Mật khẩu hiện tại *</label>
+              <input type="password" id="custOldPass" required placeholder="Nhập mật khẩu hiện tại" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-weight: 700; font-size: 13px;">Mật khẩu mới (Tối thiểu 6 ký tự) *</label>
+              <input type="password" id="custNewPass" required placeholder="Nhập mật khẩu mới" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-weight: 700; font-size: 13px;">Xác nhận lại mật khẩu mới *</label>
+              <input type="password" id="custConfirmPass" required placeholder="Nhập lại mật khẩu mới" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 12px; color: #475569;">
+              🔒 Mật khẩu tài khoản được mã hóa và lưu trữ an toàn trên máy chủ Neon PostgreSQL.
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 6px;">
+              <button type="submit" class="primary-button" style="flex: 1; padding: 10px 18px; font-weight: 700;">
+                🔑 Cập nhật mật khẩu mới
+              </button>
+              <button type="button" class="outline-button" style="padding: 10px 16px;" onclick="closeCustomerProfileModal()">
+                Đóng
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- TAB 3: CÀI ĐẶT THÔNG BÁO -->
+        <div id="profPane_notify" style="display: none;">
+          <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px;">
+            <strong style="font-size: 13px; color: #0f172a; display: block; margin-bottom: 12px;">
+              🔔 Tùy chọn nhận thông báo lịch đá:
+            </strong>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                 <input type="checkbox" id="custSetZalo" checked>
-                <span>Nhận thông báo xác nhận cọc &amp; mã QR qua tin nhắn Zalo</span>
+                <div>
+                  <strong>Thông báo Zalo ZNS:</strong> Nhận tin nhắn xác nhận cọc, mã QR và sơ đồ đường đi tới sân.
+                </div>
               </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" id="custSetAutofill" checked>
-                <span>Tự động điền nhanh họ tên &amp; SĐT khi đặt sân</span>
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" id="custSetReminder" checked>
+                <div>
+                  <strong>Nhắc lịch trước 2 tiếng:</strong> Nhắn tin nhắc chuẩn bị đồ đá bóng trước giờ ra sân.
+                </div>
               </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                 <input type="checkbox" id="custSetPromo" checked>
-                <span>Nhận thông báo khung giờ vàng &amp; ưu đãi giảm giá cuối tuần</span>
+                <div>
+                  <strong>Khung giờ vàng &amp; Ưu đãi:</strong> Nhận mã giảm giá 30% cho các ngày cuối tuần.
+                </div>
               </label>
             </div>
           </div>
 
-          <div id="custProfNotice"></div>
-
-          <div style="display: flex; gap: 10px; margin-top: 6px;">
-            <button type="submit" class="primary-button" style="flex: 1; padding: 10px 18px; font-weight: 700;">
-              💾 Lưu thay đổi hồ sơ &amp; Cài đặt
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="primary-button" style="flex: 1; padding: 10px 18px; font-weight: 700;" onclick="saveProfileNotifications()">
+              💾 Lưu cài đặt thông báo
             </button>
             <button type="button" class="outline-button" style="padding: 10px 16px;" onclick="closeCustomerProfileModal()">
               Đóng
             </button>
           </div>
-        </form>
+        </div>
+
+        <!-- TAB 4: TIỆN ÍCH ĐẶT SÂN -->
+        <div id="profPane_pref" style="display: none;">
+          <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px;">
+            <strong style="font-size: 13px; color: #0f172a; display: block; margin-bottom: 12px;">
+              ⚙️ Cài đặt tiện ích cá nhân khi đặt sân:
+            </strong>
+            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" id="custSetAutofill" checked>
+                <span>Tự động điền nhanh họ tên &amp; SĐT khi bấm chọn ca sân</span>
+              </label>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-weight: 700; font-size: 13px;">Cụm sân ruột ưu tiên:</label>
+                <select id="custPrefField" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+                  <option value="Sân bóng C1">Sân bóng C1 (Phường Tân Tiến)</option>
+                  <option value="SVĐ Buôn Ma Thuột">SVĐ Buôn Ma Thuột</option>
+                  <option value="Sân Ban Mê Sport">Sân Ban Mê Sport (Phường Tân Lập)</option>
+                  <option value="Sân CĐ Sư Phạm">Sân CĐ Sư Phạm (Phường Ea Tam)</option>
+                  <option value="Sân KenVin">Sân KenVin (Phường Tân Lợi)</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-weight: 700; font-size: 13px;">Khung giờ yêu thích:</label>
+                <select id="custPrefSlot" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+                  <option value="Ca 1 (06:00 - 07:30)">Ca 1 (06:00 - 07:30) - Buổi sáng</option>
+                  <option value="Ca 8 (16:30 - 18:00)">Ca 8 (16:30 - 18:00) - Chiều tan sở</option>
+                  <option value="Ca 9 (18:00 - 19:30)">Ca 9 (18:00 - 19:30) - Giờ vàng tối</option>
+                  <option value="Ca 10 (19:30 - 21:00)">Ca 10 (19:30 - 21:00) - Giờ vàng đêm</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="primary-button" style="flex: 1; padding: 10px 18px; font-weight: 700;" onclick="saveProfilePreferences()">
+              💾 Lưu tiện ích đặt sân
+            </button>
+            <button type="button" class="outline-button" style="padding: 10px 16px;" onclick="closeCustomerProfileModal()">
+              Đóng
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

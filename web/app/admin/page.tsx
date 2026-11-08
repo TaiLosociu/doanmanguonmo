@@ -146,9 +146,10 @@ export default function AdminPage() {
   const [userName, setUserName] = useState("Lê Duy Tài");
 
   // Login form
-  const [email, setEmail] = useState("admin@dak.edu.vn");
-  const [password, setPassword] = useState("Admin@123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [loginNotice, setLoginNotice] = useState("");
 
   const [tab, setTab] = useState<Tab>("report");
 
@@ -372,8 +373,30 @@ export default function AdminPage() {
   async function handleLogin(e: FormEvent) {
     e.preventDefault();
     setLoginError("");
+    setLoginNotice("");
     const lowerEmail = email.toLowerCase().trim();
-    const isStaff = lowerEmail.includes("staff") || lowerEmail.includes("nhanvien");
+    const isStaff = lowerEmail.includes("staff") || lowerEmail.includes("nhanvien") || lowerEmail.includes("thinh");
+
+    if (!password.trim()) {
+      setLoginError("⚠️ Vui lòng nhập mật khẩu để truy cập Cổng Quản Trị!");
+      return;
+    }
+
+    // Kiểm tra mật khẩu chuẩn xác trước khi cho phép đăng nhập
+    if (!isStaff) {
+      if (password !== "Admin@123456" && password !== "123456") {
+        setLoginError("❌ Mật khẩu Quản Trị Viên không chính xác! Truy cập bị từ chối.");
+        setPassword("");
+        return;
+      }
+    } else {
+      if (password !== "Staff@123456" && password !== "123456") {
+        setLoginError("❌ Mật khẩu Nhân Viên Trực Sân không chính xác!");
+        setPassword("");
+        return;
+      }
+    }
+
     try {
       const res = await fetch(`${API}/auth/login`, {
         method: "POST",
@@ -395,21 +418,17 @@ export default function AdminPage() {
       setUserName(name);
       if (role === "STAFF") setTab("bookings");
     } catch (err: any) {
-      // Allow demo fallback login
-      if (password === "Admin@123456" || password === "Staff@123456" || password === "123456") {
-        const demoJwt = `demo-${isStaff ? "staff" : "admin"}-${Date.now()}`;
-        const role = isStaff ? "STAFF" : "ADMIN";
-        const name = isStaff ? "Kpa Trần Quang Thịnh (Nhân viên trực sân)" : "Lê Duy Tài (Quản trị viên IT24M)";
-        window.localStorage.setItem("admin-token", demoJwt);
-        window.localStorage.setItem("user-role", role);
-        window.localStorage.setItem("user-name", name);
-        setToken(demoJwt);
-        setUserRole(role);
-        setUserName(name);
-        if (role === "STAFF") setTab("bookings");
-      } else {
-        setLoginError(err.message || "Tài khoản hoặc mật khẩu không đúng. Vui lòng thử lại!");
-      }
+      // Allow verified fallback login
+      const demoJwt = `demo-${isStaff ? "staff" : "admin"}-${Date.now()}`;
+      const role = isStaff ? "STAFF" : "ADMIN";
+      const name = isStaff ? "Kpa Trần Quang Thịnh (Nhân viên trực sân)" : "Lê Duy Tài (Quản trị viên IT24M)";
+      window.localStorage.setItem("admin-token", demoJwt);
+      window.localStorage.setItem("user-role", role);
+      window.localStorage.setItem("user-name", name);
+      setToken(demoJwt);
+      setUserRole(role);
+      setUserName(name);
+      if (role === "STAFF") setTab("bookings");
     }
   }
 
@@ -497,7 +516,7 @@ export default function AdminPage() {
           {/* Quick 1-click test credentials */}
           <div style={{ background: "#f8fafc", border: "1px dashed #cbd5e1", borderRadius: "10px", padding: "12px", marginBottom: "18px" }}>
             <div style={{ fontSize: "11px", fontWeight: "700", color: "#475569", marginBottom: "8px" }}>
-              ⚡ 1-CLICK ĐIỀN TÀI KHOẢN MẪU (TEST NHANH):
+              ⚡ CHỌN TÀI KHOẢN ĐỂ ĐĂNG NHẬP (BẮT BUỘC NHẬP MẬT KHẨU):
             </div>
             <div style={{ display: "flex", gap: "8px" }}>
               <button
@@ -506,8 +525,9 @@ export default function AdminPage() {
                 style={{ flex: 1, fontSize: "12px", background: "#dcfce7", color: "#166534", borderColor: "#86efac", fontWeight: 700 }}
                 onClick={() => {
                   setEmail("admin@example.com");
-                  setPassword("Admin@123456");
+                  setPassword("");
                   setLoginError("");
+                  setLoginNotice("🔒 Đã chọn tài khoản Quản trị viên (admin@example.com). Vui lòng nhập mật khẩu quản trị để tiếp tục.");
                 }}
               >
                 👑 Tài khoản Admin
@@ -518,8 +538,9 @@ export default function AdminPage() {
                 style={{ flex: 1, fontSize: "12px", background: "#e0f2fe", color: "#0369a1", borderColor: "#7dd3fc", fontWeight: 700 }}
                 onClick={() => {
                   setEmail("staff@example.com");
-                  setPassword("Staff@123456");
+                  setPassword("");
                   setLoginError("");
+                  setLoginNotice("🔒 Đã chọn tài khoản Nhân viên trực sân (staff@example.com). Vui lòng nhập mật khẩu nhân viên để tiếp tục.");
                 }}
               >
                 👔 Tài khoản Staff
@@ -527,8 +548,14 @@ export default function AdminPage() {
             </div>
           </div>
 
+          {loginNotice && (
+            <div style={{ background: "#f0fdf4", border: "1px solid #86efac", color: "#166534", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "14px", fontWeight: 600 }}>
+              {loginNotice}
+            </div>
+          )}
+
           {loginError && (
-            <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#991b1b", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "16px" }}>
+            <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#991b1b", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "16px", fontWeight: 700 }}>
               {loginError}
             </div>
           )}
@@ -545,13 +572,13 @@ export default function AdminPage() {
             </div>
 
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Mật khẩu đăng nhập *</label>
+              <label>Mật khẩu quản trị *</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Admin@123456 hoặc Staff@123456"
+                placeholder="Nhập mật khẩu (Bắt buộc)..."
               />
             </div>
 

@@ -512,6 +512,18 @@ export default function Home() {
   } | null>(null);
   const [authModal, setAuthModal] = useState<"LOGIN" | "REGISTER" | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [profileTab, setProfileTab] = useState<"PROFILE" | "PASSWORD" | "NOTIFICATIONS" | "PREFERENCES">("PROFILE");
+  const [profileNotice, setProfileNotice] = useState("");
+  const [userAvatar, setUserAvatar] = useState("⚽");
+  const [userArea, setUserArea] = useState("Phường Tân Tiến");
+  const [userTeam, setUserTeam] = useState("CLB Ban Mê FC");
+  const [userPosition, setUserPosition] = useState("Tiền đạo (ST)");
+  const [notifyZalo, setNotifyZalo] = useState(true);
+  const [notifyReminder, setNotifyReminder] = useState(true);
+  const [notifyPromo, setNotifyPromo] = useState(true);
+  const [prefAutofill, setPrefAutofill] = useState(true);
+  const [prefFavoriteField, setPrefFavoriteField] = useState("Sân bóng C1");
+  const [prefFavoriteSlot, setPrefFavoriteSlot] = useState("Ca 9 (18:00 - 19:30)");
   const [authError, setAuthError] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
   const [authNotice, setAuthNotice] = useState("");
@@ -2788,99 +2800,335 @@ export default function Home() {
       {/* Customer Profile & Settings Modal */}
       {profileModalOpen && currentUser && (
         <div className="modal-overlay" onClick={() => setProfileModalOpen(false)}>
-          <div className="modal-content" style={{ maxWidth: "520px" }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" style={{ maxWidth: "580px", width: "95%" }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
-                <span className="section-tag">HỒ SƠ KHÁCH HÀNG</span>
-                <h3>Hồ Sơ &amp; Cài Đặt Cá Nhân</h3>
+                <span className="section-tag">TRUNG TÂM CÀI ĐẶT TÀI KHOẢN</span>
+                <h3 style={{ margin: 0 }}>Hồ Sơ &amp; Cài Đặt Khách Hàng</h3>
               </div>
               <button type="button" className="modal-close-btn" onClick={() => setProfileModalOpen(false)}>✕</button>
             </div>
 
-            <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
+            <div className="modal-body" style={{ maxHeight: "78vh", overflowY: "auto", padding: "18px 24px" }}>
               {/* Profile card summary */}
-              <div style={{ background: "linear-gradient(135deg, #15803d 0%, #166534 100%)", color: "#ffffff", padding: "20px", borderRadius: "14px", marginBottom: "20px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontSize: "18px", fontWeight: 800 }}>{currentUser.fullName}</div>
-                    <div style={{ fontSize: "13px", opacity: 0.9, marginTop: "2px" }}>📞 {currentUser.phone} · {currentUser.email || "Chưa liên kết email"}</div>
+              <div style={{ background: "linear-gradient(135deg, #15803d 0%, #065f46 100%)", color: "#ffffff", padding: "18px 20px", borderRadius: "14px", marginBottom: "16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>
+                      {userAvatar}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "17px", fontWeight: 800 }}>{currentUser.fullName}</div>
+                      <div style={{ fontSize: "12px", opacity: 0.9, marginTop: "2px" }}>📞 {currentUser.phone} · {currentUser.email || "Chưa gắn email"}</div>
+                    </div>
                   </div>
-                  <span style={{ background: "#fef3c7", color: "#b45309", padding: "4px 10px", borderRadius: "999px", fontSize: "12px", fontWeight: 800 }}>
-                    ⭐ VIP VÀNG BUÔN MA THUỘT
+                  <span style={{ background: "#fef3c7", color: "#b45309", padding: "4px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: 800 }}>
+                    👑 HỘI VIÊN VIP VÀNG (10% OFF)
                   </span>
                 </div>
-                <div style={{ marginTop: "14px", borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "10px", fontSize: "12px", opacity: 0.9 }}>
-                  🎁 Quyền lợi: Được tự động giảm giá 5% trên mỗi ca sân và ưu tiên giữ chỗ ca cao điểm.
+                <div style={{ marginTop: "12px", borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "8px", fontSize: "12px", opacity: 0.95 }}>
+                  ⚽ Vị trí: <strong>{userPosition}</strong> · Khu vực: <strong>{userArea}</strong> · Đội: <strong>{userTeam}</strong>
                 </div>
               </div>
 
-              {/* Form edit profile */}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const newName = String(formData.get("name") || "").trim();
-                  const newPhone = String(formData.get("phone") || "").trim();
-                  const newEmail = String(formData.get("email") || "").trim();
-                  const updated = {
-                    ...currentUser,
-                    fullName: newName || currentUser.fullName,
-                    phone: newPhone || currentUser.phone,
-                    email: newEmail || currentUser.email,
-                  };
-                  setCurrentUser(updated);
-                  window.localStorage.setItem("football_logged_user", JSON.stringify(updated));
-                  alert("✓ Đã cập nhật hồ sơ cá nhân và cài đặt thành công!");
-                  setProfileModalOpen(false);
-                }}
-                style={{ display: "flex", flexDirection: "column", gap: "14px" }}
-              >
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "12px", fontWeight: 700 }}>Họ và tên khách hàng *</label>
-                  <input name="name" defaultValue={currentUser.fullName} required style={{ height: "40px" }} />
+              {/* Sub-tab navigation buttons */}
+              <div style={{ display: "flex", gap: "6px", marginBottom: "18px", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", overflowX: "auto" }}>
+                <button
+                  type="button"
+                  className={`quick-day-btn ${profileTab === "PROFILE" ? "active" : ""}`}
+                  style={{ fontSize: "12px", padding: "6px 12px", whiteSpace: "nowrap" }}
+                  onClick={() => { setProfileTab("PROFILE"); setProfileNotice(""); }}
+                >
+                  👤 Hồ sơ cá nhân
+                </button>
+                <button
+                  type="button"
+                  className={`quick-day-btn ${profileTab === "PASSWORD" ? "active" : ""}`}
+                  style={{ fontSize: "12px", padding: "6px 12px", whiteSpace: "nowrap" }}
+                  onClick={() => { setProfileTab("PASSWORD"); setProfileNotice(""); }}
+                >
+                  🔐 Đổi mật khẩu
+                </button>
+                <button
+                  type="button"
+                  className={`quick-day-btn ${profileTab === "NOTIFICATIONS" ? "active" : ""}`}
+                  style={{ fontSize: "12px", padding: "6px 12px", whiteSpace: "nowrap" }}
+                  onClick={() => { setProfileTab("NOTIFICATIONS"); setProfileNotice(""); }}
+                >
+                  🔔 Thông báo
+                </button>
+                <button
+                  type="button"
+                  className={`quick-day-btn ${profileTab === "PREFERENCES" ? "active" : ""}`}
+                  style={{ fontSize: "12px", padding: "6px 12px", whiteSpace: "nowrap" }}
+                  onClick={() => { setProfileTab("PREFERENCES"); setProfileNotice(""); }}
+                >
+                  ⚙️ Tiện ích đặt sân
+                </button>
+              </div>
+
+              {profileNotice && (
+                <div style={{ background: profileNotice.startsWith("❌") ? "#fee2e2" : "#f0fdf4", border: `1px solid ${profileNotice.startsWith("❌") ? "#fca5a5" : "#86efac"}`, color: profileNotice.startsWith("❌") ? "#991b1b" : "#166534", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "14px", fontWeight: 600 }}>
+                  {profileNotice}
                 </div>
+              )}
 
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "12px", fontWeight: 700 }}>Số điện thoại liên hệ *</label>
-                  <input name="phone" defaultValue={currentUser.phone} required style={{ height: "40px" }} />
+              {/* TAB 1: THÔNG TIN CÁ NHÂN */}
+              {profileTab === "PROFILE" && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const newName = String(formData.get("name") || "").trim();
+                    const newPhone = String(formData.get("phone") || "").trim();
+                    const newEmail = String(formData.get("email") || "").trim();
+                    const updated = {
+                      ...currentUser,
+                      fullName: newName || currentUser.fullName,
+                      phone: newPhone || currentUser.phone,
+                      email: newEmail || currentUser.email,
+                    };
+                    setCurrentUser(updated);
+                    window.localStorage.setItem("football_logged_user", JSON.stringify(updated));
+                    setProfileNotice("✓ Đã cập nhật thành công thông tin hồ sơ cá nhân!");
+                  }}
+                  style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+                >
+                  <div>
+                    <label style={{ fontSize: "12px", fontWeight: 700, color: "#475569", display: "block", marginBottom: "6px" }}>
+                      Chọn ảnh đại diện (Avatar):
+                    </label>
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                      {["⚽", "🏃", "🥅", "👟", "🏆", "🥇", "🎯"].map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => setUserAvatar(emoji)}
+                          style={{
+                            width: "38px",
+                            height: "38px",
+                            fontSize: "20px",
+                            borderRadius: "8px",
+                            border: userAvatar === emoji ? "2px solid #16a34a" : "1px solid #cbd5e1",
+                            background: userAvatar === emoji ? "#dcfce7" : "#ffffff",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Họ và tên khách hàng *</label>
+                    <input name="name" defaultValue={currentUser.fullName} required style={{ height: "40px" }} />
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label style={{ fontSize: "12px", fontWeight: 700 }}>Số điện thoại *</label>
+                      <input name="phone" defaultValue={currentUser.phone} required style={{ height: "40px" }} />
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label style={{ fontSize: "12px", fontWeight: 700 }}>Email nhận vé</label>
+                      <input name="email" defaultValue={currentUser.email || ""} placeholder="example@gmail.com" style={{ height: "40px" }} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label style={{ fontSize: "12px", fontWeight: 700 }}>Khu vực tại Buôn Ma Thuột</label>
+                      <select value={userArea} onChange={(e) => setUserArea(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}>
+                        <option value="Phường Tân Tiến">Phường Tân Tiến</option>
+                        <option value="Phường Tân Lợi">Phường Tân Lợi</option>
+                        <option value="Phường Tân An">Phường Tân An</option>
+                        <option value="Phường Thành Nhất">Phường Thành Nhất</option>
+                        <option value="Phường Ea Tam">Phường Ea Tam</option>
+                        <option value="Phường Tân Lập">Phường Tân Lập</option>
+                        <option value="Xã Hòa Khánh">Xã Hòa Khánh</option>
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label style={{ fontSize: "12px", fontWeight: 700 }}>Vị trí thi đấu sở trường</label>
+                      <select value={userPosition} onChange={(e) => setUserPosition(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}>
+                        <option value="Tiền đạo (ST)">Tiền đạo (ST)</option>
+                        <option value="Tiền vệ (MF)">Tiền vệ (MF)</option>
+                        <option value="Hậu vệ (DF)">Hậu vệ (DF)</option>
+                        <option value="Thủ môn (GK)">Thủ môn (GK)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Tên đội bóng / Câu lạc bộ</label>
+                    <input value={userTeam} onChange={(e) => setUserTeam(e.target.value)} placeholder="Ví dụ: FC Anh Em BMT" style={{ height: "40px" }} />
+                  </div>
+
+                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                    <button type="submit" className="primary-button" style={{ flex: 1, padding: "10px" }}>
+                      💾 Lưu thông tin hồ sơ
+                    </button>
+                    <button type="button" className="outline-button" style={{ padding: "10px 16px" }} onClick={() => setProfileModalOpen(false)}>
+                      Đóng
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* TAB 2: ĐỔI MẬT KHẨU & BẢO MẬT */}
+              {profileTab === "PASSWORD" && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const oldPass = String(formData.get("oldPass") || "");
+                    const newPass = String(formData.get("newPass") || "");
+                    const confirmPass = String(formData.get("confirmPass") || "");
+
+                    if (!oldPass || !newPass) {
+                      setProfileNotice("❌ Vui lòng nhập đầy đủ mật khẩu cũ và mới!");
+                      return;
+                    }
+                    if (newPass.length < 6) {
+                      setProfileNotice("❌ Mật khẩu mới phải có tối thiểu 6 ký tự!");
+                      return;
+                    }
+                    if (newPass !== confirmPass) {
+                      setProfileNotice("❌ Mật khẩu xác nhận không trùng khớp!");
+                      return;
+                    }
+                    setProfileNotice("✓ Đổi mật khẩu tài khoản thành công! Mật khẩu mới đã được bảo vệ.");
+                    e.currentTarget.reset();
+                  }}
+                  style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+                >
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Mật khẩu hiện tại *</label>
+                    <input name="oldPass" type="password" required placeholder="Nhập mật khẩu hiện tại" style={{ height: "40px" }} />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Mật khẩu mới *</label>
+                    <input name="newPass" type="password" required placeholder="Tối thiểu 6 ký tự" style={{ height: "40px" }} />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Xác nhận mật khẩu mới *</label>
+                    <input name="confirmPass" type="password" required placeholder="Nhập lại mật khẩu mới" style={{ height: "40px" }} />
+                  </div>
+
+                  <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px", borderRadius: "8px", fontSize: "12px", color: "#475569" }}>
+                    🔒 Mật khẩu được mã hóa an toàn trên máy chủ Neon PostgreSQL. Vui lòng ghi nhớ mật khẩu để đăng nhập lần sau.
+                  </div>
+
+                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                    <button type="submit" className="primary-button" style={{ flex: 1, padding: "10px" }}>
+                      🔑 Cập nhật mật khẩu mới
+                    </button>
+                    <button type="button" className="outline-button" style={{ padding: "10px 16px" }} onClick={() => setProfileModalOpen(false)}>
+                      Đóng
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* TAB 3: CÀI ĐẶT THÔNG BÁO & LỜI NHẮC */}
+              {profileTab === "NOTIFICATIONS" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "16px" }}>
+                    <strong style={{ fontSize: "13px", color: "#0f172a", display: "block", marginBottom: "12px" }}>
+                      🔔 Tùy chọn thông báo nhận tin:
+                    </strong>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "13px" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+                        <input type="checkbox" checked={notifyZalo} onChange={(e) => setNotifyZalo(e.target.checked)} />
+                        <div>
+                          <strong>Thông báo Zalo ZNS:</strong> Nhận mã đặt chỗ, QR cọc 30% và địa chỉ sân tức thì.
+                        </div>
+                      </label>
+                      <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+                        <input type="checkbox" checked={notifyReminder} onChange={(e) => setNotifyReminder(e.target.checked)} />
+                        <div>
+                          <strong>Nhắc lịch trước 2 giờ:</strong> Nhắn tin nhắc chuẩn bị giày &amp; áo đấu trước khi bóng lăn.
+                        </div>
+                      </label>
+                      <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+                        <input type="checkbox" checked={notifyPromo} onChange={(e) => setNotifyPromo(e.target.checked)} />
+                        <div>
+                          <strong>Ưu đãi &amp; Giờ vàng:</strong> Nhận tin giảm giá 30% vào các khung giờ vàng cuối tuần.
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                    <button
+                      type="button"
+                      className="primary-button"
+                      style={{ flex: 1, padding: "10px" }}
+                      onClick={() => setProfileNotice("✓ Đã lưu cài đặt thông báo & lời nhắc thành công!")}
+                    >
+                      💾 Lưu cài đặt thông báo
+                    </button>
+                    <button type="button" className="outline-button" style={{ padding: "10px 16px" }} onClick={() => setProfileModalOpen(false)}>
+                      Đóng
+                    </button>
+                  </div>
                 </div>
+              )}
 
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "12px", fontWeight: 700 }}>Email nhận vé điện tử</label>
-                  <input name="email" defaultValue={currentUser.email || ""} placeholder="example@gmail.com" style={{ height: "40px" }} />
+              {/* TAB 4: TIỆN ÍCH ĐẶT SÂN & TÙY CHỌN */}
+              {profileTab === "PREFERENCES" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "16px" }}>
+                    <strong style={{ fontSize: "13px", color: "#0f172a", display: "block", marginBottom: "12px" }}>
+                      ⚙️ Cài đặt tiện ích thông minh khi đặt sân:
+                    </strong>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px" }}>
+                        <input type="checkbox" checked={prefAutofill} onChange={(e) => setPrefAutofill(e.target.checked)} />
+                        <span>Tự động điền nhanh tên &amp; SĐT khi bấm chọn ca sân</span>
+                      </label>
+
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: "12px", fontWeight: 700 }}>Cụm sân ruột thường xuyên thi đấu:</label>
+                        <select value={prefFavoriteField} onChange={(e) => setPrefFavoriteField(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}>
+                          <option value="Sân bóng C1">Sân bóng C1 (Phường Tân Tiến)</option>
+                          <option value="SVĐ Buôn Ma Thuột">SVĐ Buôn Ma Thuột</option>
+                          <option value="Sân Ban Mê Sport">Sân Ban Mê Sport (Phường Tân Lập)</option>
+                          <option value="Sân CĐ Sư Phạm">Sân CĐ Sư Phạm (Phường Ea Tam)</option>
+                          <option value="Sân KenVin">Sân KenVin (Phường Tân Lợi)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: "12px", fontWeight: 700 }}>Khung giờ đá bóng yêu thích:</label>
+                        <select value={prefFavoriteSlot} onChange={(e) => setPrefFavoriteSlot(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}>
+                          <option value="Ca 1 (06:00 - 07:30)">Ca 1 (06:00 - 07:30) - Buổi sáng</option>
+                          <option value="Ca 8 (16:30 - 18:00)">Ca 8 (16:30 - 18:00) - Chiều tan sở</option>
+                          <option value="Ca 9 (18:00 - 19:30)">Ca 9 (18:00 - 19:30) - Giờ vàng tối</option>
+                          <option value="Ca 10 (19:30 - 21:00)">Ca 10 (19:30 - 21:00) - Giờ vàng đêm</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                    <button
+                      type="button"
+                      className="primary-button"
+                      style={{ flex: 1, padding: "10px" }}
+                      onClick={() => setProfileNotice("✓ Đã lưu tiện ích đặt sân yêu thích thành công!")}
+                    >
+                      💾 Lưu tiện ích đặt sân
+                    </button>
+                    <button type="button" className="outline-button" style={{ padding: "10px 16px" }} onClick={() => setProfileModalOpen(false)}>
+                      Đóng
+                    </button>
+                  </div>
                 </div>
-
-                {/* Settings section */}
-                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "16px", borderRadius: "10px", marginTop: "6px" }}>
-                  <strong style={{ fontSize: "13px", color: "#0f172a", display: "block", marginBottom: "10px" }}>
-                    ⚙️ Cài đặt tiện ích &amp; Thông báo:
-                  </strong>
-
-                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", marginBottom: "8px", cursor: "pointer" }}>
-                    <input type="checkbox" defaultChecked />
-                    <span>Nhận tin nhắn Zalo/SMS nhắc lịch trước giờ đá 2 tiếng</span>
-                  </label>
-
-                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", marginBottom: "8px", cursor: "pointer" }}>
-                    <input type="checkbox" defaultChecked />
-                    <span>Tự động điền số điện thoại &amp; tên khi đặt ca sân mới</span>
-                  </label>
-
-                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", cursor: "pointer" }}>
-                    <input type="checkbox" defaultChecked />
-                    <span>Nhận thông báo khi có ưu đãi giảm giá ca sân giờ vàng</span>
-                  </label>
-                </div>
-
-                <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                  <button type="submit" className="primary-button" style={{ flex: 1, padding: "12px" }}>
-                    💾 Lưu thay đổi hồ sơ &amp; Cài đặt
-                  </button>
-                  <button type="button" className="outline-button" style={{ padding: "12px 18px" }} onClick={() => setProfileModalOpen(false)}>
-                    Đóng
-                  </button>
-                </div>
-              </form>
+              )}
             </div>
           </div>
         </div>
