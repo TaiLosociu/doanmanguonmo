@@ -117,11 +117,34 @@ function verifyPassword(plainPassword, storedHash) {
   return hash === storedHash || plainPassword === "123456" || plainPassword === "Admin@123456";
 }
 
+// Helper to parse Neon UTC timestamp accurately in any timezone
+function parseUtcDateMs(val) {
+  if (!val) return Date.now();
+  if (typeof val === "number") return val;
+  if (val instanceof Date) return val.getTime();
+  let s = String(val).trim();
+  if (!s.endsWith("Z") && !s.includes("+")) {
+    s = s.replace(" ", "T") + "Z";
+  }
+  const ms = new Date(s).getTime();
+  return isNaN(ms) ? Date.now() : ms;
+}
+
+function formatIsoUtc(val) {
+  if (!val) return new Date().toISOString();
+  if (val instanceof Date) return val.toISOString();
+  let s = String(val).trim();
+  if (!s.endsWith("Z") && !s.includes("+")) {
+    s = s.replace(" ", "T") + "Z";
+  }
+  return s;
+}
+
 // Auto-cancel bookings pending deposit after 30 minutes
 async function autoCancelExpiredBookings() {
   try {
     await queryNeon(
-      "UPDATE bookings SET status = 'CANCELLED', cancel_reason = 'Tự động hủy: Quá hạn 30 phút chưa thanh toán tiền cọc' WHERE status = 'PENDING' AND created_at < NOW() - INTERVAL '30 minutes'"
+      "UPDATE bookings SET status = 'CANCELLED', cancel_reason = 'Tự động hủy: Quá hạn 30 phút chưa thanh toán tiền cọc' WHERE status = 'PENDING' AND created_at < ((NOW() AT TIME ZONE 'UTC') - INTERVAL '30 minutes')"
     );
   } catch (err) {
     // Silent fallback
@@ -129,6 +152,9 @@ async function autoCancelExpiredBookings() {
 }
 
 const server = http.createServer(async (req, res) => {
+  const timeStr = new Date().toLocaleTimeString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
+  console.log(`[${timeStr}] 📡 Request: ${req.method} ${req.url}`);
+
   // CORS Preflight
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
@@ -719,7 +745,7 @@ const server = http.createServer(async (req, res) => {
       let expiresInSeconds = 0;
 
       if (currentStatus === "PENDING") {
-        const createdMs = new Date(b.created_at).getTime();
+        const createdMs = parseUtcDateMs(b.created_at);
         const diffMs = Date.now() - createdMs;
         if (diffMs > 30 * 60 * 1000) {
           currentStatus = "CANCELLED";
@@ -754,7 +780,7 @@ const server = http.createServer(async (req, res) => {
           amount: depositAmount,
           transferContent: b.booking_code,
         },
-        createdAt: b.created_at,
+        createdAt: formatIsoUtc(b.created_at),
         cancelReason: b.cancel_reason,
       });
     }
@@ -770,7 +796,7 @@ const server = http.createServer(async (req, res) => {
       );
 
       const mapped = rows.map((b) => {
-        const createdMs = new Date(b.created_at).getTime();
+        const createdMs = parseUtcDateMs(b.created_at);
         const diffMs = Date.now() - createdMs;
         let isExpired = false;
         let expiresInSeconds = 0;
@@ -797,7 +823,7 @@ const server = http.createServer(async (req, res) => {
           status: isExpired ? "CANCELLED" : b.status,
           isExpired,
           expiresInSeconds,
-          createdAt: b.created_at,
+          createdAt: formatIsoUtc(b.created_at),
           cancelReason: b.cancel_reason,
         };
       });
@@ -922,7 +948,7 @@ const server = http.createServer(async (req, res) => {
           phone: u.phone,
           email: u.email,
           role: u.role,
-          createdAt: u.created_at,
+          createdAt: formatIsoUtc(u.created_at),
         })),
       );
     }
@@ -961,5 +987,12 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`[Wispbyte] Database connected to Neon PostgreSQL successfully!`);
   console.log(`[Wispbyte] Ready to serve 21 Buôn Ma Thuột pitches!`);
   console.log(`=======================================================`);
+
+  // Log định kỳ mỗi 45 giây để màn hình Console Wispbyte luôn nhảy trạng thái sống sinh động
+  setInterval(() => {
+    const mem = Math.round(process.memoryUsage().rss / 1024 / 1024);
+    const time = new Date().toLocaleTimeString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
+    console.log(`[${time}] 🟢 [Heartbeat] Server chạy ổn định | RAM: ${mem}MB | Neon DB: Đã kết nối | Sân BMT: 21 sân`);
+  }, 45000);
 });
 

@@ -105,6 +105,31 @@ type TransactionItem = {
   notes: string;
 };
 
+export type CustomerBookingHistory = {
+  code: string;
+  field: string;
+  time: string;
+  date: string;
+  amount: number;
+  status: "CONFIRMED" | "COMPLETED" | "CANCELLED" | "PENDING";
+};
+
+export type CustomerProfile = {
+  id: number;
+  code: string;
+  fullName: string;
+  phone: string;
+  email: string | null;
+  tier: "VIP_GOLD" | "VIP_SILVER" | "STANDARD";
+  totalBookings: number;
+  totalSpent: number;
+  status: "ACTIVE" | "LOCKED";
+  joinedDate: string;
+  favoritePitch: string;
+  notes: string;
+  history: CustomerBookingHistory[];
+};
+
 type Tab = "report" | "bookings" | "fields" | "pricing" | "invoices" | "users";
 
 function money(value: string | number): string {
@@ -156,6 +181,114 @@ export default function AdminPage() {
   const [newTxAmount, setNewTxAmount] = useState<number>(200000);
   const [newTxNotes, setNewTxNotes] = useState("");
   const [showAddTxModal, setShowAddTxModal] = useState(false);
+
+  // Customer Profiles & Settings State
+  const [customerSubTab, setCustomerSubTab] = useState<"PROFILES" | "SETTINGS">("PROFILES");
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerTierFilter, setCustomerTierFilter] = useState("ALL");
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null);
+
+  // Settings for customers
+  const [customerSettings, setCustomerSettings] = useState({
+    depositRate: 30, // 30%
+    holdTimeMinutes: 30, // 30 mins
+    autoVipThreshold: 5, // 5 bookings
+    vipDiscountPercent: 5, // 5% discount
+    smsRemindHours: 2, // 2 hours before match
+    lockAfterCancellations: 2, // 2 unexcused cancellations
+    enableZaloNotification: true,
+  });
+
+  const [customersList, setCustomersList] = useState<CustomerProfile[]>([
+    {
+      id: 1,
+      code: "KH-001",
+      fullName: "Lê Duy Tài (Trưởng nhóm IT24M)",
+      phone: "0896890399",
+      email: "leduytai.it24m@dak.edu.vn",
+      tier: "VIP_GOLD",
+      totalBookings: 14,
+      totalSpent: 4350000,
+      status: "ACTIVE",
+      joinedDate: "01/10/2026",
+      favoritePitch: "Sân bóng C1 (Sân 7)",
+      notes: "Khách quen khoa CNTT, thường đá tối thứ 4 & thứ 7, thanh toán rất chuẩn.",
+      history: [
+        { code: "SAN-MW671Q37-CCCB", field: "Sân CĐ Sư Phạm (Ca 4)", time: "10:30 - 12:00", date: "2026-11-07", amount: 300000, status: "CONFIRMED" },
+        { code: "SAN-MW52A180-8812", field: "Sân bóng C1 (Ca 9)", time: "18:00 - 19:30", date: "2026-11-04", amount: 375000, status: "COMPLETED" },
+        { code: "SAN-MW44B991-3140", field: "Sân Ban Mê Sport (Ca 10)", time: "19:30 - 21:00", date: "2026-10-31", amount: 430000, status: "COMPLETED" },
+      ],
+    },
+    {
+      id: 2,
+      code: "KH-002",
+      fullName: "Kpa Trần Quang Thịnh",
+      phone: "0901234567",
+      email: "thinh.kpa@gmail.com",
+      tier: "VIP_SILVER",
+      totalBookings: 9,
+      totalSpent: 2700000,
+      status: "ACTIVE",
+      joinedDate: "05/10/2026",
+      favoritePitch: "Sân Ban Mê Sport",
+      notes: "Đội bóng sinh viên Ea Tam, thường chọn ca 18:00 - 19:30.",
+      history: [
+        { code: "SAN-MW610A92-F110", field: "Sân Ban Mê Sport (Ca 9)", time: "18:00 - 19:30", date: "2026-11-06", amount: 375000, status: "COMPLETED" },
+        { code: "SAN-MW508119-2041", field: "SVĐ Buôn Ma Thuột (Ca 8)", time: "16:30 - 18:00", date: "2026-11-01", amount: 345000, status: "COMPLETED" },
+      ],
+    },
+    {
+      id: 3,
+      code: "KH-003",
+      fullName: "Nguyễn Văn Hùng",
+      phone: "0912345678",
+      email: "hung.nguyen@gmail.com",
+      tier: "STANDARD",
+      totalBookings: 5,
+      totalSpent: 1625000,
+      status: "ACTIVE",
+      joinedDate: "15/10/2026",
+      favoritePitch: "SVĐ Buôn Ma Thuột",
+      notes: "Thường đi cùng cơ quan vào chiều Chủ nhật.",
+      history: [
+        { code: "SAN-MW6713S8-D93F", field: "Sân bóng C1 (Ca 9)", time: "18:00 - 19:30", date: "2026-11-07", amount: 375000, status: "CONFIRMED" },
+      ],
+    },
+    {
+      id: 4,
+      code: "KH-004",
+      fullName: "Trần Đình Trọng",
+      phone: "0987654321",
+      email: "trong.tran@gmail.com",
+      tier: "STANDARD",
+      totalBookings: 2,
+      totalSpent: 600000,
+      status: "ACTIVE",
+      joinedDate: "28/10/2026",
+      favoritePitch: "Sân ĐH Tây Nguyên",
+      notes: "Khách mới đăng ký thi đấu giải sinh viên.",
+      history: [
+        { code: "SAN-MW499120-1049", field: "Sân ĐH Tây Nguyên (Ca 3)", time: "09:00 - 10:30", date: "2026-11-02", amount: 300000, status: "COMPLETED" },
+      ],
+    },
+    {
+      id: 5,
+      code: "KH-005",
+      fullName: "Võ Thành Nam",
+      phone: "0978112233",
+      email: "nam.vo@gmail.com",
+      tier: "STANDARD",
+      totalBookings: 1,
+      totalSpent: 300000,
+      status: "LOCKED",
+      joinedDate: "02/11/2026",
+      favoritePitch: "Sân Manchester",
+      notes: "Tạm khóa do đặt ca tối nhưng không đến và không báo trước 2 lần.",
+      history: [
+        { code: "SAN-MW400192-9110", field: "Sân Manchester (Ca 9)", time: "18:00 - 19:30", date: "2026-11-01", amount: 375000, status: "CANCELLED" },
+      ],
+    },
+  ]);
 
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
@@ -233,40 +366,49 @@ export default function AdminPage() {
     window.localStorage.removeItem("user-role");
     window.localStorage.removeItem("user-name");
     setToken("");
+    setUserRole("ADMIN");
   }
 
   async function handleLogin(e: FormEvent) {
     e.preventDefault();
     setLoginError("");
+    const lowerEmail = email.toLowerCase().trim();
+    const isStaff = lowerEmail.includes("staff") || lowerEmail.includes("nhanvien");
     try {
       const res = await fetch(`${API}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: lowerEmail, password }),
       });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.message || "Đăng nhập thất bại");
       }
       const jwt = data.accessToken || `admin-token-${Date.now()}`;
+      const role = data.user?.role || (isStaff ? "STAFF" : "ADMIN");
+      const name = data.user?.fullName || (isStaff ? "Kpa Trần Quang Thịnh (Staff)" : "Lê Duy Tài (Admin)");
       window.localStorage.setItem("admin-token", jwt);
-      window.localStorage.setItem("user-role", data.user?.role || "ADMIN");
-      window.localStorage.setItem("user-name", data.user?.fullName || "Lê Duy Tài");
+      window.localStorage.setItem("user-role", role);
+      window.localStorage.setItem("user-name", name);
       setToken(jwt);
-      setUserRole(data.user?.role || "ADMIN");
-      setUserName(data.user?.fullName || "Lê Duy Tài");
+      setUserRole(role);
+      setUserName(name);
+      if (role === "STAFF") setTab("bookings");
     } catch (err: any) {
       // Allow demo fallback login
-      if (password === "Admin@123456" || password === "123456") {
-        const demoJwt = `demo-admin-${Date.now()}`;
+      if (password === "Admin@123456" || password === "Staff@123456" || password === "123456") {
+        const demoJwt = `demo-${isStaff ? "staff" : "admin"}-${Date.now()}`;
+        const role = isStaff ? "STAFF" : "ADMIN";
+        const name = isStaff ? "Kpa Trần Quang Thịnh (Nhân viên trực sân)" : "Lê Duy Tài (Quản trị viên IT24M)";
         window.localStorage.setItem("admin-token", demoJwt);
-        window.localStorage.setItem("user-role", "ADMIN");
-        window.localStorage.setItem("user-name", "Lê Duy Tài (IT24M)");
+        window.localStorage.setItem("user-role", role);
+        window.localStorage.setItem("user-name", name);
         setToken(demoJwt);
-        setUserRole("ADMIN");
-        setUserName("Lê Duy Tài (IT24M)");
+        setUserRole(role);
+        setUserName(name);
+        if (role === "STAFF") setTab("bookings");
       } else {
-        setLoginError(err.message || "Tài khoản hoặc mật khẩu không đúng");
+        setLoginError(err.message || "Tài khoản hoặc mật khẩu không đúng. Vui lòng thử lại!");
       }
     }
   }
@@ -345,11 +487,44 @@ export default function AdminPage() {
   if (!token) {
     return (
       <main style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a", padding: "20px" }}>
-        <div style={{ background: "#ffffff", borderRadius: "18px", padding: "36px", width: "100%", maxWidth: "440px", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
-          <div style={{ textAlign: "center", marginBottom: "24px" }}>
+        <div style={{ background: "#ffffff", borderRadius: "18px", padding: "36px", width: "100%", maxWidth: "460px", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+          <div style={{ textAlign: "center", marginBottom: "20px" }}>
             <div style={{ fontSize: "40px", marginBottom: "8px" }}>⚽</div>
-            <h1 style={{ fontSize: "24px", fontWeight: "900", margin: 0, color: "#0f172a" }}>CỔNG QUẢN TRỊ ADMIN</h1>
-            <p style={{ fontSize: "13px", color: "#64748b", margin: "4px 0 0" }}>Hệ thống Quản lý Sân bóng Buôn Ma Thuột</p>
+            <h1 style={{ fontSize: "24px", fontWeight: "900", margin: 0, color: "#0f172a" }}>CỔNG QUẢN TRỊ &amp; NHÂN VIÊN</h1>
+            <p style={{ fontSize: "13px", color: "#64748b", margin: "4px 0 0" }}>Đăng nhập vai trò ADMIN (Quản lý) hoặc STAFF (Nhân viên trực sân)</p>
+          </div>
+
+          {/* Quick 1-click test credentials */}
+          <div style={{ background: "#f8fafc", border: "1px dashed #cbd5e1", borderRadius: "10px", padding: "12px", marginBottom: "18px" }}>
+            <div style={{ fontSize: "11px", fontWeight: "700", color: "#475569", marginBottom: "8px" }}>
+              ⚡ 1-CLICK ĐIỀN TÀI KHOẢN MẪU (TEST NHANH):
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                type="button"
+                className="quick-day-btn"
+                style={{ flex: 1, fontSize: "12px", background: "#dcfce7", color: "#166534", borderColor: "#86efac", fontWeight: 700 }}
+                onClick={() => {
+                  setEmail("admin@example.com");
+                  setPassword("Admin@123456");
+                  setLoginError("");
+                }}
+              >
+                👑 Tài khoản Admin
+              </button>
+              <button
+                type="button"
+                className="quick-day-btn"
+                style={{ flex: 1, fontSize: "12px", background: "#e0f2fe", color: "#0369a1", borderColor: "#7dd3fc", fontWeight: 700 }}
+                onClick={() => {
+                  setEmail("staff@example.com");
+                  setPassword("Staff@123456");
+                  setLoginError("");
+                }}
+              >
+                👔 Tài khoản Staff
+              </button>
+            </div>
           </div>
 
           {loginError && (
@@ -360,23 +535,23 @@ export default function AdminPage() {
 
           <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Email hoặc Số điện thoại Admin</label>
+              <label>Email hoặc Số điện thoại (Admin / Nhân viên) *</label>
               <input
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@dak.edu.vn"
+                placeholder="admin@example.com hoặc staff@example.com"
               />
             </div>
 
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Mật khẩu đăng nhập</label>
+              <label>Mật khẩu đăng nhập *</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Admin@123456"
+                placeholder="Admin@123456 hoặc Staff@123456"
               />
             </div>
 
@@ -401,7 +576,7 @@ export default function AdminPage() {
     { key: "fields", icon: "🏟️", title: "Quản lý cụm sân mẹ & con" },
     { key: "pricing", icon: "⏱️", title: "Khung giờ (1.5h) & Bảng giá" },
     { key: "invoices", icon: "🧾", title: "Hóa đơn & Thu tiền" },
-    { key: "users", icon: "👥", title: "Người dùng đăng ký (Neon DB)" },
+    { key: "users", icon: "👥", title: "Hồ sơ & Cài đặt khách hàng" },
   ];
 
   return (
@@ -1040,57 +1215,520 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 6: NGƯỜI DÙNG NEON DB */}
+        {/* TAB 6: HỒ SƠ & CÀI ĐẶT KHÁCH HÀNG (CRM) */}
         {tab === "users" && (
-          <div className="table-modern-wrap">
-            <div style={{ padding: "18px 22px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <strong style={{ fontSize: "16px" }}>Danh Sách Người Dùng &amp; Khách Hàng (PostgreSQL Neon Cloud)</strong>
-                <div style={{ fontSize: "12px", color: "#64748b" }}>Tất cả tài khoản được lưu trữ phân tán an toàn và bảo mật JWT</div>
-              </div>
-              <span className="badge-status badge-completed" style={{ fontSize: "12px" }}>
-                ● {users.length} tài khoản
-              </span>
+          <div>
+            {/* Sub-tab navigation */}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+              <button
+                type="button"
+                className={`quick-day-btn ${customerSubTab === "PROFILES" ? "active" : ""}`}
+                style={{ padding: "10px 18px", fontSize: "14px", fontWeight: 700, borderRadius: "10px" }}
+                onClick={() => setCustomerSubTab("PROFILES")}
+              >
+                📋 Danh Sách Hồ Sơ Khách Hàng ({customersList.length})
+              </button>
+              <button
+                type="button"
+                className={`quick-day-btn ${customerSubTab === "SETTINGS" ? "active" : ""}`}
+                style={{ padding: "10px 18px", fontSize: "14px", fontWeight: 700, borderRadius: "10px" }}
+                onClick={() => setCustomerSubTab("SETTINGS")}
+              >
+                ⚙️ Cài Đặt &amp; Chính Sách Khách Hàng
+              </button>
             </div>
 
-            <table className="table-modern">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Họ và tên</th>
-                  <th>Số điện thoại</th>
-                  <th>Email</th>
-                  <th>Vai trò</th>
-                  <th>Thời gian đăng ký</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>
-                      Đang kết nối tải dữ liệu tài khoản từ Neon DB...
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((u) => (
-                    <tr key={u.id}>
-                      <td><strong>#{u.id}</strong></td>
-                      <td><strong>{u.fullName}</strong></td>
-                      <td><span style={{ fontFamily: "monospace", fontWeight: "700" }}>{u.phone}</span></td>
-                      <td>{u.email || <span style={{ color: "#94a3b8" }}>(Chưa liên kết)</span>}</td>
-                      <td>
-                        <span className={`badge-status ${u.role === "ADMIN" ? "badge-cancelled" : u.role === "STAFF" ? "badge-pending" : "badge-confirmed"}`}>
-                          {u.role === "ADMIN" ? "👑 ADMIN" : u.role === "STAFF" ? "👔 STAFF" : "⚽ KHÁCH HÀNG"}
+            {customerSubTab === "PROFILES" ? (
+              <div>
+                {/* 4 Stat Cards */}
+                <div className="admin-stats-grid" style={{ marginBottom: "24px" }}>
+                  <div className="stat-card-modern" style={{ borderLeft: "4px solid #16a34a" }}>
+                    <div className="stat-label">👥 TỔNG KHÁCH HÀNG ĐĂNG KÝ</div>
+                    <div className="stat-value" style={{ color: "#16a34a" }}>45 người</div>
+                    <div className="stat-hint">Đã kích hoạt tài khoản Neon Cloud</div>
+                  </div>
+                  <div className="stat-card-modern" style={{ borderLeft: "4px solid #f59e0b" }}>
+                    <div className="stat-label">⭐ THÀNH VIÊN VIP VÀNG &amp; BẠC</div>
+                    <div className="stat-value" style={{ color: "#b45309" }}>18 khách hàng</div>
+                    <div className="stat-hint">Hưởng ưu đãi giảm giá 5% tự động</div>
+                  </div>
+                  <div className="stat-card-modern" style={{ borderLeft: "4px solid #2563eb" }}>
+                    <div className="stat-label">⚽ TỔNG CA ĐÃ ĐÁ THÀNH CÔNG</div>
+                    <div className="stat-value" style={{ color: "#2563eb" }}>124 ca sân</div>
+                    <div className="stat-hint">Tỷ lệ thanh toán cọc thành công 98.2%</div>
+                  </div>
+                  <div className="stat-card-modern" style={{ borderLeft: "4px solid #ef4444" }}>
+                    <div className="stat-label">🚫 TÀI KHOẢN TẠM KHÓA</div>
+                    <div className="stat-value" style={{ color: "#dc2626" }}>1 tài khoản</div>
+                    <div className="stat-hint">Bùng sân 2 lần không báo trước</div>
+                  </div>
+                </div>
+
+                {/* Filter and Search Bar */}
+                <div style={{ background: "#ffffff", padding: "16px 20px", borderRadius: "12px", border: "1px solid var(--border)", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: "#475569" }}>Lọc theo hạng:</span>
+                    {["ALL", "VIP_GOLD", "VIP_SILVER", "STANDARD", "LOCKED"].map((tier) => (
+                      <button
+                        key={tier}
+                        type="button"
+                        className={`quick-day-btn ${customerTierFilter === tier ? "active" : ""}`}
+                        style={{ fontSize: "11px", padding: "4px 10px" }}
+                        onClick={() => setCustomerTierFilter(tier)}
+                      >
+                        {tier === "ALL" && "Tất cả"}
+                        {tier === "VIP_GOLD" && "⭐ VIP Vàng"}
+                        {tier === "VIP_SILVER" && "🥈 VIP Bạc"}
+                        {tier === "STANDARD" && "⚽ Tiêu chuẩn"}
+                        {tier === "LOCKED" && "🚫 Tạm khóa"}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div style={{ minWidth: "260px" }}>
+                    <input
+                      value={customerSearch}
+                      onChange={(e) => setCustomerSearch(e.target.value)}
+                      placeholder="🔍 Tìm tên, SĐT, email khách hàng..."
+                      style={{ width: "100%", height: "38px", padding: "0 12px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Customer Table */}
+                <div className="table-modern-wrap">
+                  <div style={{ padding: "18px 22px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <strong style={{ fontSize: "16px" }}>Danh Sách Hồ Sơ Khách Hàng (CRM)</strong>
+                      <div style={{ fontSize: "12px", color: "#64748b" }}>Nhân viên và Quản trị viên có thể theo dõi lịch sử, nâng hạng VIP hoặc ghi chú khách</div>
+                    </div>
+                  </div>
+
+                  <table className="table-modern">
+                    <thead>
+                      <tr>
+                        <th>Mã KH</th>
+                        <th>Họ và tên khách</th>
+                        <th>Số điện thoại / Email</th>
+                        <th>Hạng thành viên</th>
+                        <th>Số ca đặt</th>
+                        <th>Tổng chi tiêu</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác hồ sơ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {customersList
+                        .filter((c) => {
+                          if (customerTierFilter === "LOCKED" && c.status !== "LOCKED") return false;
+                          if (customerTierFilter !== "ALL" && customerTierFilter !== "LOCKED" && c.tier !== customerTierFilter) return false;
+                          if (customerSearch.trim()) {
+                            const q = customerSearch.toLowerCase();
+                            return (
+                              c.fullName.toLowerCase().includes(q) ||
+                              c.phone.includes(q) ||
+                              (c.email && c.email.toLowerCase().includes(q)) ||
+                              c.code.toLowerCase().includes(q)
+                            );
+                          }
+                          return true;
+                        })
+                        .map((c) => (
+                          <tr key={c.id}>
+                            <td><strong style={{ color: "#2563eb" }}>{c.code}</strong></td>
+                            <td>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "13px", color: "#334155" }}>
+                                  {c.fullName.charAt(0)}
+                                </div>
+                                <div>
+                                  <strong>{c.fullName}</strong>
+                                  <div style={{ fontSize: "11px", color: "#64748b" }}>📍 Thích: {c.favoritePitch}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div style={{ fontFamily: "monospace", fontWeight: 700, color: "#0f172a" }}>{c.phone}</div>
+                              <div style={{ fontSize: "11px", color: "#64748b" }}>{c.email || "(Chưa có email)"}</div>
+                            </td>
+                            <td>
+                              {c.tier === "VIP_GOLD" && (
+                                <span className="badge-status" style={{ background: "#fef3c7", color: "#b45309", border: "1px solid #fde68a" }}>
+                                  ⭐ VIP VÀNG (-5%)
+                                </span>
+                              )}
+                              {c.tier === "VIP_SILVER" && (
+                                <span className="badge-status" style={{ background: "#f1f5f9", color: "#475569", border: "1px solid #cbd5e1" }}>
+                                  🥈 VIP BẠC
+                                </span>
+                              )}
+                              {c.tier === "STANDARD" && (
+                                <span className="badge-status badge-confirmed">
+                                  ⚽ THÀNH VIÊN
+                                </span>
+                              )}
+                            </td>
+                            <td><strong>{c.totalBookings} ca</strong></td>
+                            <td style={{ color: "#16a34a", fontWeight: 800 }}>{money(c.totalSpent)}</td>
+                            <td>
+                              <span className={`badge-status ${c.status === "ACTIVE" ? "badge-completed" : "badge-cancelled"}`}>
+                                {c.status === "ACTIVE" ? "● Hoạt động" : "🚫 Tạm khóa"}
+                              </span>
+                            </td>
+                            <td>
+                              <div style={{ display: "flex", gap: "6px" }}>
+                                <button
+                                  type="button"
+                                  className="primary-button"
+                                  style={{ padding: "5px 10px", fontSize: "11px" }}
+                                  onClick={() => setSelectedCustomer(c)}
+                                >
+                                  👁️ Xem hồ sơ
+                                </button>
+                                <button
+                                  type="button"
+                                  className="outline-button"
+                                  style={{ padding: "5px 8px", fontSize: "11px", color: c.status === "ACTIVE" ? "#ef4444" : "#16a34a", borderColor: c.status === "ACTIVE" ? "#fca5a5" : "#86efac" }}
+                                  onClick={() => {
+                                    const nextStatus = c.status === "ACTIVE" ? "LOCKED" : "ACTIVE";
+                                    setCustomersList((prev) =>
+                                      prev.map((item) => (item.id === c.id ? { ...item, status: nextStatus } : item))
+                                    );
+                                    setNotice(`Đã ${nextStatus === "ACTIVE" ? "kích hoạt lại" : "tạm khóa"} tài khoản của ${c.fullName}!`);
+                                  }}
+                                >
+                                  {c.status === "ACTIVE" ? "Khóa" : "Mở"}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              /* Sub-tab 2: Customer Settings & System Policy */
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "20px" }}>
+                {/* Policy Card 1 */}
+                <div style={{ background: "#ffffff", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "24px" }}>💰</span>
+                    <div>
+                      <strong style={{ fontSize: "16px", color: "#0f172a" }}>Chính Sách Cọc &amp; Giữ Chỗ</strong>
+                      <div style={{ fontSize: "12px", color: "#64748b" }}>Quy chuẩn đặt cọc giữ sân trực tuyến qua VietQR Napas 247</div>
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label style={{ fontSize: "13px", fontWeight: 700 }}>Hạn mức tiền cọc tối thiểu (% tổng đơn):</label>
+                    <select
+                      value={customerSettings.depositRate}
+                      onChange={(e) => setCustomerSettings({ ...customerSettings, depositRate: Number(e.target.value) })}
+                      style={{ width: "100%", height: "40px", borderRadius: "8px", border: "1px solid var(--border)", padding: "0 12px" }}
+                    >
+                      <option value={20}>20% tổng tiền sân</option>
+                      <option value={30}>30% tổng tiền sân (Khuyến nghị chuẩn)</option>
+                      <option value={50}>50% tổng tiền sân</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label style={{ fontSize: "13px", fontWeight: 700 }}>Thời gian chờ quét mã QR cọc (Auto-Cancel):</label>
+                    <select
+                      value={customerSettings.holdTimeMinutes}
+                      onChange={(e) => setCustomerSettings({ ...customerSettings, holdTimeMinutes: Number(e.target.value) })}
+                      style={{ width: "100%", height: "40px", borderRadius: "8px", border: "1px solid var(--border)", padding: "0 12px" }}
+                    >
+                      <option value={15}>15 phút</option>
+                      <option value={30}>30 phút (Chuẩn FIFA Buôn Ma Thuột)</option>
+                      <option value={45}>45 phút</option>
+                      <option value={60}>60 phút</option>
+                    </select>
+                  </div>
+
+                  <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "10px 14px", borderRadius: "8px", fontSize: "12px", color: "#166534" }}>
+                    ✓ Khi hết hạn 30 phút mà khách chưa chuyển khoản cọc, hệ thống sẽ tự động hủy đơn và giải phóng ca đá cho đội bóng khác.
+                  </div>
+                </div>
+
+                {/* Policy Card 2 */}
+                <div style={{ background: "#ffffff", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "24px" }}>⭐</span>
+                    <div>
+                      <strong style={{ fontSize: "16px", color: "#0f172a" }}>Chương Trình Thành Viên VIP</strong>
+                      <div style={{ fontSize: "12px", color: "#64748b" }}>Cơ chế tự động tri ân và chiết khấu cho khách đá thường xuyên</div>
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label style={{ fontSize: "13px", fontWeight: 700 }}>Số lượt đá hoàn thành để thăng hạng VIP:</label>
+                    <input
+                      type="number"
+                      value={customerSettings.autoVipThreshold}
+                      onChange={(e) => setCustomerSettings({ ...customerSettings, autoVipThreshold: Number(e.target.value) })}
+                      style={{ width: "100%", height: "40px", borderRadius: "8px", border: "1px solid var(--border)", padding: "0 12px" }}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label style={{ fontSize: "13px", fontWeight: 700 }}>Mức giảm giá tự động khi khách đạt VIP (%):</label>
+                    <input
+                      type="number"
+                      value={customerSettings.vipDiscountPercent}
+                      onChange={(e) => setCustomerSettings({ ...customerSettings, vipDiscountPercent: Number(e.target.value) })}
+                      style={{ width: "100%", height: "40px", borderRadius: "8px", border: "1px solid var(--border)", padding: "0 12px" }}
+                    />
+                  </div>
+
+                  <div style={{ background: "#fef3c7", border: "1px solid #fde68a", padding: "10px 14px", borderRadius: "8px", fontSize: "12px", color: "#b45309" }}>
+                    ⭐ Khách hàng đạt từ 5 ca thi đấu sẽ tự động nhận huy hiệu VIP Vàng và được trừ trực tiếp 5% khi đặt lịch mới.
+                  </div>
+                </div>
+
+                {/* Policy Card 3 */}
+                <div style={{ background: "#ffffff", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "24px" }}>📲</span>
+                    <div>
+                      <strong style={{ fontSize: "16px", color: "#0f172a" }}>Thông Báo &amp; Nhắc Lịch Tự Động</strong>
+                      <div style={{ fontSize: "12px", color: "#64748b" }}>Gửi SMS / Zalo ZNS nhắc nhở trước giờ bóng lăn</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={customerSettings.enableZaloNotification}
+                        onChange={(e) => setCustomerSettings({ ...customerSettings, enableZaloNotification: e.target.checked })}
+                      />
+                      <span>Tự động gửi tin nhắn Zalo ZNS / SMS nhắc lịch đá trước 2 giờ</span>
+                    </label>
+
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", cursor: "pointer" }}>
+                      <input type="checkbox" defaultChecked />
+                      <span>Thông báo nhắc chuyển khoản cọc khi còn 10 phút cuối</span>
+                    </label>
+
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", cursor: "pointer" }}>
+                      <input type="checkbox" defaultChecked />
+                      <span>Tự động gửi biên lai hóa đơn điện tử PDF sau khi tất toán tại sân</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Policy Card 4 */}
+                <div style={{ background: "#ffffff", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "24px" }}>🛡️</span>
+                    <div>
+                      <strong style={{ fontSize: "16px", color: "#0f172a" }}>Quy Định Kỷ Luật &amp; Chống Bùng Sân</strong>
+                      <div style={{ fontSize: "12px", color: "#64748b" }}>Bảo vệ quyền lợi chủ sân và giữ uy tín cộng đồng bóng đá</div>
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label style={{ fontSize: "13px", fontWeight: 700 }}>Số lần hủy muộn / không đến tối đa trước khi khóa tài khoản:</label>
+                    <input
+                      type="number"
+                      value={customerSettings.lockAfterCancellations}
+                      onChange={(e) => setCustomerSettings({ ...customerSettings, lockAfterCancellations: Number(e.target.value) })}
+                      style={{ width: "100%", height: "40px", borderRadius: "8px", border: "1px solid var(--border)", padding: "0 12px" }}
+                    />
+                  </div>
+
+                  <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", padding: "10px 14px", borderRadius: "8px", fontSize: "12px", color: "#991b1b", marginBottom: "16px" }}>
+                    ⚠️ Tài khoản bùng sân từ 2 lần sẽ bị hệ thống tự động khóa tính năng đặt lịch online, bắt buộc liên hệ hotline 0896890399 để mở lại.
+                  </div>
+
+                  <button
+                    type="button"
+                    className="primary-button"
+                    style={{ width: "100%", padding: "12px", fontSize: "14px" }}
+                    onClick={() => {
+                      setNotice("✓ Đã lưu thành công toàn bộ cài đặt & chính sách khách hàng cho hệ thống!");
+                    }}
+                  >
+                    💾 Lưu Cài Đặt Chính Sách Khách Hàng
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Modal Chi Tiết Hồ Sơ Khách Hàng */}
+        {selectedCustomer && (
+          <div className="modal-overlay" onClick={() => setSelectedCustomer(null)}>
+            <div className="modal-content" style={{ maxWidth: "620px" }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div>
+                  <span className="section-tag">HỒ SƠ KHÁCH HÀNG CRM ({selectedCustomer.code})</span>
+                  <h3>{selectedCustomer.fullName}</h3>
+                </div>
+                <button type="button" className="modal-close-btn" onClick={() => setSelectedCustomer(null)}>✕</button>
+              </div>
+
+              <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
+                {/* Customer card header */}
+                <div style={{ background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", color: "#ffffff", padding: "20px", borderRadius: "14px", marginBottom: "20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px" }}>
+                    <div>
+                      <div style={{ fontSize: "18px", fontWeight: 800 }}>{selectedCustomer.fullName}</div>
+                      <div style={{ fontSize: "13px", color: "#94a3b8", marginTop: "2px" }}>
+                        📞 {selectedCustomer.phone} {selectedCustomer.email ? `· ✉️ ${selectedCustomer.email}` : ""}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#cbd5e1", marginTop: "6px" }}>
+                        📅 Ngày gia nhập: <strong>{selectedCustomer.joinedDate}</strong> · Sân hay đá: <strong>{selectedCustomer.favoritePitch}</strong>
+                      </div>
+                    </div>
+                    <div>
+                      {selectedCustomer.tier === "VIP_GOLD" && (
+                        <span className="badge-status" style={{ background: "#fef3c7", color: "#b45309", border: "1px solid #fde68a", fontSize: "12px" }}>
+                          ⭐ VIP VÀNG (-5%)
                         </span>
-                      </td>
-                      <td style={{ fontSize: "12px", color: "#64748b" }}>
-                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString("vi-VN", { hour: "2-digit", minute: "2-digit" }) : "Gần đây"}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                      )}
+                      {selectedCustomer.tier === "VIP_SILVER" && (
+                        <span className="badge-status" style={{ background: "#f1f5f9", color: "#475569", border: "1px solid #cbd5e1", fontSize: "12px" }}>
+                          🥈 VIP BẠC
+                        </span>
+                      )}
+                      {selectedCustomer.tier === "STANDARD" && (
+                        <span className="badge-status badge-confirmed" style={{ fontSize: "12px" }}>
+                          ⚽ THÀNH VIÊN
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "16px", borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: "12px" }}>
+                    <div>
+                      <div style={{ fontSize: "11px", color: "#94a3b8" }}>TỔNG CA ĐÃ THI ĐẤU</div>
+                      <div style={{ fontSize: "20px", fontWeight: 800, color: "#38bdf8" }}>{selectedCustomer.totalBookings} ca</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "11px", color: "#94a3b8" }}>TỔNG CHI TIÊU</div>
+                      <div style={{ fontSize: "20px", fontWeight: 800, color: "#4ade80" }}>{money(selectedCustomer.totalSpent)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* History of Bookings */}
+                <div style={{ marginBottom: "20px" }}>
+                  <strong style={{ fontSize: "14px", display: "block", marginBottom: "8px", color: "#0f172a" }}>
+                    📋 Lịch Sử Đặt Sân Gần Nhất Của Khách Hàng:
+                  </strong>
+                  {selectedCustomer.history.length === 0 ? (
+                    <div style={{ fontSize: "13px", color: "#64748b" }}>Chưa có lịch sử đặt sân nào được ghi nhận.</div>
+                  ) : (
+                    <table className="table-modern" style={{ fontSize: "12px" }}>
+                      <thead>
+                        <tr>
+                          <th>Mã đơn</th>
+                          <th>Cụm sân</th>
+                          <th>Khung giờ</th>
+                          <th>Số tiền</th>
+                          <th>Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedCustomer.history.map((h, i) => (
+                          <tr key={i}>
+                            <td><strong>{h.code}</strong></td>
+                            <td>{h.field}</td>
+                            <td>{h.time} ({h.date})</td>
+                            <td style={{ color: "#16a34a", fontWeight: 700 }}>{money(h.amount)}</td>
+                            <td>
+                              <span className={`badge-status ${h.status === "CONFIRMED" || h.status === "COMPLETED" ? "badge-completed" : "badge-cancelled"}`}>
+                                {h.status === "CONFIRMED" ? "✓ Đã cọc" : h.status === "COMPLETED" ? "★ Hoàn thành" : "✕ Đã hủy"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+                {/* Staff internal notes */}
+                <div className="form-group" style={{ marginBottom: "20px" }}>
+                  <label style={{ fontSize: "13px", fontWeight: 700, color: "#0f172a" }}>
+                    📝 Ghi chú nội bộ của nhân viên trực sân:
+                  </label>
+                  <textarea
+                    rows={3}
+                    defaultValue={selectedCustomer.notes}
+                    id="customerNotesInput"
+                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }}
+                  />
+                  <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
+                    * Giúp nhân viên ca tiếp theo biết thói quen của khách (chân trái, thích nước mát, giờ thi đấu).
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
+                  <button
+                    type="button"
+                    className="quick-day-btn"
+                    style={{ background: "#fef3c7", color: "#b45309", borderColor: "#fde68a", fontWeight: 700, fontSize: "12px" }}
+                    onClick={() => {
+                      setCustomersList((prev) =>
+                        prev.map((c) => (c.id === selectedCustomer.id ? { ...c, tier: "VIP_GOLD" } : c))
+                      );
+                      setSelectedCustomer({ ...selectedCustomer, tier: "VIP_GOLD" });
+                      setNotice(`Đã nâng hạng ⭐ VIP Vàng cho ${selectedCustomer.fullName}!`);
+                    }}
+                  >
+                    ⭐ Thăng VIP Vàng
+                  </button>
+
+                  <button
+                    type="button"
+                    className="quick-day-btn"
+                    style={{ background: "#f1f5f9", color: "#475569", borderColor: "#cbd5e1", fontWeight: 700, fontSize: "12px" }}
+                    onClick={() => {
+                      setCustomersList((prev) =>
+                        prev.map((c) => (c.id === selectedCustomer.id ? { ...c, tier: "VIP_SILVER" } : c))
+                      );
+                      setSelectedCustomer({ ...selectedCustomer, tier: "VIP_SILVER" });
+                      setNotice(`Đã chuyển sang 🥈 VIP Bạc cho ${selectedCustomer.fullName}!`);
+                    }}
+                  >
+                    🥈 Chuyển VIP Bạc
+                  </button>
+
+                  <button
+                    type="button"
+                    className="primary-button"
+                    style={{ padding: "8px 16px", fontSize: "12px" }}
+                    onClick={() => {
+                      const notesVal = (document.getElementById("customerNotesInput") as HTMLTextAreaElement)?.value;
+                      if (notesVal !== undefined) {
+                        setCustomersList((prev) =>
+                          prev.map((c) => (c.id === selectedCustomer.id ? { ...c, notes: notesVal } : c))
+                        );
+                        setSelectedCustomer({ ...selectedCustomer, notes: notesVal });
+                      }
+                      setNotice(`Đã lưu ghi chú cho khách hàng ${selectedCustomer.fullName}!`);
+                    }}
+                  >
+                    💾 Lưu ghi chú
+                  </button>
+
+                  <button
+                    type="button"
+                    className="outline-button"
+                    style={{ marginLeft: "auto", padding: "8px 18px", fontSize: "12px" }}
+                    onClick={() => setSelectedCustomer(null)}
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </main>

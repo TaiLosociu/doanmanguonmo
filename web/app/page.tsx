@@ -511,6 +511,7 @@ export default function Home() {
     accessToken: string;
   } | null>(null);
   const [authModal, setAuthModal] = useState<"LOGIN" | "REGISTER" | null>(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [authError, setAuthError] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
   const [authNotice, setAuthNotice] = useState("");
@@ -948,10 +949,28 @@ export default function Home() {
             </button>
             {currentUser ? (
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <div className="user-badge-topbar">
+                <button
+                  type="button"
+                  className="user-badge-topbar"
+                  style={{
+                    cursor: "pointer",
+                    background: "#f0fdf4",
+                    border: "1px solid #86efac",
+                    borderRadius: "999px",
+                    padding: "6px 14px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                  onClick={() => setProfileModalOpen(true)}
+                  title="Nhấn để xem Hồ sơ & Cài đặt cá nhân"
+                >
                   <span>👤</span>
-                  <span>{currentUser.fullName}</span>
-                </div>
+                  <span style={{ fontWeight: 700, color: "#166534" }}>{currentUser.fullName}</span>
+                  <span style={{ fontSize: "11px", background: "#22c55e", color: "#fff", padding: "2px 8px", borderRadius: "999px" }}>
+                    Hồ sơ &amp; Cài đặt ⚙️
+                  </span>
+                </button>
                 <button
                   type="button"
                   className="outline-button"
@@ -2765,6 +2784,107 @@ export default function Home() {
           <span>Bảo mật JWT · Neon Cloud DB · Wispbyte Server · Next.js 15.</span>
         </div>
       </footer>
+
+      {/* Customer Profile & Settings Modal */}
+      {profileModalOpen && currentUser && (
+        <div className="modal-overlay" onClick={() => setProfileModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: "520px" }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <span className="section-tag">HỒ SƠ KHÁCH HÀNG</span>
+                <h3>Hồ Sơ &amp; Cài Đặt Cá Nhân</h3>
+              </div>
+              <button type="button" className="modal-close-btn" onClick={() => setProfileModalOpen(false)}>✕</button>
+            </div>
+
+            <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
+              {/* Profile card summary */}
+              <div style={{ background: "linear-gradient(135deg, #15803d 0%, #166534 100%)", color: "#ffffff", padding: "20px", borderRadius: "14px", marginBottom: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <div style={{ fontSize: "18px", fontWeight: 800 }}>{currentUser.fullName}</div>
+                    <div style={{ fontSize: "13px", opacity: 0.9, marginTop: "2px" }}>📞 {currentUser.phone} · {currentUser.email || "Chưa liên kết email"}</div>
+                  </div>
+                  <span style={{ background: "#fef3c7", color: "#b45309", padding: "4px 10px", borderRadius: "999px", fontSize: "12px", fontWeight: 800 }}>
+                    ⭐ VIP VÀNG BUÔN MA THUỘT
+                  </span>
+                </div>
+                <div style={{ marginTop: "14px", borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "10px", fontSize: "12px", opacity: 0.9 }}>
+                  🎁 Quyền lợi: Được tự động giảm giá 5% trên mỗi ca sân và ưu tiên giữ chỗ ca cao điểm.
+                </div>
+              </div>
+
+              {/* Form edit profile */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const newName = String(formData.get("name") || "").trim();
+                  const newPhone = String(formData.get("phone") || "").trim();
+                  const newEmail = String(formData.get("email") || "").trim();
+                  const updated = {
+                    ...currentUser,
+                    fullName: newName || currentUser.fullName,
+                    phone: newPhone || currentUser.phone,
+                    email: newEmail || currentUser.email,
+                  };
+                  setCurrentUser(updated);
+                  window.localStorage.setItem("football_logged_user", JSON.stringify(updated));
+                  alert("✓ Đã cập nhật hồ sơ cá nhân và cài đặt thành công!");
+                  setProfileModalOpen(false);
+                }}
+                style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+              >
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: "12px", fontWeight: 700 }}>Họ và tên khách hàng *</label>
+                  <input name="name" defaultValue={currentUser.fullName} required style={{ height: "40px" }} />
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: "12px", fontWeight: 700 }}>Số điện thoại liên hệ *</label>
+                  <input name="phone" defaultValue={currentUser.phone} required style={{ height: "40px" }} />
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: "12px", fontWeight: 700 }}>Email nhận vé điện tử</label>
+                  <input name="email" defaultValue={currentUser.email || ""} placeholder="example@gmail.com" style={{ height: "40px" }} />
+                </div>
+
+                {/* Settings section */}
+                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "16px", borderRadius: "10px", marginTop: "6px" }}>
+                  <strong style={{ fontSize: "13px", color: "#0f172a", display: "block", marginBottom: "10px" }}>
+                    ⚙️ Cài đặt tiện ích &amp; Thông báo:
+                  </strong>
+
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", marginBottom: "8px", cursor: "pointer" }}>
+                    <input type="checkbox" defaultChecked />
+                    <span>Nhận tin nhắn Zalo/SMS nhắc lịch trước giờ đá 2 tiếng</span>
+                  </label>
+
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", marginBottom: "8px", cursor: "pointer" }}>
+                    <input type="checkbox" defaultChecked />
+                    <span>Tự động điền số điện thoại &amp; tên khi đặt ca sân mới</span>
+                  </label>
+
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", cursor: "pointer" }}>
+                    <input type="checkbox" defaultChecked />
+                    <span>Nhận thông báo khi có ưu đãi giảm giá ca sân giờ vàng</span>
+                  </label>
+                </div>
+
+                <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                  <button type="submit" className="primary-button" style={{ flex: 1, padding: "12px" }}>
+                    💾 Lưu thay đổi hồ sơ &amp; Cài đặt
+                  </button>
+                  <button type="button" className="outline-button" style={{ padding: "12px 18px" }} onClick={() => setProfileModalOpen(false)}>
+                    Đóng
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
