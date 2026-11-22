@@ -622,6 +622,19 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 201, rows[0] || { success: true });
     }
 
+    // 3e. API Xóa cụm sân bóng (DELETE /api/v1/fields/:id)
+    if (fieldDetailMatch && req.method === "DELETE") {
+      const fieldId = Number(fieldDetailMatch[1]);
+      try {
+        await queryNeon(`DELETE FROM price_rules WHERE field_id = $1`, [fieldId]);
+        await queryNeon(`DELETE FROM bookings WHERE field_id = $1`, [fieldId]);
+        await queryNeon(`DELETE FROM fields WHERE id = $1`, [fieldId]);
+        return sendJson(res, 200, { success: true, message: `Đã xóa thành công cụm sân #${fieldId} khỏi cơ sở dữ liệu.` });
+      } catch (err) {
+        return sendJson(res, 500, { message: `Lỗi khi xóa sân #${fieldId}: ` + err.message });
+      }
+    }
+
     // 4. API Lịch riêng từng sân & sân con (GET /api/v1/fields/:id/schedule)
     const fieldScheduleMatch = pathname.match(/^\/api\/v1\/fields\/(\d+)\/schedule$/);
     if (fieldScheduleMatch && req.method === "GET") {

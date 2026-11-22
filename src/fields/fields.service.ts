@@ -215,16 +215,12 @@ export class FieldsService {
   }
 
   async delete(id: number, userId?: number, ip?: string) {
-    await this.getById(id);
-    const bookingCount = await this.prisma.booking.count({
-      where: { fieldId: id },
-    });
-    if (bookingCount > 0) {
-      throw new ConflictException("Không thể xóa sân đã có lịch sử đặt; hãy chuyển sang trạng thái bảo trì hoặc ngưng hoạt động");
-    }
+    const existing = await this.getById(id);
 
-    const deleted = await this.prisma.field.delete({
-      where: { id },
+    const deleted = await this.prisma.$transaction(async (tx) => {
+      await tx.priceRule.deleteMany({ where: { fieldId: id } });
+      await tx.booking.deleteMany({ where: { fieldId: id } });
+      return tx.field.delete({ where: { id } });
     });
 
     await this.auditLogs.log({
@@ -232,7 +228,7 @@ export class FieldsService {
       action: "DELETE_FIELD",
       resource: "fields",
       resourceId: id,
-      details: { name: deleted.name },
+      details: { name: existing.name },
       ipAddress: ip,
     });
 

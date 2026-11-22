@@ -9,9 +9,8 @@
 </head>
 <body>
   <!-- Top announcement bar -->
-  <div class="top-announcement">
-    <span>⚡ Hệ thống đặt sân bóng đá mini tự động snapshot giá &amp; chống trùng lịch bằng Database Transaction</span>
-    <span>📞 Hotline hỗ trợ: <strong>0901.234.567</strong> · Mở cửa 06:00 - 23:00</span>
+  <div class="top-announcement" style="justify-content: flex-end;">
+    <span>📞 Hotline hỗ trợ: <strong>0896890399</strong> · Mở cửa 06:00 - 23:00</span>
   </div>
 
   <!-- Main Navigation Topbar -->
@@ -102,9 +101,10 @@
           <div class="quick-bar-item">
             <label>⚽ Quy mô sân</label>
             <select id="heroTypeSelect" onchange="onTypeFilterChanged(this.value)">
-              <option value="ALL">Tất cả sân (5 &amp; 7)</option>
-              <option value="SAN_5">Sân 5 người (300k - 375k)</option>
-              <option value="SAN_7">Sân 7 người (500k - 625k)</option>
+              <option value="ALL">Tất cả sân (5, 7, 11)</option>
+              <option value="SAN_5">⚽ Sân 5 người (Từ 250k)</option>
+              <option value="SAN_7">🏆 Sân 7 người (Từ 400k)</option>
+              <option value="SAN_11">⭐ Sân 11 người (Chuẩn VFF / SVĐ · Từ 800k)</option>
             </select>
           </div>
           <div class="quick-bar-item" style="flex: 0 0 auto; min-width: auto; justify-content: flex-end;">
@@ -201,9 +201,10 @@
       </div>
 
       <div class="filter-tabs" style="margin: 0;">
-        <button class="filter-tab active" id="tabAll" onclick="setFieldTypeFilter('ALL')">Tất cả (4)</button>
-        <button class="filter-tab" id="tab5" onclick="setFieldTypeFilter('SAN_5')">Sân 5 người</button>
-        <button class="filter-tab" id="tab7" onclick="setFieldTypeFilter('SAN_7')">Sân 7 người</button>
+        <button class="filter-tab active" id="tabAll" onclick="setFieldTypeFilter('ALL')">Tất cả</button>
+        <button class="filter-tab" id="tab5" onclick="setFieldTypeFilter('SAN_5')">⚽ Sân 5</button>
+        <button class="filter-tab" id="tab7" onclick="setFieldTypeFilter('SAN_7')">🏆 Sân 7</button>
+        <button class="filter-tab" id="tab11" onclick="setFieldTypeFilter('SAN_11')">⭐ Sân 11</button>
       </div>
     </div>
 
@@ -238,9 +239,10 @@
       <label>
         Lọc loại sân:
         <select id="scheduleTypeSelect" onchange="onTypeFilterChanged(this.value)">
-          <option value="ALL">Tất cả loại sân</option>
-          <option value="SAN_5">Sân 5 người</option>
-          <option value="SAN_7">Sân 7 người</option>
+          <option value="ALL">Tất cả loại sân (5, 7, 11)</option>
+          <option value="SAN_5">⚽ Sân 5 người</option>
+          <option value="SAN_7">🏆 Sân 7 người</option>
+          <option value="SAN_11">⭐ Sân 11 người</option>
         </select>
       </label>
 
@@ -1241,11 +1243,42 @@
     // Filter fields & render
     function setFieldTypeFilter(type) {
       currentFieldFilter = type;
-      document.getElementById("tabAll").className = `filter-tab ${type === 'ALL' ? 'active' : ''}`;
-      document.getElementById("tab5").className = `filter-tab ${type === 'SAN_5' ? 'active' : ''}`;
-      document.getElementById("tab7").className = `filter-tab ${type === 'SAN_7' ? 'active' : ''}`;
+      const tabAll = document.getElementById("tabAll");
+      const tab5 = document.getElementById("tab5");
+      const tab7 = document.getElementById("tab7");
+      const tab11 = document.getElementById("tab11");
+      if (tabAll) tabAll.className = `filter-tab ${type === 'ALL' ? 'active' : ''}`;
+      if (tab5) tab5.className = `filter-tab ${type === 'SAN_5' ? 'active' : ''}`;
+      if (tab7) tab7.className = `filter-tab ${type === 'SAN_7' ? 'active' : ''}`;
+      if (tab11) tab11.className = `filter-tab ${type === 'SAN_11' ? 'active' : ''}`;
+
+      const heroSelect = document.getElementById("heroTypeSelect");
+      if (heroSelect) heroSelect.value = type;
+      const schedSelect = document.getElementById("scheduleTypeSelect");
+      if (schedSelect) schedSelect.value = type;
+
+      // Tự động tìm cụm sân và ca trống phù hợp đúng loại sân đã chọn (Sân 5, 7 hoặc 11)
+      if (type !== 'ALL') {
+        selectedPitchSize = type;
+        const match = DEFAULT_FIELDS.find(f => {
+          if (f.status === 'MAINTENANCE' || f.id === 22) return false;
+          const subs = (typeof getFieldSubPitches === "function") ? getFieldSubPitches(f) : [];
+          return subs.some(s => s.category === type);
+        });
+        if (match) {
+          selectedPitchId = match.id;
+        }
+      }
+
       renderFields();
       renderSchedule();
+
+      if (type !== 'ALL') {
+        const target = document.getElementById("dat-san");
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
 
     function onTypeFilterChanged(val) {
@@ -1267,7 +1300,12 @@
     // Render Field Cards
     function renderFields() {
       const grid = document.getElementById("pitchesGrid");
-      const fields = DEFAULT_FIELDS.filter(f => currentFieldFilter === "ALL" || f.fieldType === currentFieldFilter);
+      const fields = DEFAULT_FIELDS.filter(f => {
+        if (f.status === 'MAINTENANCE' || f.id === 22) return false;
+        if (currentFieldFilter === "ALL") return true;
+        const subs = (typeof getFieldSubPitches === "function") ? getFieldSubPitches(f) : [];
+        return subs.some(s => s.category === currentFieldFilter);
+      });
 
       grid.innerHTML = fields.map(field => {
         const isSelected = selectedPitchId === field.id;
@@ -1341,7 +1379,12 @@
     // Render Schedule Grid
     function renderSchedule() {
       const container = document.getElementById("scheduleRowsContainer");
-      const activeFields = DEFAULT_FIELDS.filter(f => f.status === "ACTIVE" && (currentFieldFilter === "ALL" || f.fieldType === currentFieldFilter));
+      const activeFields = DEFAULT_FIELDS.filter(f => {
+        if (f.status !== "ACTIVE" || f.id === 22) return false;
+        if (currentFieldFilter === "ALL") return true;
+        const subs = (typeof getFieldSubPitches === "function") ? getFieldSubPitches(f) : [];
+        return subs.some(s => s.category === currentFieldFilter);
+      });
       const isWeekend = new Date(selectedDate + "T12:00:00").getDay() % 6 === 0;
       const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
       const activeField = DEFAULT_FIELDS.find(f => f.id === selectedPitchId) || activeFields[0];

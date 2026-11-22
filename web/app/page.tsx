@@ -363,9 +363,6 @@ function getFieldSubPitches(field: FieldInfo | { id: number; name?: string } | n
         },
       ];
 
-    case 22: // Sân An Dương Vương: ĐÃ ĐÓNG CỬA VĨNH VIỄN
-      return [];
-
     default: // 9 sân phong trào còn lại (ID 8, 9, 13, 14, 15, 16, 18, 20, 21, 23, 24, 25): CHỈ CÓ 2 SÂN 5 MINI (BỎ SÂN 7, BỎ SÂN 11)
       return [
         {
@@ -439,7 +436,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_7",
     "status": "ACTIVE",
     "description": "1 sân 11 - Sân cỏ tự nhiên chuẩn thi đấu (sân nhà CLB Đắk Lắk, sức chứa 20.000 chỗ).",
-    "imageUrl": "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-chuan-va-dep_101638538.jpg",
     "capacity": "11 người / đội",
     "turf": "Cỏ tự nhiên FIFA",
     "size": "68m x 105m"
@@ -454,7 +451,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "2 sân 5 (có thể ghép đá giải sân 7) - Quy mô 2 sân 5 ngoài trời (nguồn Tuấn Việt). Từng tổ chức Giải sân 7 Đắk Lắk D-League 2025.",
-    "imageUrl": "https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://atsport.vn/wp-content/uploads/2021/08/kich-thuoc-san-bong-da-7-nguoi-co-nhan-tao-1-1-960x960.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo 50mm",
     "size": "20m x 40m (Ghép 40m x 50m)"
@@ -469,7 +466,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "3 sân 5 - Gồm 2 sân 36m × 19m và 1 sân rộng 41m × 36m (nguồn Tuấn Việt).",
-    "imageUrl": "https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://image.made-in-china.com/202f0j00QIzeVHbmrscn/Football-Artificial-Grass-Carpets-Astro-Turf-for-Football-Stadium.webp",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo cao cấp",
     "size": "36m x 19m & 41m x 36m"
@@ -484,7 +481,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "4–6 sân thể thao/cầu lông kết hợp sân bóng đá mini (nguồn Alobo & Siêu Thị Cầu Lông).",
-    "imageUrl": "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://image.made-in-china.com/2f0j00IRUGJVdyrFgM/Mini-Football-Field-Artificial-Grass-Carpet-Grass-G-4001-.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ FIFA giảm chấn",
     "size": "20m x 40m"
@@ -514,7 +511,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "3 sân 5 - Xác thực từ Tuấn Việt & Google Maps (Có 3 sân 5 người); gồm 2 sân 36m × 19m và 1 sân 41m × 36m.",
-    "imageUrl": "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://5.imimg.com/data5/SELLER/Default/2023/8/335821545/AO/WO/DU/19508713/football-artificial-grass-1000x1000.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo 50mm mới",
     "size": "36m x 19m & 41m x 36m"
@@ -529,7 +526,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_7",
     "status": "ACTIVE",
     "description": "6 sân 5, 2 sân 7, 1 sân 11 - Cụm sân thật lớn tại Buôn Ma Thuột: 6 sân 5 (40m × 18m), 2 sân 7 (58m × 40m), 1 sân 11 (83m × 58m) (thay thế cho sân Công Thành đã đóng cửa).",
-    "imageUrl": "https://images.unsplash.com/photo-1533107862482-0e6974b06ec4?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-rong-rai_101640962.jpg",
     "capacity": "5 - 7 - 11 người",
     "turf": "Cỏ nhân tạo Pro FIFA",
     "size": "Đa kích thước (40x18m, 58x40m, 83x58m)"
@@ -544,7 +541,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "2 sân (cỏ nhân tạo có mái che) - Nguồn DakLak360 xác nhận 2 sân cỏ nhân tạo có mái che (mở 06:00–23:00).",
-    "imageUrl": "https://images.unsplash.com/photo-1589487391730-58f20eb2c308?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://5.imimg.com/data5/SELLER/Default/2024/4/410627380/PG/HQ/JD/1329433/artificial-football-turf-1000x1000.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo có mái che",
     "size": "20m x 40m"
@@ -559,7 +556,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "Sân mini cụm Tân An, phục vụ thi đấu giao lưu phong trào BMT.",
-    "imageUrl": "https://images.unsplash.com/photo-1563299796-17596ed6b017?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://bizweb.dktcdn.net/100/017/070/files/kich-thuoc-san-bong-da-1-jpeg.jpg?v=1671246300021",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo tiêu chuẩn",
     "size": "20m x 40m"
@@ -619,7 +616,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_7",
     "status": "ACTIVE",
     "description": "1 sân 11 - Sân vận động chính trong khuôn viên trường (từng tổ chức vòng chung kết Giải sân 7 VĐQG theo Báo Gia Lai).",
-    "imageUrl": "https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-dep-nhin-tu-tren-cao_101639111.jpg",
     "capacity": "7 - 11 người",
     "turf": "Cỏ tự nhiên & nhân tạo SVĐ",
     "size": "65m x 100m"
@@ -685,21 +682,6 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "size": "20m x 40m"
   },
   {
-    "id": 22,
-    "name": "Sân An Dương Vương",
-    "ward": "Phường Khánh Xuân",
-    "address": "Đường An Dương Vương, Phường Khánh Xuân, Buôn Ma Thuột",
-    "phone": "0905 999 000",
-    "ownerName": "Chủ cụm sân",
-    "fieldType": "SAN_5",
-    "status": "MAINTENANCE",
-    "description": "Đã đóng cửa vĩnh viễn (nguồn xác thực thực tế BMT).",
-    "imageUrl": "https://images.unsplash.com/photo-1524015368236-bbf6f72545b6?w=900&auto=format&fit=crop&q=80",
-    "capacity": "5 - 7 người / đội",
-    "turf": "Cỏ nhân tạo",
-    "size": "20m x 40m"
-  },
-  {
     "id": 23,
     "name": "Sân thể thao Đức Thịnh",
     "ward": "Phường Khánh Xuân",
@@ -724,7 +706,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "Sân cỏ nhân tạo khu vực Hòa Khánh, mặt sân rộng rãi.",
-    "imageUrl": "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://luoinhua.net/uploads/tin-tuc-luoi-nhua/2016_01/luoi-san-co-nhan-tao.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo 50mm",
     "size": "20m x 40m"
@@ -739,7 +721,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "Sân bóng giao lưu khu vực Hòa Thuận, mở cửa 06:00 - 22:30.",
-    "imageUrl": "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://pos.nvncdn.com/b0b717-26181/art/artCT/20240812_0rmC0gAF.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo tiêu chuẩn",
     "size": "20m x 40m"
@@ -768,13 +750,41 @@ export default function Home() {
   const [date, setDate] = useState("");
   const [fieldsList, setFieldsList] = useState<FieldInfo[]>(DEFAULT_FIELDS);
   const [schedule, setSchedule] = useState<Schedule | null>(null);
-  const [filterType, setFilterType] = useState<"ALL" | "SAN_5" | "SAN_7">("ALL");
+  const [filterType, setFilterType] = useState<"ALL" | "SAN_5" | "SAN_7" | "SAN_11">("ALL");
   const [filterWard, setFilterWard] = useState<string>("ALL");
 
   // Selected complex & sub-pitch state
   const [selectedPitchId, setSelectedPitchId] = useState<number>(6); // Mặc định Sân C1 (có sân 5 và sân 7)
   const [selectedSubPitchId, setSelectedSubPitchId] = useState<string>("SAN_5_1");
   const [selectedPitchSize, setSelectedPitchSize] = useState<"SAN_5" | "SAN_7" | "SAN_11">("SAN_5");
+
+  function handleFilterTypeChange(newType: "ALL" | "SAN_5" | "SAN_7" | "SAN_11") {
+    setFilterType(newType);
+    if (newType !== "ALL") {
+      setSelectedPitchSize(newType);
+      const targetField = fieldsList.find((f) => getFieldSubPitches(f).some((s) => s.category === newType));
+      if (targetField) {
+        setSelectedPitchId(targetField.id);
+        const subList = getFieldSubPitches(targetField);
+        const matchSub = subList.find((s) => s.category === newType);
+        if (matchSub) setSelectedSubPitchId(matchSub.id);
+      }
+    }
+  }
+
+  function handleCheckAvailableSlots() {
+    if (filterType !== "ALL") {
+      const targetField = fieldsList.find((f) => getFieldSubPitches(f).some((s) => s.category === filterType));
+      if (targetField) {
+        setSelectedPitchId(targetField.id);
+        const subList = getFieldSubPitches(targetField);
+        const matchSub = subList.find((s) => s.category === filterType);
+        if (matchSub) setSelectedSubPitchId(matchSub.id);
+      }
+    }
+    const el = document.getElementById("dat-san");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  }
 
   const activePitch = fieldsList.find((f) => f.id === selectedPitchId) ?? fieldsList[0] ?? DEFAULT_FIELDS[0];
   const availableSubPitches = useMemo(() => getFieldSubPitches(activePitch), [activePitch]);
@@ -979,12 +989,12 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
-  async function loadSchedule(selectedDate = date, selectedType = filterType, selectedWard = filterWard) {
+  async function loadSchedule(selectedDate = date, selectedType: "ALL" | "SAN_5" | "SAN_7" | "SAN_11" = filterType, selectedWard = filterWard) {
     if (!selectedDate) return;
     setErrorNotice("");
     try {
       const params = new URLSearchParams({ date: selectedDate });
-      if (selectedType !== "ALL") params.set("fieldType", selectedType);
+      if (selectedType !== "ALL" && selectedType !== "SAN_11") params.set("fieldType", selectedType);
       if (selectedWard !== "ALL") params.set("ward", selectedWard);
       const res = await fetch(`${API}/bookings/available-schedule?${params}`);
       const data = await res.json();
@@ -1001,7 +1011,7 @@ export default function Home() {
     const activeFields = fieldsList.filter(
       (f) =>
         f.status === "ACTIVE" &&
-        (selectedType === "ALL" || f.fieldType === selectedType) &&
+        (selectedType === "ALL" || f.fieldType === selectedType || getFieldSubPitches(f).some((s) => s.category === selectedType)) &&
         (selectedWard === "ALL" || (f.ward && f.ward.includes(selectedWard))),
     );
 
@@ -1274,8 +1284,7 @@ export default function Home() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Top announcement bar */}
-      <div className="top-announcement">
-        <span>⚡ Hệ thống đặt sân bóng đá mini tự động snapshot giá &amp; chống trùng lịch bằng Database Transaction</span>
+      <div className="top-announcement" style={{ justifyContent: "flex-end" }}>
         <span>📞 Hotline hỗ trợ: <strong>0896890399</strong> · Mở cửa 06:00 - 23:00</span>
       </div>
 
@@ -1472,24 +1481,26 @@ export default function Home() {
                 />
               </div>
               <div className="quick-bar-item">
-                <label>⚽ Quy mô sân</label>
+                <label>⚽ Quy mô sân thi đấu</label>
                 <select
                   value={filterType}
-                  onChange={(e) => setFilterType(e.target.value as any)}
+                  onChange={(e) => handleFilterTypeChange(e.target.value as any)}
                 >
-                  <option value="ALL">Tất cả sân (5 &amp; 7)</option>
-                  <option value="SAN_5">Sân 5 người (300k - 375k)</option>
-                  <option value="SAN_7">Sân 7 người (500k - 625k)</option>
+                  <option value="ALL">Tất cả quy mô (Sân 5, 7, 11)</option>
+                  <option value="SAN_5">⚽ Sân 5 người (Mini · Từ 250k)</option>
+                  <option value="SAN_7">🏆 Sân 7 người (Bán chuyên · Từ 400k)</option>
+                  <option value="SAN_11">⭐ Sân 11 người (Chuẩn VFF / SVĐ · Từ 800k)</option>
                 </select>
               </div>
               <div className="quick-bar-item" style={{ flex: "0 0 auto", minWidth: "auto", justifyContent: "flex-end" }}>
-                <a
-                  href="#dat-san"
+                <button
+                  type="button"
+                  onClick={handleCheckAvailableSlots}
                   className="primary-button"
-                  style={{ padding: "10px 20px", fontSize: "14px", height: "42px", display: "inline-flex", alignItems: "center" }}
+                  style={{ padding: "10px 20px", fontSize: "14px", height: "42px", display: "inline-flex", alignItems: "center", cursor: "pointer" }}
                 >
                   Kiểm tra giờ trống ⚡
-                </a>
+                </button>
               </div>
             </div>
 
@@ -1610,21 +1621,27 @@ export default function Home() {
             <div className="filter-tabs" style={{ margin: 0 }}>
               <button
                 className={`filter-tab ${filterType === "ALL" ? "active" : ""}`}
-                onClick={() => setFilterType("ALL")}
+                onClick={() => handleFilterTypeChange("ALL")}
               >
-                Tất cả
+                Tất cả ({fieldsList.length})
               </button>
               <button
                 className={`filter-tab ${filterType === "SAN_5" ? "active" : ""}`}
-                onClick={() => setFilterType("SAN_5")}
+                onClick={() => handleFilterTypeChange("SAN_5")}
               >
-                Sân 5
+                ⚽ Sân 5
               </button>
               <button
                 className={`filter-tab ${filterType === "SAN_7" ? "active" : ""}`}
-                onClick={() => setFilterType("SAN_7")}
+                onClick={() => handleFilterTypeChange("SAN_7")}
               >
-                Sân 7
+                🏆 Sân 7
+              </button>
+              <button
+                className={`filter-tab ${filterType === "SAN_11" ? "active" : ""}`}
+                onClick={() => handleFilterTypeChange("SAN_11")}
+              >
+                ⭐ Sân 11
               </button>
             </div>
           </div>
@@ -1633,7 +1650,9 @@ export default function Home() {
         <div className="pitches-grid">
           {fieldsList
             .filter((f) => {
-              const matchType = filterType === "ALL" || f.fieldType === filterType;
+              const matchType = filterType === "ALL"
+                || getFieldSubPitches(f).some((s) => s.category === filterType)
+                || f.fieldType === filterType;
               const matchWard = filterWard === "ALL" || (f.ward && f.ward.includes(filterWard));
               return matchType && matchWard;
             })

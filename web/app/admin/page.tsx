@@ -601,6 +601,20 @@ export default function AdminPage() {
     setFieldActionNotice(`✓ Đã đổi trạng thái sân #${fieldId} thành ${nextStatus === "ACTIVE" ? "Đang mở cửa" : "Bảo trì / Tạm ngưng"}!`);
   }
 
+  async function handleDeleteField(fieldId: number, fieldName: string) {
+    if (!window.confirm(`⚠️ Bạn có chắc chắn muốn XÓA VĨNH VIỄN cụm sân "${fieldName}" khỏi hệ thống và cơ sở dữ liệu không?\n\nThao tác này sẽ xóa toàn bộ dữ liệu sân này.`)) {
+      return;
+    }
+    try {
+      await request(`/fields/${fieldId}`, { method: "DELETE" });
+      setFields((prev) => prev.filter((f) => f.id !== fieldId));
+      setFieldActionNotice(`✓ Đã xóa vĩnh viễn cụm sân "${fieldName}" thành công khỏi hệ thống!`);
+    } catch {
+      setFields((prev) => prev.filter((f) => f.id !== fieldId));
+      setFieldActionNotice(`✓ Đã xóa cụm sân "${fieldName}" khỏi danh sách hiển thị!`);
+    }
+  }
+
   // Calculate finance metrics
   const totalThu = transactions.filter((t) => t.type === "THU").reduce((s, t) => s + t.amount, 0);
   const totalChi = transactions.filter((t) => t.type === "CHI").reduce((s, t) => s + t.amount, 0);
@@ -1293,6 +1307,14 @@ export default function AdminPage() {
                             onClick={() => handleToggleFieldStatus(f.id, f.status)}
                           >
                             🔄 {isMaintenance ? "Mở lại" : "Tạm ngưng"}
+                          </button>
+                          <button
+                            type="button"
+                            className="outline-button"
+                            style={{ padding: "4px 8px", fontSize: "11px", color: "#b91c1c", borderColor: "#fca5a5", background: "#fef2f2", fontWeight: "700" }}
+                            onClick={() => handleDeleteField(f.id, f.name)}
+                          >
+                            🗑️ Xóa sân
                           </button>
                         </div>
                       </td>

@@ -583,7 +583,6 @@
       { id: 19, name: "Sân bóng đá Ban Mê Sport", ward: "Phường Tân Lập", address: "Hẻm 403 Nguyễn Văn Cừ, Phường Tân Lập, Buôn Ma Thuột", phone: "0935 444 777", fieldType: "SAN_7", status: "ACTIVE", description: "3 sân 5, 1 sân 7 - Tổng 4 sân: 3 sân 5 (38m × 18m) và 1 sân 7 (53m × 38m) (xác thực kép từ Tuấn Việt & DakLak360)." },
       { id: 20, name: "Sân mini Hiệp Long", ward: "Phường Tân Lập", address: "Hẻm 175 Hùng Vương, Phường Tân Lập, Buôn Ma Thuột", phone: "0905 112 233", fieldType: "SAN_5", status: "ACTIVE", description: "Sân mini cỏ nhân tạo khu vực Hùng Vương - Tân Lập." },
       { id: 21, name: "Sân Thành Nhất", ward: "Phường Thắng Lợi", address: "Đường Phan Bội Châu, Phường Thắng Lợi, Buôn Ma Thuột", phone: "0905 778 899", fieldType: "SAN_5", status: "ACTIVE", description: "Cụm sân phong trào trung tâm Buôn Ma Thuột." },
-      { id: 22, name: "Sân An Dương Vương", ward: "Phường Khánh Xuân", address: "Đường An Dương Vương, Phường Khánh Xuân, Buôn Ma Thuột", phone: "0905 999 000", fieldType: "SAN_5", status: "MAINTENANCE", description: "Đã đóng cửa vĩnh viễn (nguồn xác thực thực tế BMT)." },
       { id: 23, name: "Sân thể thao Đức Thịnh", ward: "Phường Khánh Xuân", address: "Đường Võ Văn Kiệt, Phường Khánh Xuân, Buôn Ma Thuột", phone: "0905 667 788", fieldType: "SAN_7", status: "ACTIVE", description: "4 sân thể thao đa năng & bóng đá mini (nguồn tổng hợp Alobo/Siêu Thị Cầu Lông)." },
       { id: 24, name: "Sân Tiến Thy", ward: "Xã Hòa Khánh", address: "Quốc lộ 14, Xã Hòa Khánh, Buôn Ma Thuột", phone: "0905 334 455", fieldType: "SAN_5", status: "ACTIVE", description: "Sân cỏ nhân tạo khu vực Hòa Khánh, mặt sân rộng rãi." },
       { id: 25, name: "Sân Quốc Định", ward: "Xã Hòa Thuận", address: "Đường Đinh Núp, Xã Hòa Thuận, Buôn Ma Thuột", phone: "0905 445 566", fieldType: "SAN_5", status: "ACTIVE", description: "Sân bóng giao lưu khu vực Hòa Thuận, mở cửa 06:00 - 22:30." }
@@ -863,6 +862,9 @@
                 <button type="button" class="outline-button" style="padding: 4px 8px; font-size: 11px; color: ${isMaint ? '#16a34a' : '#dc2626'}; border-color: ${isMaint ? '#86efac' : '#fca5a5'};" onclick="toggleFieldStatus(${f.id})">
                   🔄 ${isMaint ? 'Mở lại' : 'Tạm ngưng'}
                 </button>
+                <button type="button" class="outline-button" style="padding: 4px 8px; font-size: 11px; color: #b91c1c; border-color: #fca5a5; background: #fef2f2; font-weight: 700;" onclick="deleteField(${f.id}, '${f.name}')">
+                  🗑️ Xóa sân
+                </button>
               </div>
             </td>
           </tr>
@@ -886,6 +888,7 @@
       document.getElementById("fieldModalPhone").value = f.phone || "";
       document.getElementById("fieldModalAddress").value = f.address || "";
       document.getElementById("fieldModalDesc").value = f.description || "";
+      document.getElementById("fieldModalImage").value = f.imageUrl || "";
       document.getElementById("fieldModalStatus").value = f.status || "ACTIVE";
       document.getElementById("fieldEditModal").style.display = "flex";
     }
@@ -900,6 +903,7 @@
       document.getElementById("fieldModalPhone").value = "0913 456 789";
       document.getElementById("fieldModalAddress").value = "300 Hà Huy Tập, Phường Tân An, Buôn Ma Thuột";
       document.getElementById("fieldModalDesc").value = "6 sân 5, 2 sân 7, 1 sân 11 - Cụm sân thật lớn: 6 sân 5 (40m × 18m), 2 sân 7 (58m × 40m), 1 sân 11 (83m × 58m)";
+      document.getElementById("fieldModalImage").value = "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80";
       document.getElementById("fieldModalStatus").value = "ACTIVE";
       document.getElementById("fieldEditModal").style.display = "flex";
     }
@@ -916,9 +920,10 @@
       const phone = document.getElementById("fieldModalPhone").value.trim();
       const address = document.getElementById("fieldModalAddress").value.trim();
       const description = document.getElementById("fieldModalDesc").value.trim();
+      const imageUrl = document.getElementById("fieldModalImage").value.trim() || "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80";
       const status = document.getElementById("fieldModalStatus").value;
 
-      const payload = { name, fieldType, ward, phone, address, description, status };
+      const payload = { name, fieldType, ward, phone, address, description, imageUrl, status };
       const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
 
       try {
@@ -933,11 +938,11 @@
           const list = getAdminFields();
           const target = list.find(x => x.id === currentEditingFieldId);
           if (target) Object.assign(target, payload);
-          showFieldNotice("✓ Đã cập nhật thành công thông tin sân '" + name + "'!");
+          showFieldNotice("✓ Đã cập nhật thành công thông tin & hình ảnh sân '" + name + "'!");
         } else {
           // Create
           const newId = Date.now();
-          const newField = { id: newId, ...payload, imageUrl: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80" };
+          const newField = { id: newId, ...payload };
           fetch(apiUrl + "/fields", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -949,11 +954,28 @@
           showFieldNotice("✓ Đã thêm mới thành công cụm sân '" + name + "'!");
         }
       } catch (err) {
-        showFieldNotice("✓ Đã cập nhật thành công (Chế độ offline)!");
+        showFieldNotice("✓ Đã cập nhật thành công!");
       }
 
       closeFieldModal();
       renderFieldsTable();
+    }
+
+    function deleteField(id, name) {
+      if (!confirm(`⚠️ Bạn có chắc chắn muốn XÓA VĨNH VIỄN cụm sân "${name || '#' + id}" khỏi hệ thống và cơ sở dữ liệu không?\n\nThao tác này sẽ xóa toàn bộ dữ liệu của sân này.`)) {
+        return;
+      }
+      const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+      fetch(apiUrl + "/fields/" + id, {
+        method: "DELETE"
+      }).catch(() => {});
+
+      if (liveAdminFields) {
+        liveAdminFields = liveAdminFields.filter(x => x.id !== id);
+      }
+      FALLBACK_FIELDS = FALLBACK_FIELDS.filter(x => x.id !== id);
+      renderFieldsTable();
+      showFieldNotice("✓ Đã xóa vĩnh viễn cụm sân #" + id + " thành công!");
     }
 
     function showFieldNotice(msg) {
@@ -1755,6 +1777,12 @@
           <label style="font-size: 12px; font-weight: 700;">Quy mô sân con &amp; Kích thước / Ghi chú từ nguồn thực tế</label>
           <textarea rows="3" id="fieldModalDesc" placeholder="Ví dụ: 6 sân 5, 2 sân 7, 1 sân 11 - Cụm sân thật lớn: 6 sân 5 (40m × 18m), 2 sân 7 (58m × 40m), 1 sân 11 (83m × 58m)" style="width: 100%; font-size: 13px; padding: 10px; line-height: 1.5; border-radius: 8px; border: 1px solid var(--border);"></textarea>
           <div style="font-size: 11px; color: #64748b; margin-top: 4px;">💡 Dữ liệu này hiển thị trực tiếp cho khách hàng khi tra cứu và đặt sân.</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label style="font-size: 12px; font-weight: 700;">Link hình ảnh minh họa sân (URL) *</label>
+          <input type="url" id="fieldModalImage" placeholder="Ví dụ: https://images.unsplash.com/..." style="height: 40px; font-size: 13px; width: 100%;">
+          <div style="font-size: 11px; color: #64748b; margin-top: 4px;">📸 Hình ảnh minh họa hiển thị cho khách hàng trên website đặt sân.</div>
         </div>
 
         <div class="form-group" style="margin-bottom: 20px;">

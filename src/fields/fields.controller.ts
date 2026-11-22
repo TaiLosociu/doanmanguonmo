@@ -111,9 +111,9 @@ export class FieldsController {
 
   @Delete(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.STAFF)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Xóa sân bóng nếu chưa từng phát sinh đơn đặt (Chỉ ADMIN)" })
+  @ApiOperation({ summary: "Xóa sân bóng khỏi hệ thống (ADMIN & STAFF)" })
   @ApiResponse({ status: 200, description: "Xóa sân thành công" })
   @ApiResponse({ status: 409, description: "Sân đã có lịch sử đặt, không được xóa" })
   delete(

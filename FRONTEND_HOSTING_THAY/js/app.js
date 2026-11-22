@@ -20,7 +20,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_7",
     "status": "ACTIVE",
     "description": "1 sân 11 - Sân cỏ tự nhiên chuẩn thi đấu (sân nhà CLB Đắk Lắk, sức chứa 20.000 chỗ).",
-    "imageUrl": "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-chuan-va-dep_101638538.jpg",
     "capacity": "11 người / đội",
     "turf": "Cỏ tự nhiên FIFA",
     "size": "68m x 105m"
@@ -35,7 +35,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "2 sân 5 (có thể ghép đá giải sân 7) - Quy mô 2 sân 5 ngoài trời (nguồn Tuấn Việt). Từng tổ chức Giải sân 7 Đắk Lắk D-League 2025.",
-    "imageUrl": "https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://atsport.vn/wp-content/uploads/2021/08/kich-thuoc-san-bong-da-7-nguoi-co-nhan-tao-1-1-960x960.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo 50mm",
     "size": "20m x 40m (Ghép 40m x 50m)"
@@ -50,7 +50,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "3 sân 5 - Gồm 2 sân 36m × 19m và 1 sân rộng 41m × 36m (nguồn Tuấn Việt).",
-    "imageUrl": "https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://image.made-in-china.com/202f0j00QIzeVHbmrscn/Football-Artificial-Grass-Carpets-Astro-Turf-for-Football-Stadium.webp",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo cao cấp",
     "size": "36m x 19m & 41m x 36m"
@@ -65,7 +65,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "4–6 sân thể thao/cầu lông kết hợp sân bóng đá mini (nguồn Alobo & Siêu Thị Cầu Lông).",
-    "imageUrl": "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://image.made-in-china.com/2f0j00IRUGJVdyrFgM/Mini-Football-Field-Artificial-Grass-Carpet-Grass-G-4001-.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ FIFA giảm chấn",
     "size": "20m x 40m"
@@ -95,7 +95,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "3 sân 5 - Xác thực từ Tuấn Việt & Google Maps (Có 3 sân 5 người); gồm 2 sân 36m × 19m và 1 sân 41m × 36m.",
-    "imageUrl": "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://5.imimg.com/data5/SELLER/Default/2023/8/335821545/AO/WO/DU/19508713/football-artificial-grass-1000x1000.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo 50mm mới",
     "size": "36m x 19m & 41m x 36m"
@@ -110,7 +110,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_7",
     "status": "ACTIVE",
     "description": "6 sân 5, 2 sân 7, 1 sân 11 - Cụm sân thật lớn tại Buôn Ma Thuột: 6 sân 5 (40m × 18m), 2 sân 7 (58m × 40m), 1 sân 11 (83m × 58m) (thay thế cho sân Công Thành đã đóng cửa).",
-    "imageUrl": "https://images.unsplash.com/photo-1533107862482-0e6974b06ec4?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-rong-rai_101640962.jpg",
     "capacity": "5 - 7 - 11 người",
     "turf": "Cỏ nhân tạo Pro FIFA",
     "size": "Đa kích thước (40x18m, 58x40m, 83x58m)"
@@ -125,7 +125,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "2 sân (cỏ nhân tạo có mái che) - Nguồn DakLak360 xác nhận 2 sân cỏ nhân tạo có mái che (mở 06:00–23:00).",
-    "imageUrl": "https://images.unsplash.com/photo-1589487391730-58f20eb2c308?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://5.imimg.com/data5/SELLER/Default/2024/4/410627380/PG/HQ/JD/1329433/artificial-football-turf-1000x1000.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo có mái che",
     "size": "20m x 40m"
@@ -140,7 +140,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "Sân mini cụm Tân An, phục vụ thi đấu giao lưu phong trào BMT.",
-    "imageUrl": "https://images.unsplash.com/photo-1563299796-17596ed6b017?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://bizweb.dktcdn.net/100/017/070/files/kich-thuoc-san-bong-da-1-jpeg.jpg?v=1671246300021",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo tiêu chuẩn",
     "size": "20m x 40m"
@@ -200,7 +200,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_7",
     "status": "ACTIVE",
     "description": "1 sân 11 - Sân vận động chính trong khuôn viên trường (từng tổ chức vòng chung kết Giải sân 7 VĐQG theo Báo Gia Lai).",
-    "imageUrl": "https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-dep-nhin-tu-tren-cao_101639111.jpg",
     "capacity": "7 - 11 người",
     "turf": "Cỏ tự nhiên & nhân tạo SVĐ",
     "size": "65m x 100m"
@@ -266,21 +266,6 @@ const DEFAULT_FIELDS = [
     "size": "20m x 40m"
   },
   {
-    "id": 22,
-    "name": "Sân An Dương Vương",
-    "ward": "Phường Khánh Xuân",
-    "address": "Đường An Dương Vương, Phường Khánh Xuân, Buôn Ma Thuột",
-    "phone": "0905 999 000",
-    "ownerName": "Chủ cụm sân",
-    "fieldType": "SAN_5",
-    "status": "MAINTENANCE",
-    "description": "Đã đóng cửa vĩnh viễn (nguồn xác thực thực tế BMT).",
-    "imageUrl": "https://images.unsplash.com/photo-1524015368236-bbf6f72545b6?w=900&auto=format&fit=crop&q=80",
-    "capacity": "5 - 7 người / đội",
-    "turf": "Cỏ nhân tạo",
-    "size": "20m x 40m"
-  },
-  {
     "id": 23,
     "name": "Sân thể thao Đức Thịnh",
     "ward": "Phường Khánh Xuân",
@@ -305,7 +290,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "Sân cỏ nhân tạo khu vực Hòa Khánh, mặt sân rộng rãi.",
-    "imageUrl": "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://luoinhua.net/uploads/tin-tuc-luoi-nhua/2016_01/luoi-san-co-nhan-tao.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo 50mm",
     "size": "20m x 40m"
@@ -320,7 +305,7 @@ const DEFAULT_FIELDS = [
     "fieldType": "SAN_5",
     "status": "ACTIVE",
     "description": "Sân bóng giao lưu khu vực Hòa Thuận, mở cửa 06:00 - 22:30.",
-    "imageUrl": "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=900&auto=format&fit=crop&q=80",
+    "imageUrl": "https://pos.nvncdn.com/b0b717-26181/art/artCT/20240812_0rmC0gAF.jpg",
     "capacity": "5 - 7 người / đội",
     "turf": "Cỏ nhân tạo tiêu chuẩn",
     "size": "20m x 40m"
@@ -702,9 +687,6 @@ function getFieldSubPitches(field) {
           desc: "Kích thước thực tế 53m × 38m chuẩn thi đấu."
         }
       ];
-
-    case 22: // Sân An Dương Vương: ĐÃ ĐÓNG CỬA VĨNH VIỄN
-      return [];
 
     default: // 9 sân phong trào còn lại (ID 8, 9, 13, 14, 15, 16, 18, 20, 21, 23, 24, 25): CHỈ CÓ 2 SÂN 5 MINI (BỎ SÂN 7, BỎ SÂN 11)
       return [
