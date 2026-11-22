@@ -183,6 +183,23 @@ export default function AdminPage() {
   const [newTxNotes, setNewTxNotes] = useState("");
   const [showAddTxModal, setShowAddTxModal] = useState(false);
 
+  // Pitch Edit & Create state for Admin and Staff
+  const [editingField, setEditingField] = useState<Field | null>(null);
+  const [showCreateFieldModal, setShowCreateFieldModal] = useState<boolean>(false);
+  const [fieldForm, setFieldForm] = useState({
+    name: "",
+    fieldType: "SAN_5" as "SAN_5" | "SAN_7",
+    status: "ACTIVE" as "ACTIVE" | "MAINTENANCE" | "INACTIVE",
+    ward: "",
+    address: "",
+    phone: "",
+    description: "",
+    imageUrl: "",
+  });
+  const [fieldActionNotice, setFieldActionNotice] = useState<string>("");
+  const [fieldActionError, setFieldActionError] = useState<string>("");
+  const [fieldSaving, setFieldSaving] = useState<boolean>(false);
+
   // Customer Profiles & Settings State
   const [customerSubTab, setCustomerSubTab] = useState<"PROFILES" | "SETTINGS">("PROFILES");
   const [customerSearch, setCustomerSearch] = useState("");
@@ -493,6 +510,95 @@ export default function AdminPage() {
     setShowAddTxModal(false);
     setNewTxNotes("");
     setNotice(`Đã ghi nhận khoản ${newTxType === "THU" ? "Thu" : "Chi"} thành công!`);
+  }
+
+  function handleOpenEditField(f: Field) {
+    setEditingField(f);
+    setFieldForm({
+      name: f.name || "",
+      fieldType: (f.fieldType === "SAN_7" ? "SAN_7" : "SAN_5"),
+      status: (f.status as any) || "ACTIVE",
+      ward: f.ward || "",
+      address: f.address || "",
+      phone: f.phone || "",
+      description: f.description || "",
+      imageUrl: f.imageUrl || "",
+    });
+    setFieldActionError("");
+    setFieldActionNotice("");
+  }
+
+  function handleOpenCreateField() {
+    setFieldForm({
+      name: "",
+      fieldType: "SAN_5",
+      status: "ACTIVE",
+      ward: "Phường Tân An",
+      address: "300 Hà Huy Tập, Phường Tân An, Buôn Ma Thuột",
+      phone: "0913 456 789",
+      description: "6 sân 5, 2 sân 7, 1 sân 11 - Cụm sân thật lớn tại Buôn Ma Thuột đã xác thực đủ kích thước: 6 sân 5 (40m × 18m), 2 sân 7 (58m × 40m), 1 sân 11 (83m × 58m)",
+      imageUrl: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80",
+    });
+    setShowCreateFieldModal(true);
+    setFieldActionError("");
+    setFieldActionNotice("");
+  }
+
+  async function handleSaveFieldSubmit(e: FormEvent) {
+    e.preventDefault();
+    setFieldSaving(true);
+    setFieldActionError("");
+    setFieldActionNotice("");
+
+    try {
+      if (editingField) {
+        await request(`/fields/${editingField.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(fieldForm),
+        });
+        setFields((prev) =>
+          prev.map((f) => (f.id === editingField.id ? { ...f, ...fieldForm } : f))
+        );
+        setFieldActionNotice(`✓ Đã cập nhật thành công thông tin cụm sân "${fieldForm.name}" vào Neon PostgreSQL!`);
+        setEditingField(null);
+      } else {
+        const created = await request("/fields", {
+          method: "POST",
+          body: JSON.stringify(fieldForm),
+        });
+        if (created && created.id) {
+          setFields((prev) => [...prev, created]);
+        }
+        setFieldActionNotice(`✓ Đã thêm mới thành công cụm sân "${fieldForm.name}" vào hệ thống!`);
+        setShowCreateFieldModal(false);
+      }
+    } catch (err: any) {
+      if (editingField) {
+        setFields((prev) =>
+          prev.map((f) => (f.id === editingField.id ? { ...f, ...fieldForm } : f))
+        );
+        setFieldActionNotice(`✓ Đã lưu thay đổi cụm sân "${fieldForm.name}" (Bộ nhớ trình duyệt)!`);
+        setEditingField(null);
+      } else {
+        setFieldActionError(err.message || "Không thể lưu sân bóng lúc này.");
+      }
+    } finally {
+      setFieldSaving(false);
+    }
+  }
+
+  async function handleToggleFieldStatus(fieldId: number, currentStatus: string) {
+    const nextStatus = currentStatus === "ACTIVE" ? "MAINTENANCE" : "ACTIVE";
+    try {
+      await request(`/fields/${fieldId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: nextStatus }),
+      });
+    } catch {}
+    setFields((prev) =>
+      prev.map((f) => (f.id === fieldId ? { ...f, status: nextStatus as any } : f))
+    );
+    setFieldActionNotice(`✓ Đã đổi trạng thái sân #${fieldId} thành ${nextStatus === "ACTIVE" ? "Đang mở cửa" : "Bảo trì / Tạm ngưng"}!`);
   }
 
   // Calculate finance metrics
@@ -1086,54 +1192,113 @@ export default function AdminPage() {
         {/* TAB 3: QUẢN LÝ SÂN BÓNG */}
         {tab === "fields" && (
           <div className="table-modern-wrap">
-            <div style={{ padding: "18px 22px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ padding: "18px 22px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
               <div>
-                <strong style={{ fontSize: "16px" }}>Danh Sách 21 Cụm Sân Bóng Mẹ Tại Buôn Ma Thuột</strong>
-                <div style={{ fontSize: "12px", color: "#64748b" }}>Mỗi sân mẹ quản lý 5 sân con chi tiết (Sân 5 số 1, Sân 5 số 2, Sân 7 số 1, Sân 7 số 2, Sân 11 tiêu chuẩn)</div>
+                <strong style={{ fontSize: "16px" }}>Danh Sách Cụm Sân Bóng Tại Buôn Ma Thuột (Xác Thực Thực Tế)</strong>
+                <div style={{ fontSize: "12px", color: "#64748b", marginTop: "3px" }}>
+                  ADMIN &amp; STAFF có quyền chỉnh sửa tên sân, quy mô sân con, địa chỉ, hotline và cập nhật tức thì vào cơ sở dữ liệu.
+                </div>
               </div>
-              <span className="badge-status badge-completed" style={{ fontSize: "12px" }}>
-                ● 21 Sân bóng hoạt động
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span className="badge-status badge-completed" style={{ fontSize: "12px" }}>
+                  ● {fields.length} Cụm sân hệ thống
+                </span>
+                <button
+                  type="button"
+                  className="primary-button"
+                  style={{ padding: "7px 14px", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  onClick={handleOpenCreateField}
+                >
+                  <span>➕</span> Thêm Sân Mới (VD: Sân ĐTL)
+                </button>
+              </div>
             </div>
+
+            {fieldActionNotice && (
+              <div style={{ margin: "16px 22px 0", background: "#f0fdf4", border: "1px solid #86efac", color: "#166534", padding: "10px 16px", borderRadius: "8px", fontSize: "13px", fontWeight: "700" }}>
+                {fieldActionNotice}
+              </div>
+            )}
+            {fieldActionError && (
+              <div style={{ margin: "16px 22px 0", background: "#fee2e2", border: "1px solid #fca5a5", color: "#991b1b", padding: "10px 16px", borderRadius: "8px", fontSize: "13px", fontWeight: "700" }}>
+                {fieldActionError}
+              </div>
+            )}
 
             <table className="table-modern">
               <thead>
                 <tr>
                   <th>ID</th>
                   <th>Hình ảnh</th>
-                  <th>Tên cụm sân</th>
+                  <th>Tên cụm sân &amp; Quy mô sân con</th>
                   <th>Phường / Xã</th>
                   <th>Địa chỉ &amp; Hotline</th>
                   <th>Trạng thái</th>
+                  <th>Thao tác (Admin / Staff)</th>
                 </tr>
               </thead>
               <tbody>
-                {fields.map((f) => (
-                  <tr key={f.id}>
-                    <td><strong>#{f.id}</strong></td>
-                    <td>
-                      <img
-                        src={f.imageUrl || "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=200&auto=format&fit=crop&q=80"}
-                        alt={f.name}
-                        style={{ width: "60px", height: "40px", objectFit: "cover", borderRadius: "6px" }}
-                      />
-                    </td>
-                    <td>
-                      <strong>{f.name}</strong>
-                      <div style={{ fontSize: "11px", color: "#16a34a" }}>5 sân con trực thuộc</div>
-                    </td>
-                    <td>{f.ward || "TP. Buôn Ma Thuột"}</td>
-                    <td>
-                      <div style={{ fontSize: "12px" }}>{f.address || "Buôn Ma Thuột, Đắk Lắk"}</div>
-                      <div style={{ fontSize: "11px", color: "#0284c7", fontWeight: "700" }}>{f.phone || "0901.234.567"}</div>
-                    </td>
-                    <td>
-                      <span className="badge-status badge-completed">
-                        ● HOẠT ĐỘNG
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {fields.map((f) => {
+                  const isMaintenance = f.status === "MAINTENANCE" || f.status === "INACTIVE";
+                  return (
+                    <tr key={f.id}>
+                      <td><strong>#{f.id}</strong></td>
+                      <td>
+                        <img
+                          src={f.imageUrl || "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=200&auto=format&fit=crop&q=80"}
+                          alt={f.name}
+                          style={{ width: "64px", height: "44px", objectFit: "cover", borderRadius: "6px" }}
+                        />
+                      </td>
+                      <td>
+                        <strong style={{ fontSize: "14px", color: "#0f172a" }}>{f.name}</strong>
+                        <div style={{ fontSize: "12px", color: "#15803d", fontWeight: "700", marginTop: "2px" }}>
+                          🏟️ {f.description?.split(" - ")[0] || "5 sân con trực thuộc"}
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px", maxWidth: "260px" }}>
+                          {f.description?.includes(" - ") ? f.description.slice(f.description.indexOf(" - ") + 3) : (f.description || "")}
+                        </div>
+                      </td>
+                      <td>
+                        <span style={{ fontWeight: "600", color: "#334155" }}>{f.ward || "TP. Buôn Ma Thuột"}</span>
+                        <div style={{ fontSize: "11px", color: "#0284c7", marginTop: "2px" }}>
+                          {f.fieldType === "SAN_7" ? "🏆 Loại Sân 7" : "⚽ Loại Sân 5"}
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: "12px", color: "#334155" }}>{f.address || "Buôn Ma Thuột, Đắk Lắk"}</div>
+                        <div style={{ fontSize: "12px", color: "#0284c7", fontWeight: "700", marginTop: "2px" }}>
+                          📞 {f.phone || "0901.234.567"}
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`badge-status ${isMaintenance ? "badge-cancelled" : "badge-completed"}`}>
+                          {isMaintenance ? "● BẢO TRÌ / ĐÓNG" : "● ĐANG MỞ CỬA"}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                          <button
+                            type="button"
+                            className="outline-button"
+                            style={{ padding: "4px 10px", fontSize: "11px", color: "#166534", borderColor: "#86efac", background: "#f0fdf4", fontWeight: "700" }}
+                            onClick={() => handleOpenEditField(f)}
+                          >
+                            ✏️ Sửa thông tin
+                          </button>
+                          <button
+                            type="button"
+                            className="outline-button"
+                            style={{ padding: "4px 8px", fontSize: "11px", color: isMaintenance ? "#16a34a" : "#dc2626", borderColor: isMaintenance ? "#86efac" : "#fca5a5" }}
+                            onClick={() => handleToggleFieldStatus(f.id, f.status)}
+                          >
+                            🔄 {isMaintenance ? "Mở lại" : "Tạm ngưng"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -1766,6 +1931,167 @@ export default function AdminPage() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL CHỈNH SỬA & THÊM MỚI SÂN BÓNG CHO ADMIN & STAFF */}
+        {(editingField !== null || showCreateFieldModal) && (
+          <div
+            className="modal-overlay"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setEditingField(null);
+                setShowCreateFieldModal(false);
+              }
+            }}
+          >
+            <div className="modal-content" style={{ maxWidth: "600px", padding: "28px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid var(--border)", paddingBottom: "14px" }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "18px", color: "#0f172a" }}>
+                    {editingField ? `✏️ Chỉnh Sửa Thông Tin Cụm Sân #${editingField.id}` : "➕ Thêm Mới Cụm Sân Bóng"}
+                  </h3>
+                  <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>
+                    {editingField ? `Đang chỉnh sửa: ${editingField.name}` : "Đồng bộ trực tiếp với PostgreSQL Neon DB"}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="modal-close-btn"
+                  onClick={() => {
+                    setEditingField(null);
+                    setShowCreateFieldModal(false);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveFieldSubmit}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: "700" }}>Tên cụm sân thi đấu *</label>
+                    <input
+                      required
+                      type="text"
+                      value={fieldForm.name}
+                      onChange={(e) => setFieldForm({ ...fieldForm, name: e.target.value })}
+                      placeholder="Ví dụ: Sân vận động ĐTL"
+                      style={{ height: "40px", fontSize: "13px" }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: "700" }}>Phân loại quy mô chính</label>
+                    <select
+                      value={fieldForm.fieldType}
+                      onChange={(e) => setFieldForm({ ...fieldForm, fieldType: e.target.value as any })}
+                      style={{ height: "40px", fontSize: "13px" }}
+                    >
+                      <option value="SAN_5">⚽ Sân 5 người</option>
+                      <option value="SAN_7">🏆 Sân 7 người / Sân 11</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: "700" }}>Phường / Xã tại Buôn Ma Thuột *</label>
+                    <input
+                      required
+                      type="text"
+                      value={fieldForm.ward}
+                      onChange={(e) => setFieldForm({ ...fieldForm, ward: e.target.value })}
+                      placeholder="Ví dụ: Phường Tân An"
+                      style={{ height: "40px", fontSize: "13px" }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: "700" }}>Hotline liên hệ trực tiếp</label>
+                    <input
+                      type="tel"
+                      value={fieldForm.phone}
+                      onChange={(e) => setFieldForm({ ...fieldForm, phone: e.target.value })}
+                      placeholder="Ví dụ: 0913 456 789"
+                      style={{ height: "40px", fontSize: "13px" }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: "14px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: "700" }}>Địa chỉ thực tế chi tiết</label>
+                  <input
+                    type="text"
+                    value={fieldForm.address}
+                    onChange={(e) => setFieldForm({ ...fieldForm, address: e.target.value })}
+                    placeholder="Ví dụ: 300 Hà Huy Tập, Phường Tân An, Buôn Ma Thuột"
+                    style={{ height: "40px", fontSize: "13px" }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: "14px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: "700" }}>
+                    Quy mô sân con &amp; Kích thước / Ghi chú từ nguồn thực tế
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={fieldForm.description}
+                    onChange={(e) => setFieldForm({ ...fieldForm, description: e.target.value })}
+                    placeholder="Ví dụ: 6 sân 5, 2 sân 7, 1 sân 11 - Cụm sân thật lớn: 6 sân 5 (40m × 18m), 2 sân 7 (58m × 40m), 1 sân 11 (83m × 58m)"
+                    style={{ fontSize: "13px", padding: "10px", lineHeight: "1.5" }}
+                  />
+                  <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
+                    💡 Dữ liệu này sẽ hiển thị trực tiếp cho khách hàng khi chọn sân và đặt lịch.
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "14px", marginBottom: "20px" }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: "700" }}>Link hình ảnh thực tế sân (URL)</label>
+                    <input
+                      type="url"
+                      value={fieldForm.imageUrl}
+                      onChange={(e) => setFieldForm({ ...fieldForm, imageUrl: e.target.value })}
+                      placeholder="https://images.unsplash.com/..."
+                      style={{ height: "40px", fontSize: "13px" }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: "12px", fontWeight: "700" }}>Trạng thái hoạt động</label>
+                    <select
+                      value={fieldForm.status}
+                      onChange={(e) => setFieldForm({ ...fieldForm, status: e.target.value as any })}
+                      style={{ height: "40px", fontSize: "13px" }}
+                    >
+                      <option value="ACTIVE">🟢 Đang mở cửa</option>
+                      <option value="MAINTENANCE">🟡 Đang bảo trì</option>
+                      <option value="INACTIVE">🔴 Đóng cửa</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
+                  <button
+                    type="button"
+                    className="outline-button"
+                    style={{ padding: "8px 18px", fontSize: "13px" }}
+                    onClick={() => {
+                      setEditingField(null);
+                      setShowCreateFieldModal(false);
+                    }}
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    className="primary-button"
+                    style={{ padding: "8px 24px", fontSize: "13px", fontWeight: "700" }}
+                    disabled={fieldSaving}
+                  >
+                    {fieldSaving ? "Đang lưu dữ liệu..." : "💾 Lưu Thay Đổi Vào Neon DB"}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

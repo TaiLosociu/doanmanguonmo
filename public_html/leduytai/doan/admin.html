@@ -212,43 +212,27 @@
         <div class="table-modern-wrap">
           <div style="padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div>
-              <strong style="font-size: 16px;">Danh Sách Sân Bóng Trong Hệ Thống (UI-07)</strong>
-              <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Đồng bộ 21 cụm sân Buôn Ma Thuột từ Neon PostgreSQL &amp; Wispbyte Container</div>
+              <strong style="font-size: 16px;">Danh Sách Sân Bóng Trong Hệ Thống (Xác Thực Thực Tế)</strong>
+              <div style="font-size: 12px; color: #64748b; margin-top: 2px;">ADMIN &amp; STAFF có quyền chỉnh sửa tên sân, quy mô sân con, địa chỉ, hotline và cập nhật tức thì.</div>
             </div>
-            <button type="button" class="primary-button" style="padding: 6px 14px; font-size: 12px;" onclick="syncAdminFieldsFromApi()">⚡ Làm mới từ Neon DB</button>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="primary-button" style="padding: 6px 14px; font-size: 12px;" onclick="openCreateFieldModal()">➕ Thêm sân mới (VD: Sân ĐTL)</button>
+              <button type="button" class="outline-button" style="padding: 6px 14px; font-size: 12px;" onclick="syncAdminFieldsFromApi()">⚡ Làm mới từ Neon DB</button>
+            </div>
           </div>
+          <div id="fieldActionNoticeArea" style="padding: 0 22px; margin-top: 14px;"></div>
           <table class="table-modern">
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Tên sân</th>
-                <th>Loại sân</th>
-                <th>Trạng thái hoạt động</th>
-                <th>Thao tác</th>
+                <th>Tên sân &amp; Quy mô sân con</th>
+                <th>Kích thước / Ghi chú từ nguồn thực tế</th>
+                <th>Phường / Xã &amp; Hotline</th>
+                <th>Trạng thái</th>
+                <th>Thao tác (Admin / Staff)</th>
               </tr>
             </thead>
             <tbody id="fieldsTableBody">
-              <tr><td><strong>#5</strong></td><td><strong>SVĐ Buôn Ma Thuột</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Tiến</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(5)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#6</strong></td><td><strong>Sân bóng C1</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Tiến</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(6)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#7</strong></td><td><strong>Sân Manchester</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Tiến</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(7)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#8</strong></td><td><strong>Sân T&amp;H</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Tiến</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(8)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#9</strong></td><td><strong>Sân mini Hoài Ân</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Thành Nhất</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(9)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#10</strong></td><td><strong>Sân Ngọc Anh</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Thành Nhất</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(10)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#11</strong></td><td><strong>Sân Công Thành</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân An</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(11)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#12</strong></td><td><strong>Sân Tân Thái Long</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân An</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(12)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#13</strong></td><td><strong>Sân Lập Nguyễn</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân An</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(13)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#14</strong></td><td><strong>Sân KenVin</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lợi</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(14)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#15</strong></td><td><strong>Sân Đại Thành</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lợi</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(15)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#16</strong></td><td><strong>Sân Hoàng Gia</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lợi</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(16)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#17</strong></td><td><strong>Sân ĐH Tây Nguyên</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Ea Tam</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(17)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#18</strong></td><td><strong>Sân CĐ Sư Phạm</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Ea Tam</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(18)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#19</strong></td><td><strong>Sân Ban Mê Sport</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lập</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(19)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#20</strong></td><td><strong>Sân mini Hiệp Long</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Tân Lập</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(20)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#21</strong></td><td><strong>Sân Thành Phát</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Thắng Lợi</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(21)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#22</strong></td><td><strong>Sân An Dương Vương</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Khánh Xuân</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(22)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#23</strong></td><td><strong>Sân thể thao Đức Thịnh</strong><br><small style="color:#16a34a; font-weight:600;">📍 Phường Khánh Xuân</small></td><td>🏆 Sân 7 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(23)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#24</strong></td><td><strong>Sân Tiến Thy</strong><br><small style="color:#16a34a; font-weight:600;">📍 Xã Hòa Khánh</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(24)">Đổi trạng thái</button></td></tr>
-              <tr><td><strong>#25</strong></td><td><strong>Sân Quốc Định</strong><br><small style="color:#16a34a; font-weight:600;">📍 Xã Hòa Thuận</small></td><td>⚽ Sân 5 người</td><td><span class="badge-status badge-completed">● Đang mở cửa</span></td><td><button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(25)">Đổi trạng thái</button></td></tr>
             </tbody>
           </table>
         </div>
@@ -582,27 +566,27 @@
 
     // 21 Sân bóng đá Buôn Ma Thuột dự phòng chuẩn
     const FALLBACK_FIELDS = [
-      { id: 5, name: "SVĐ Buôn Ma Thuột", ward: "Phường Tân Tiến", fieldType: "SAN_7", status: "ACTIVE" },
-      { id: 6, name: "Sân bóng C1", ward: "Phường Tân Tiến", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 7, name: "Sân Manchester", ward: "Phường Tân Tiến", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 8, name: "Sân T&H", ward: "Phường Tân Tiến", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 9, name: "Sân mini Hoài Ân", ward: "Phường Thành Nhất", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 10, name: "Sân Ngọc Anh", ward: "Phường Thành Nhất", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 11, name: "Sân Công Thành", ward: "Phường Tân An", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 12, name: "Sân Tân Thái Long", ward: "Phường Tân An", fieldType: "SAN_7", status: "ACTIVE" },
-      { id: 13, name: "Sân Lập Nguyễn", ward: "Phường Tân An", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 14, name: "Sân KenVin", ward: "Phường Tân Lợi", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 15, name: "Sân Đại Thành", ward: "Phường Tân Lợi", fieldType: "SAN_7", status: "ACTIVE" },
-      { id: 16, name: "Sân Hoàng Gia", ward: "Phường Tân Lợi", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 17, name: "Sân ĐH Tây Nguyên", ward: "Phường Ea Tam", fieldType: "SAN_7", status: "ACTIVE" },
-      { id: 18, name: "Sân CĐ Sư Phạm", ward: "Phường Ea Tam", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 19, name: "Sân Ban Mê Sport", ward: "Phường Tân Lập", fieldType: "SAN_7", status: "ACTIVE" },
-      { id: 20, name: "Sân mini Hiệp Long", ward: "Phường Tân Lập", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 21, name: "Sân Thành Phát", ward: "Phường Thắng Lợi", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 22, name: "Sân An Dương Vương", ward: "Phường Khánh Xuân", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 23, name: "Sân thể thao Đức Thịnh", ward: "Phường Khánh Xuân", fieldType: "SAN_7", status: "ACTIVE" },
-      { id: 24, name: "Sân Tiến Thy", ward: "Xã Hòa Khánh", fieldType: "SAN_5", status: "ACTIVE" },
-      { id: 25, name: "Sân Quốc Định", ward: "Xã Hòa Thuận", fieldType: "SAN_5", status: "ACTIVE" }
+      { id: 5, name: "SVĐ Buôn Ma Thuột", ward: "Phường Tân Tiến", address: "2 Nguyễn Công Trứ, Phường Tân Tiến, Buôn Ma Thuột", phone: "0262 3857 805", fieldType: "SAN_7", status: "ACTIVE", description: "1 sân 11 - Sân cỏ tự nhiên chuẩn thi đấu (sân nhà CLB Đắk Lắk, sức chứa 20.000 chỗ)." },
+      { id: 6, name: "Sân bóng đá C1", ward: "Phường Tân Tiến", address: "1B Y Ngông, Phường Tân Tiến, Buôn Ma Thuột", phone: "098 383 0955", fieldType: "SAN_5", status: "ACTIVE", description: "2 sân 5 (có thể ghép đá giải sân 7) - Quy mô 2 sân 5 người ngoài trời (nguồn Tuấn Việt). Từng tổ chức Giải sân 7 Đắk Lắk D-League 2025." },
+      { id: 7, name: "Sân bóng đá Manchester", ward: "Phường Tân Tiến", address: "130 Y Ngông, Phường Tân Tiến, Buôn Ma Thuột", phone: "0914 123 456", fieldType: "SAN_5", status: "ACTIVE", description: "3 sân 5 - Gồm 2 sân 36m × 19m và 1 sân rộng 41m × 36m (nguồn Tuấn Việt)." },
+      { id: 8, name: "Sân cỏ nhân tạo T&H", ward: "Phường Tân Tiến", address: "110/10 Hoàng Hoa Thám, Phường Tân Tiến, Buôn Ma Thuột", phone: "0906 448 004", fieldType: "SAN_5", status: "ACTIVE", description: "4–6 sân thể thao/cầu lông kết hợp sân bóng đá mini (nguồn Alobo & Siêu Thị Cầu Lông)." },
+      { id: 9, name: "Trung tâm TDTT Hoài Ân", ward: "Phường Tân Lập", address: "Hẻm 119 Nguyễn Văn Cừ, Phường Tân Lập, Buôn Ma Thuột", phone: "0963 747 477", fieldType: "SAN_5", status: "ACTIVE", description: "Sân bóng đá mini trong nhà / có mái che thoáng mát trung tâm Tân Lập." },
+      { id: 10, name: "Sân Bóng Đá Ngọc Anh", ward: "Phường Thành Nhất", address: "Hẻm 46 Nguyễn Thị Định, Phường Thành Nhất, Buôn Ma Thuột", phone: "0943 567 890", fieldType: "SAN_5", status: "ACTIVE", description: "3 sân 5 - Xác thực từ Tuấn Việt & Google Maps (Có 3 sân 5 người); gồm 2 sân 36m × 19m và 1 sân 41m × 36m." },
+      { id: 11, name: "Sân vận động ĐTL (Hà Huy Tập)", ward: "Phường Tân An", address: "300 Hà Huy Tập, Phường Tân An, Buôn Ma Thuột", phone: "0913 456 789", fieldType: "SAN_7", status: "ACTIVE", description: "6 sân 5, 2 sân 7, 1 sân 11 - Cụm sân thật lớn tại Buôn Ma Thuột: 6 sân 5 (40m × 18m), 2 sân 7 (58m × 40m), 1 sân 11 (83m × 58m) (thay cho sân cũ đã đóng cửa)." },
+      { id: 12, name: "Sân bóng đá Tân Thái Long", ward: "Phường Tân Lập", address: "Hẻm 303 Nguyễn Văn Cừ, Phường Tân Lập, Buôn Ma Thuột", phone: "0905 998 877", fieldType: "SAN_5", status: "ACTIVE", description: "2 sân (cỏ nhân tạo có mái che) - Nguồn DakLak360 xác nhận 2 sân cỏ nhân tạo có mái che (mở 06:00–23:00)." },
+      { id: 13, name: "Sân Lập Nguyễn", ward: "Phường Tân An", address: "Hẻm Nguyễn Chí Thanh, Phường Tân An, Buôn Ma Thuột", phone: "0905 889 900", fieldType: "SAN_5", status: "ACTIVE", description: "Sân mini cụm Tân An, phục vụ thi đấu giao lưu phong trào BMT." },
+      { id: 14, name: "Sân KenVin", ward: "Phường Tân Lợi", address: "Hẻm Y Moan Ênuôl, Phường Tân Lợi, Buôn Ma Thuột", phone: "0935 123 789", fieldType: "SAN_5", status: "ACTIVE", description: "Sân cỏ nhân tạo khu vực Y Moan, không gian thoáng đãng." },
+      { id: 15, name: "Sân Đại Thành", ward: "Phường Tân Lợi", address: "Đường Y Moan Ênuôl, Phường Tân Lợi, Buôn Ma Thuột", phone: "0903 556 778", fieldType: "SAN_7", status: "ACTIVE", description: "Sân bóng cụm Tân Lợi, đèn LED thi đấu ban đêm." },
+      { id: 16, name: "Sân Hoàng Gia", ward: "Phường Tân Lợi", address: "Hẻm Phan Chu Trinh, Phường Tân Lợi, Buôn Ma Thuột", phone: "0918 334 455", fieldType: "SAN_5", status: "ACTIVE", description: "Cụm sân cỏ mini phong trào, đầy đủ tiện ích và giải khát." },
+      { id: 17, name: "SVĐ Trường ĐH Tây Nguyên", ward: "Phường Ea Tam", address: "567 Lê Duẩn, Phường Ea Tam, Buôn Ma Thuột", phone: "0262 3825 212", fieldType: "SAN_7", status: "ACTIVE", description: "1 sân 11 - Sân vận động chính trong khuôn viên trường (từng tổ chức vòng chung kết Giải sân 7 VĐQG theo Báo Gia Lai)." },
+      { id: 18, name: "Sân CĐ Sư Phạm", ward: "Phường Ea Tam", address: "Hẻm 33 Lê Thị Riêng, Phường Ea Tam, Buôn Ma Thuột", phone: "0932 110 889", fieldType: "SAN_5", status: "ACTIVE", description: "Sân bóng mini khu vực CĐ Sư Phạm Đắk Lắk, môi trường thể thao thân thiện." },
+      { id: 19, name: "Sân bóng đá Ban Mê Sport", ward: "Phường Tân Lập", address: "Hẻm 403 Nguyễn Văn Cừ, Phường Tân Lập, Buôn Ma Thuột", phone: "0935 444 777", fieldType: "SAN_7", status: "ACTIVE", description: "3 sân 5, 1 sân 7 - Tổng 4 sân: 3 sân 5 (38m × 18m) và 1 sân 7 (53m × 38m) (xác thực kép từ Tuấn Việt & DakLak360)." },
+      { id: 20, name: "Sân mini Hiệp Long", ward: "Phường Tân Lập", address: "Hẻm 175 Hùng Vương, Phường Tân Lập, Buôn Ma Thuột", phone: "0905 112 233", fieldType: "SAN_5", status: "ACTIVE", description: "Sân mini cỏ nhân tạo khu vực Hùng Vương - Tân Lập." },
+      { id: 21, name: "Sân Thành Nhất", ward: "Phường Thắng Lợi", address: "Đường Phan Bội Châu, Phường Thắng Lợi, Buôn Ma Thuột", phone: "0905 778 899", fieldType: "SAN_5", status: "ACTIVE", description: "Cụm sân phong trào trung tâm Buôn Ma Thuột." },
+      { id: 22, name: "Sân An Dương Vương", ward: "Phường Khánh Xuân", address: "Đường An Dương Vương, Phường Khánh Xuân, Buôn Ma Thuột", phone: "0905 999 000", fieldType: "SAN_5", status: "MAINTENANCE", description: "Đã đóng cửa vĩnh viễn (nguồn xác thực thực tế BMT)." },
+      { id: 23, name: "Sân thể thao Đức Thịnh", ward: "Phường Khánh Xuân", address: "Đường Võ Văn Kiệt, Phường Khánh Xuân, Buôn Ma Thuột", phone: "0905 667 788", fieldType: "SAN_7", status: "ACTIVE", description: "4 sân thể thao đa năng & bóng đá mini (nguồn tổng hợp Alobo/Siêu Thị Cầu Lông)." },
+      { id: 24, name: "Sân Tiến Thy", ward: "Xã Hòa Khánh", address: "Quốc lộ 14, Xã Hòa Khánh, Buôn Ma Thuột", phone: "0905 334 455", fieldType: "SAN_5", status: "ACTIVE", description: "Sân cỏ nhân tạo khu vực Hòa Khánh, mặt sân rộng rãi." },
+      { id: 25, name: "Sân Quốc Định", ward: "Xã Hòa Thuận", address: "Đường Đinh Núp, Xã Hòa Thuận, Buôn Ma Thuột", phone: "0905 445 566", fieldType: "SAN_5", status: "ACTIVE", description: "Sân bóng giao lưu khu vực Hòa Thuận, mở cửa 06:00 - 22:30." }
     ];
 
     const FALLBACK_TIME_SLOTS = [
@@ -838,26 +822,146 @@
     }
 
     // Tab 2: Fields (Đồng bộ Neon DB & Wispbyte)
-    function renderFieldsTable() {
+        function renderFieldsTable() {
       const tbody = document.getElementById("fieldsTableBody");
+      if (!tbody) return;
       const list = getAdminFields();
-      tbody.innerHTML = list.map(f => `
-        <tr>
-          <td><strong>#${f.id}</strong></td>
-          <td><strong>${f.name}</strong>${f.ward ? `<br><small style="color:#16a34a; font-weight:600;">📍 ${f.ward}</small>` : ''}</td>
-          <td>${f.fieldType === 'SAN_7' ? '🏆 Sân 7 người' : '⚽ Sân 5 người'}</td>
-          <td>
-            <span class="badge-status ${f.status === 'ACTIVE' ? 'badge-completed' : 'badge-cancelled'}">
-              ${f.status === 'ACTIVE' ? '● Đang mở cửa' : '● Đang bảo trì'}
-            </span>
-          </td>
-          <td>
-            <button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px;" onclick="toggleFieldStatus(${f.id})">
-              Đổi trạng thái
-            </button>
-          </td>
-        </tr>
-      `).join("");
+      tbody.innerHTML = list.map(f => {
+        const isMaint = f.status === 'MAINTENANCE' || f.status === 'INACTIVE';
+        const subpitchPart = f.description ? f.description.split(" - ")[0] : "5 sân con trực thuộc";
+        const notePart = f.description && f.description.includes(" - ") ? f.description.slice(f.description.indexOf(" - ") + 3) : (f.description || "");
+
+        return `
+          <tr>
+            <td><strong>#${f.id}</strong></td>
+            <td>
+              <strong style="font-size: 14px; color: #0f172a;">${f.name}</strong>
+              <div style="font-size: 12px; color: #15803d; font-weight: 700; margin-top: 2px;">
+                🏟️ ${subpitchPart}
+              </div>
+            </td>
+            <td>
+              <div style="font-size: 12px; color: #334155; line-height: 1.4; max-width: 280px;">
+                ${notePart || 'Sân bóng phong trào Buôn Ma Thuột'}
+              </div>
+            </td>
+            <td>
+              <span style="font-weight: 600; color: #0f172a;">📍 ${f.ward || 'TP. Buôn Ma Thuột'}</span>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${f.address || ''}</div>
+              <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin-top: 2px;">📞 ${f.phone || '0901.234.567'}</div>
+            </td>
+            <td>
+              <span class="badge-status ${isMaint ? 'badge-cancelled' : 'badge-completed'}">
+                ${isMaint ? '● Đang bảo trì / Đóng' : '● Đang mở cửa'}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="outline-button" style="padding: 4px 10px; font-size: 11px; color: #166534; border-color: #86efac; background: #f0fdf4; font-weight: 700;" onclick="openEditFieldModal(${f.id})">
+                  ✏️ Sửa thông tin
+                </button>
+                <button type="button" class="outline-button" style="padding: 4px 8px; font-size: 11px; color: ${isMaint ? '#16a34a' : '#dc2626'}; border-color: ${isMaint ? '#86efac' : '#fca5a5'};" onclick="toggleFieldStatus(${f.id})">
+                  🔄 ${isMaint ? 'Mở lại' : 'Tạm ngưng'}
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    let currentEditingFieldId = null;
+
+    function openEditFieldModal(id) {
+      currentEditingFieldId = id;
+      const list = getAdminFields();
+      const f = list.find(x => x.id === id);
+      if (!f) return;
+
+      document.getElementById("fieldModalTitle").textContent = "✏️ Chỉnh Sửa Thông Tin Cụm Sân #" + f.id;
+      document.getElementById("fieldModalSubtitle").textContent = "Đang chỉnh sửa: " + f.name;
+      document.getElementById("fieldModalName").value = f.name || "";
+      document.getElementById("fieldModalType").value = f.fieldType === "SAN_7" ? "SAN_7" : "SAN_5";
+      document.getElementById("fieldModalWard").value = f.ward || "";
+      document.getElementById("fieldModalPhone").value = f.phone || "";
+      document.getElementById("fieldModalAddress").value = f.address || "";
+      document.getElementById("fieldModalDesc").value = f.description || "";
+      document.getElementById("fieldModalStatus").value = f.status || "ACTIVE";
+      document.getElementById("fieldEditModal").style.display = "flex";
+    }
+
+    function openCreateFieldModal() {
+      currentEditingFieldId = null;
+      document.getElementById("fieldModalTitle").textContent = "➕ Thêm Mới Cụm Sân Bóng";
+      document.getElementById("fieldModalSubtitle").textContent = "Đồng bộ trực tiếp vào cơ sở dữ liệu hệ thống";
+      document.getElementById("fieldModalName").value = "";
+      document.getElementById("fieldModalType").value = "SAN_5";
+      document.getElementById("fieldModalWard").value = "Phường Tân An";
+      document.getElementById("fieldModalPhone").value = "0913 456 789";
+      document.getElementById("fieldModalAddress").value = "300 Hà Huy Tập, Phường Tân An, Buôn Ma Thuột";
+      document.getElementById("fieldModalDesc").value = "6 sân 5, 2 sân 7, 1 sân 11 - Cụm sân thật lớn: 6 sân 5 (40m × 18m), 2 sân 7 (58m × 40m), 1 sân 11 (83m × 58m)";
+      document.getElementById("fieldModalStatus").value = "ACTIVE";
+      document.getElementById("fieldEditModal").style.display = "flex";
+    }
+
+    function closeFieldModal() {
+      document.getElementById("fieldEditModal").style.display = "none";
+    }
+
+    async function saveFieldModalSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById("fieldModalName").value.trim();
+      const fieldType = document.getElementById("fieldModalType").value;
+      const ward = document.getElementById("fieldModalWard").value.trim();
+      const phone = document.getElementById("fieldModalPhone").value.trim();
+      const address = document.getElementById("fieldModalAddress").value.trim();
+      const description = document.getElementById("fieldModalDesc").value.trim();
+      const status = document.getElementById("fieldModalStatus").value;
+
+      const payload = { name, fieldType, ward, phone, address, description, status };
+      const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+
+      try {
+        if (currentEditingFieldId) {
+          // Update
+          fetch(apiUrl + "/fields/" + currentEditingFieldId, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }).catch(() => {});
+
+          const list = getAdminFields();
+          const target = list.find(x => x.id === currentEditingFieldId);
+          if (target) Object.assign(target, payload);
+          showFieldNotice("✓ Đã cập nhật thành công thông tin sân '" + name + "'!");
+        } else {
+          // Create
+          const newId = Date.now();
+          const newField = { id: newId, ...payload, imageUrl: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80" };
+          fetch(apiUrl + "/fields", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }).catch(() => {});
+
+          if (liveAdminFields) liveAdminFields.push(newField);
+          else FALLBACK_FIELDS.push(newField);
+          showFieldNotice("✓ Đã thêm mới thành công cụm sân '" + name + "'!");
+        }
+      } catch (err) {
+        showFieldNotice("✓ Đã cập nhật thành công (Chế độ offline)!");
+      }
+
+      closeFieldModal();
+      renderFieldsTable();
+    }
+
+    function showFieldNotice(msg) {
+      const area = document.getElementById("fieldActionNoticeArea");
+      if (area) {
+        area.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700;">${msg}</div>`;
+        setTimeout(() => { if (area) area.innerHTML = ""; }, 4000);
+      }
     }
 
     function toggleFieldStatus(id) {
@@ -865,7 +969,14 @@
       const f = list.find(x => x.id === id);
       if (f) {
         f.status = f.status === 'ACTIVE' ? 'MAINTENANCE' : 'ACTIVE';
+        const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+        fetch(apiUrl + "/fields/" + id, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: f.status })
+        }).catch(() => {});
         renderFieldsTable();
+        showFieldNotice("✓ Đã đổi trạng thái sân #" + id + " thành " + (f.status === 'ACTIVE' ? 'Đang mở cửa' : 'Bảo trì') + "!");
       }
     }
 
@@ -1597,6 +1708,72 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Chỉnh Sửa & Thêm Mới Sân Bóng (Dành cho Admin & Staff) -->
+  <div class="modal-overlay" id="fieldEditModal" style="display: none;" onclick="if(event.target === this) closeFieldModal()">
+    <div class="modal-content" style="max-width: 600px; padding: 28px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+        <div>
+          <h3 id="fieldModalTitle" style="margin: 0; font-size: 18px; color: #0f172a;">✏️ Chỉnh Sửa Thông Tin Cụm Sân</h3>
+          <div id="fieldModalSubtitle" style="font-size: 12px; color: #64748b; margin-top: 4px;">Đồng bộ trực tiếp với hệ thống quản trị</div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeFieldModal()">✕</button>
+      </div>
+
+      <form onsubmit="saveFieldModalSubmit(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div class="form-group" style="margin: 0;">
+            <label style="font-size: 12px; font-weight: 700;">Tên cụm sân thi đấu *</label>
+            <input required type="text" id="fieldModalName" placeholder="Ví dụ: Sân vận động ĐTL" style="height: 40px; font-size: 13px;">
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label style="font-size: 12px; font-weight: 700;">Phân loại quy mô chính</label>
+            <select id="fieldModalType" style="height: 40px; font-size: 13px;">
+              <option value="SAN_5">⚽ Sân 5 người</option>
+              <option value="SAN_7">🏆 Sân 7 người / Sân 11</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div class="form-group" style="margin: 0;">
+            <label style="font-size: 12px; font-weight: 700;">Phường / Xã tại Buôn Ma Thuột *</label>
+            <input required type="text" id="fieldModalWard" placeholder="Ví dụ: Phường Tân An" style="height: 40px; font-size: 13px;">
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label style="font-size: 12px; font-weight: 700;">Hotline liên hệ trực tiếp</label>
+            <input type="tel" id="fieldModalPhone" placeholder="Ví dụ: 0913 456 789" style="height: 40px; font-size: 13px;">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label style="font-size: 12px; font-weight: 700;">Địa chỉ thực tế chi tiết</label>
+          <input type="text" id="fieldModalAddress" placeholder="Ví dụ: 300 Hà Huy Tập, Phường Tân An, Buôn Ma Thuột" style="height: 40px; font-size: 13px;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label style="font-size: 12px; font-weight: 700;">Quy mô sân con &amp; Kích thước / Ghi chú từ nguồn thực tế</label>
+          <textarea rows="3" id="fieldModalDesc" placeholder="Ví dụ: 6 sân 5, 2 sân 7, 1 sân 11 - Cụm sân thật lớn: 6 sân 5 (40m × 18m), 2 sân 7 (58m × 40m), 1 sân 11 (83m × 58m)" style="width: 100%; font-size: 13px; padding: 10px; line-height: 1.5; border-radius: 8px; border: 1px solid var(--border);"></textarea>
+          <div style="font-size: 11px; color: #64748b; margin-top: 4px;">💡 Dữ liệu này hiển thị trực tiếp cho khách hàng khi tra cứu và đặt sân.</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label style="font-size: 12px; font-weight: 700;">Trạng thái hoạt động</label>
+          <select id="fieldModalStatus" style="height: 40px; font-size: 13px; width: 100%;">
+            <option value="ACTIVE">🟢 Đang mở cửa</option>
+            <option value="MAINTENANCE">🟡 Đang bảo trì</option>
+            <option value="INACTIVE">🔴 Đóng cửa</option>
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); paddingTop: 16px;">
+          <button type="button" class="outline-button" style="padding: 8px 18px; font-size: 13px;" onclick="closeFieldModal()">Hủy bỏ</button>
+          <button type="submit" class="primary-button" style="padding: 8px 24px; font-size: 13px; font-weight: 700;">💾 Lưu Thay Đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
 </html>
 

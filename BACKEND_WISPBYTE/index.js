@@ -369,6 +369,66 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    // 3c. API Cập nhật thông tin sân bóng (PATCH /api/v1/fields/:id)
+    if (fieldDetailMatch && (req.method === "PATCH" || req.method === "PUT")) {
+      const fieldId = Number(fieldDetailMatch[1]);
+      const body = await parseJsonBody(req);
+      const updates = [];
+      const params = [];
+      let pIdx = 1;
+
+      if (body.name !== undefined) { updates.push(`name = $${pIdx++}`); params.push(body.name); }
+      if (body.ward !== undefined) { updates.push(`ward = $${pIdx++}`); params.push(body.ward); }
+      if (body.address !== undefined) { updates.push(`address = $${pIdx++}`); params.push(body.address); }
+      if (body.phone !== undefined) { updates.push(`phone = $${pIdx++}`); params.push(body.phone); }
+      if (body.fieldType !== undefined) { updates.push(`field_type = $${pIdx++}`); params.push(body.fieldType); }
+      if (body.status !== undefined) { updates.push(`status = $${pIdx++}`); params.push(body.status); }
+      if (body.description !== undefined) { updates.push(`description = $${pIdx++}`); params.push(body.description); }
+      if (body.imageUrl !== undefined) { updates.push(`image_url = $${pIdx++}`); params.push(body.imageUrl); }
+
+      if (updates.length > 0) {
+        params.push(fieldId);
+        await queryNeon(`UPDATE fields SET ${updates.join(", ")} WHERE id = $${pIdx}`, params);
+      }
+
+      const rows = await queryNeon(`SELECT * FROM fields WHERE id = ${fieldId} LIMIT 1`);
+      if (rows.length === 0) return sendJson(res, 404, { message: "Không tìm thấy sân bóng" });
+      const r = rows[0];
+      return sendJson(res, 200, {
+        id: r.id,
+        name: r.name,
+        ward: r.ward,
+        address: r.address,
+        phone: r.phone,
+        fieldType: r.field_type,
+        status: r.status,
+        description: r.description,
+        imageUrl: r.image_url,
+      });
+    }
+
+    // 3d. API Thêm mới cụm sân bóng (POST /api/v1/fields)
+    if (pathname === "/api/v1/fields" && req.method === "POST") {
+      const body = await parseJsonBody(req);
+      const name = body.name || "Sân bóng mới";
+      const ward = body.ward || "TP. Buôn Ma Thuột";
+      const address = body.address || "Buôn Ma Thuột, Đắk Lắk";
+      const phone = body.phone || "0896890399";
+      const fieldType = body.fieldType === "SAN_7" ? "SAN_7" : "SAN_5";
+      const status = body.status || "ACTIVE";
+      const description = body.description || "Cụm sân bóng thi đấu Buôn Ma Thuột";
+      const imageUrl = body.imageUrl || "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80";
+
+      await queryNeon(
+        `INSERT INTO fields (name, ward, address, phone, field_type, status, description, image_url)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [name, ward, address, phone, fieldType, status, description, imageUrl]
+      );
+
+      const rows = await queryNeon(`SELECT * FROM fields ORDER BY id DESC LIMIT 1`);
+      return sendJson(res, 201, rows[0] || { success: true });
+    }
+
     // 4. API Lịch riêng từng sân & sân con (GET /api/v1/fields/:id/schedule)
     const fieldScheduleMatch = pathname.match(/^\/api\/v1\/fields\/(\d+)\/schedule$/);
     if (fieldScheduleMatch && req.method === "GET") {
