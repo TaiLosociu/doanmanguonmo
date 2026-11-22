@@ -28,6 +28,22 @@ export class CreateBookingDto {
   @IsString()
   @IsNotEmpty({ message: "Số điện thoại không được để trống" })
   customerPhone!: string;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  subPitchId?: number;
+
+  @ApiPropertyOptional({ example: "Sân 5 - Số 1" })
+  @IsOptional()
+  @IsString()
+  subPitchName?: string;
+
+  @ApiPropertyOptional({ example: "SAN_5" })
+  @IsOptional()
+  @IsString()
+  pitchSize?: string;
 }
 
 export class BookingQueryDto {

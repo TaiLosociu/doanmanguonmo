@@ -46,6 +46,18 @@ type Booking = {
   } | null;
 };
 
+function parseUtcDateMs(val: any): number {
+  if (!val) return Date.now();
+  if (typeof val === "number") return val;
+  if (val instanceof Date) return val.getTime();
+  let s = String(val).trim();
+  if (!s.endsWith("Z") && !s.includes("+")) {
+    s = s.replace(" ", "T") + "Z";
+  }
+  const ms = new Date(s).getTime();
+  return isNaN(ms) ? Date.now() : ms;
+}
+
 function money(value: string | number): string {
   return new Intl.NumberFormat("vi-VN").format(Number(value)) + "đ";
 }
@@ -132,12 +144,14 @@ export default function LookupPage() {
       const result = await response.json();
       if (response.ok && result) {
         setBooking(result);
-        const createdMs = result.createdAt ? new Date(result.createdAt).getTime() : Date.now();
+        const createdMs = result.createdAt ? parseUtcDateMs(result.createdAt) : Date.now();
         const diffMs = Date.now() - createdMs;
         const calculatedRemainingSec = Math.max(0, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
-        const remSec = typeof result.expiresInSeconds === "number" ? result.expiresInSeconds : calculatedRemainingSec;
-        if (result.status === "PENDING" && remSec > 0) {
-          setCountdown(remSec);
+        const remSec = typeof result.expiresInSeconds === "number" && result.expiresInSeconds > 0
+          ? result.expiresInSeconds
+          : calculatedRemainingSec;
+        if (result.status === "PENDING") {
+          setCountdown(remSec > 0 ? remSec : 1800);
         } else {
           setCountdown(0);
         }
@@ -157,7 +171,7 @@ export default function LookupPage() {
     );
 
     if (foundInLocal) {
-      const createdAtMs = foundInLocal.createdAt ? new Date(foundInLocal.createdAt).getTime() : Date.now();
+      const createdAtMs = foundInLocal.createdAt ? parseUtcDateMs(foundInLocal.createdAt) : Date.now();
       const diffMs = Date.now() - createdAtMs;
       const isExpired = diffMs > 30 * 60 * 1000 && foundInLocal.status === "PENDING";
       const remainingSec = Math.max(0, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
@@ -177,8 +191,8 @@ export default function LookupPage() {
         createdAt: foundInLocal.createdAt,
       });
 
-      if (!isExpired && foundInLocal.status === "PENDING") {
-        setCountdown(remainingSec);
+      if (!isExpired && (foundInLocal.status === "PENDING" || !foundInLocal.status)) {
+        setCountdown(remainingSec > 0 ? remainingSec : 1800);
       }
     } else {
       setError("Không tìm thấy phiếu đặt sân với mã hoặc số điện thoại này.");

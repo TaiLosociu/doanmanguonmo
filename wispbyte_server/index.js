@@ -804,9 +804,18 @@ const server = http.createServer(async (req, res) => {
       let isExpired = false;
       let expiresInSeconds = 0;
 
+      const createdMs = parseUtcDateMs(b.created_at);
+      const diffMs = Date.now() - createdMs;
+
+      // Phục hồi PENDING nếu đơn mới tạo trong vòng 30 phút
+      if (diffMs <= 30 * 60 * 1000 && currentStatus === "CANCELLED" && b.cancel_reason && b.cancel_reason.includes("30")) {
+        currentStatus = "PENDING";
+        try {
+          await queryNeon("UPDATE bookings SET status = 'PENDING', cancel_reason = NULL WHERE id = $1", [b.id]);
+        } catch (e) {}
+      }
+
       if (currentStatus === "PENDING") {
-        const createdMs = parseUtcDateMs(b.created_at);
-        const diffMs = Date.now() - createdMs;
         if (diffMs > 30 * 60 * 1000) {
           currentStatus = "CANCELLED";
           isExpired = true;
@@ -814,7 +823,7 @@ const server = http.createServer(async (req, res) => {
             await queryNeon("UPDATE bookings SET status = 'CANCELLED', cancel_reason = 'Quá hạn 30 phút chưa thanh toán cọc' WHERE id = $1", [b.id]);
           } catch (e) {}
         } else {
-          expiresInSeconds = Math.max(0, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
+          expiresInSeconds = Math.max(1, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
         }
       }
 

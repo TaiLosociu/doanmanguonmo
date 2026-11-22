@@ -311,8 +311,14 @@
       // Check status & 30-min expiration
       const createdAtMs = booking.createdAt ? parseUtcDateMs(booking.createdAt) : Date.now();
       const diffMs = Date.now() - createdAtMs;
+
+      // Phục hồi PENDING nếu đơn mới tạo trong vòng 30 phút
+      if (diffMs <= 30 * 60 * 1000 && booking.status === "CANCELLED" && (!booking.cancelReason || booking.cancelReason.includes("30") || booking.cancelReason.includes("Tự động"))) {
+        booking.status = "PENDING";
+      }
+
       const isExpired = (diffMs > 30 * 60 * 1000 && booking.status === "PENDING") || booking.status === "CANCELLED";
-      const remainingSec = Math.max(0, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
+      const remainingSec = Math.max(1, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
 
       const qrSection = document.getElementById("qrPaymentSection");
       const expiredBanner = document.getElementById("expiredBanner");

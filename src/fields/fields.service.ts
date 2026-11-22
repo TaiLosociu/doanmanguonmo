@@ -124,7 +124,7 @@ export class FieldsService {
 
   async createBookingForField(
     fieldId: number,
-    dto: { timeSlotId: number; bookingDate: string; customerName: string; customerPhone: string },
+    dto: { timeSlotId: number; bookingDate: string; customerName: string; customerPhone: string; subPitchId?: number; subPitchName?: string; pitchSize?: string },
     user?: AuthenticatedUser,
     ip?: string,
   ) {
@@ -136,6 +136,9 @@ export class FieldsService {
         bookingDate: dto.bookingDate,
         customerName: dto.customerName,
         customerPhone: dto.customerPhone,
+        subPitchId: dto.subPitchId,
+        subPitchName: dto.subPitchName,
+        pitchSize: dto.pitchSize,
       },
       user,
       ip,

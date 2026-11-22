@@ -202,13 +202,16 @@ export class BookingsService {
 
       const bookingCode = makeCode("SAN");
       const customerId = currentUser?.sub ?? null;
+      const finalCustomerName = dto.subPitchName && !dto.customerName.includes(dto.subPitchName)
+        ? `[${dto.subPitchName}] ${dto.customerName.trim()}`
+        : dto.customerName.trim();
 
       // 6. Create Booking with snapshot price
       const booking = await tx.booking.create({
         data: {
           bookingCode,
           customerId,
-          customerName: dto.customerName.trim(),
+          customerName: finalCustomerName,
           customerPhone: dto.customerPhone.trim(),
           fieldId: dto.fieldId,
           timeSlotId: dto.timeSlotId,
@@ -238,7 +241,7 @@ export class BookingsService {
       });
 
       return booking;
-    });
+    }, { maxWait: 15000, timeout: 20000 });
   }
 
   async lookupBooking(dto: BookingLookupDto) {
@@ -262,6 +265,20 @@ export class BookingsService {
 
     const createdAtMs = booking.createdAt ? new Date(booking.createdAt).getTime() : Date.now();
     const diffMs = Date.now() - createdAtMs;
+
+    // Tự động phục hồi PENDING nếu đơn tạo trong 30 phút nhưng bị đánh dấu CANCELLED do lỗi múi giờ hoặc test cũ
+    if (diffMs <= 30 * 60 * 1000 && booking.status === BookingStatus.CANCELLED && booking.cancelReason?.includes("Quá hạn 30 phút")) {
+      await this.prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          status: BookingStatus.PENDING,
+          cancelReason: null,
+        },
+      });
+      booking.status = BookingStatus.PENDING;
+      booking.cancelReason = null;
+    }
+
     const isExpired = diffMs > 30 * 60 * 1000 && booking.status === BookingStatus.PENDING;
     const remainingSec = Math.max(0, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
 
@@ -287,6 +304,13 @@ export class BookingsService {
       isExpired,
       depositAmount,
       qrUrl,
+      bankInfo: {
+        bankName: "MB Bank (Napas 247)",
+        accountNo: "02304200699999",
+        accountName: "LE DUY TAI",
+        amount: depositAmount,
+        transferContent: booking.bookingCode,
+      },
     };
   }
 
@@ -372,7 +396,7 @@ export class BookingsService {
       });
 
       return updated;
-    });
+    }, { maxWait: 15000, timeout: 20000 });
   }
 
   async cancelBooking(
@@ -422,7 +446,7 @@ export class BookingsService {
         },
         include: { field: true, timeSlot: true },
       });
-    });
+    }, { maxWait: 15000, timeout: 20000 });
 
     await this.auditLogs.log({
       userId: currentUser?.sub,

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { FieldStatus, FieldType } from "@prisma/client";
-import { IsEnum, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
+import { Type } from "class-transformer";
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
 
 export class CreateFieldDto {
   @ApiProperty({ example: "Sân 5A" })
@@ -121,5 +122,21 @@ export class CreateFieldBookingDto {
   @IsString()
   @IsNotEmpty({ message: "Số điện thoại không được để trống" })
   customerPhone!: string;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  subPitchId?: number;
+
+  @ApiPropertyOptional({ example: "Sân 5 - Số 1" })
+  @IsOptional()
+  @IsString()
+  subPitchName?: string;
+
+  @ApiPropertyOptional({ example: "SAN_5" })
+  @IsOptional()
+  @IsString()
+  pitchSize?: string;
 }
 
