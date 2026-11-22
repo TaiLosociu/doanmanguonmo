@@ -8,6 +8,29 @@ const http = require("http");
 const https = require("https");
 const crypto = require("crypto");
 const url = require("url");
+const fs = require("fs");
+const path = require("path");
+
+// Tự động nạp file .env nếu có (dành cho môi trường Wispbyte không tự nạp .env)
+try {
+  const envPath = path.join(__dirname, ".env");
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx > 0) {
+        const k = trimmed.slice(0, eqIdx).trim();
+        let v = trimmed.slice(eqIdx + 1).trim();
+        if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+          v = v.slice(1, -1);
+        }
+        if (!process.env[k]) process.env[k] = v;
+      }
+    }
+  }
+} catch (e) {}
 
 const NEON_CONN =
   process.env.DATABASE_URL ||
@@ -1240,13 +1263,26 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-// Port binding: Wispbyte passes SERVER_PORT (11199) or PORT, locally defaults to 3000
-const PORT = Number(process.env.SERVER_PORT || process.env.PORT || 3000);
+// Port binding: Wispbyte passes SERVER_PORT (11199 hoặc 12677) hoặc PORT, mặc định 11199
+const PORT = Number(process.env.SERVER_PORT || process.env.PORT || 11199);
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`[Wispbyte Warning] Cổng ${PORT} đang bận, thử lắng nghe cổng dự phòng...`);
+    const fallbackPort = PORT === 11199 ? 12677 : 11199;
+    server.listen(fallbackPort, "0.0.0.0", () => {
+      console.log(`[Wispbyte] Đã chuyển sang cổng dự phòng http://0.0.0.0:${fallbackPort}`);
+    });
+  } else {
+    console.error("[Wispbyte Server Error]:", err);
+  }
+});
+
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`=======================================================`);
   console.log(`[Wispbyte] Server listening on http://0.0.0.0:${PORT}`);
   console.log(`[Wispbyte] Database connected to Neon PostgreSQL successfully!`);
-  console.log(`[Wispbyte] Ready to serve 21 Buôn Ma Thuột pitches!`);
+  console.log(`[Wispbyte] Ready to serve 20 Buôn Ma Thuột pitches!`);
   console.log(`=======================================================`);
 
   // Log định kỳ mỗi 45 giây để màn hình Console Wispbyte luôn nhảy trạng thái sống sinh động

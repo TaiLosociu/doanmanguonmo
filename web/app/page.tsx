@@ -927,10 +927,32 @@ export default function Home() {
       : API;
     setApiUrlInput(currentApi);
 
-    // Ping API connection
+    // Ping API connection (thử backend trước, nếu tắt thì thử thẳng Neon Cloud)
     fetch(`${currentApi}/fields`)
-      .then((res) => setIsApiConnected(res.ok))
-      .catch(() => setIsApiConnected(false));
+      .then((res) => {
+        if (res.ok) {
+          setIsApiConnected(true);
+        } else {
+          fetch("https://ep-silent-heart-b5tbjmh7.c-7.us-east-2.aws.neon.tech/sql", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Neon-Connection-String": "postgresql://neondb_owner:npg_Y76lDyzLaGkZ@ep-silent-heart-b5tbjmh7-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require"
+            },
+            body: JSON.stringify({ query: "SELECT 1" })
+          }).then((r) => setIsApiConnected(r.ok)).catch(() => setIsApiConnected(false));
+        }
+      })
+      .catch(() => {
+        fetch("https://ep-silent-heart-b5tbjmh7.c-7.us-east-2.aws.neon.tech/sql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Neon-Connection-String": "postgresql://neondb_owner:npg_Y76lDyzLaGkZ@ep-silent-heart-b5tbjmh7-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require"
+          },
+          body: JSON.stringify({ query: "SELECT 1" })
+        }).then((r) => setIsApiConnected(r.ok)).catch(() => setIsApiConnected(false));
+      });
   }, []);
 
   async function testAndSaveApi(customUrl?: string) {

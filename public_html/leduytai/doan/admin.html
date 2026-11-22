@@ -926,6 +926,19 @@
       const payload = { name, fieldType, ward, phone, address, description, imageUrl, status };
       const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
 
+      // Direct Neon Cloud sync (chạy song song để cập nhật ngay vào Neon)
+      try {
+        const NEON_SQL_ENDPOINT = "https://ep-silent-heart-b5tbjmh7.c-7.us-east-2.aws.neon.tech/sql";
+        const NEON_DB_CONNECTION = "postgresql://neondb_owner:npg_Y76lDyzLaGkZ@ep-silent-heart-b5tbjmh7-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require";
+        if (currentEditingFieldId) {
+          fetch(NEON_SQL_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Neon-Connection-String": NEON_DB_CONNECTION },
+            body: JSON.stringify({ query: `UPDATE fields SET name = '${name.replace(/'/g, "''")}', address = '${address.replace(/'/g, "''")}', image_url = '${imageUrl.replace(/'/g, "''")}', description = '${description.replace(/'/g, "''")}', phone = '${phone.replace(/'/g, "''")}', ward = '${ward.replace(/'/g, "''")}', status = '${status}' WHERE id = ${currentEditingFieldId}` })
+          }).catch(() => {});
+        }
+      } catch (e) {}
+
       try {
         if (currentEditingFieldId) {
           // Update
@@ -969,6 +982,17 @@
       fetch(apiUrl + "/fields/" + id, {
         method: "DELETE"
       }).catch(() => {});
+
+      // Direct Neon Cloud delete (xóa trực tiếp khỏi Neon PostgreSQL)
+      try {
+        const NEON_SQL_ENDPOINT = "https://ep-silent-heart-b5tbjmh7.c-7.us-east-2.aws.neon.tech/sql";
+        const NEON_DB_CONNECTION = "postgresql://neondb_owner:npg_Y76lDyzLaGkZ@ep-silent-heart-b5tbjmh7-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require";
+        fetch(NEON_SQL_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Neon-Connection-String": NEON_DB_CONNECTION },
+          body: JSON.stringify({ query: `DELETE FROM price_rules WHERE field_id = ${id}; DELETE FROM bookings WHERE field_id = ${id}; DELETE FROM fields WHERE id = ${id};` })
+        }).catch(() => {});
+      } catch (e) {}
 
       if (liveAdminFields) {
         liveAdminFields = liveAdminFields.filter(x => x.id !== id);

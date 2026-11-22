@@ -261,8 +261,39 @@
           return;
         }
       } catch (err) {
-        // Fallback to local
+        // Fallback
       }
+
+      // Fallback: Tìm trực tiếp trong cơ sở dữ liệu Neon PostgreSQL Cloud
+      try {
+        const NEON_SQL_ENDPOINT = "https://ep-silent-heart-b5tbjmh7.c-7.us-east-2.aws.neon.tech/sql";
+        const NEON_DB_CONNECTION = "postgresql://neondb_owner:npg_Y76lDyzLaGkZ@ep-silent-heart-b5tbjmh7-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require";
+        let cond = [];
+        if (code) cond.push(`b.booking_code = '${code.replace(/'/g, "''")}'`);
+        if (phone) cond.push(`b.customer_phone = '${phone.replace(/'/g, "''")}'`);
+        if (cond.length > 0) {
+          const neonRes = await fetch(NEON_SQL_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Neon-Connection-String": NEON_DB_CONNECTION },
+            body: JSON.stringify({ query: `SELECT b.*, f.name as "fieldName" FROM bookings b LEFT JOIN fields f ON b.field_id = f.id WHERE ${cond.join(" OR ")} ORDER BY b.id DESC LIMIT 1` })
+          });
+          const neonJson = await neonRes.json();
+          if (neonJson.rows && neonJson.rows.length > 0) {
+            const row = neonJson.rows[0];
+            displayTicket({
+              bookingCode: row.booking_code,
+              fieldName: row.fieldName || "Sân bóng đá Buôn Ma Thuột",
+              customerName: row.customer_name,
+              customerPhone: row.customer_phone,
+              totalPrice: Number(row.total_price),
+              depositAmount: Number(row.total_price) * 0.3,
+              status: row.status,
+              createdAt: row.created_at
+            });
+            return;
+          }
+        }
+      } catch (neonErr) {}
 
       const bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
       const found = bookings.find(b => 
