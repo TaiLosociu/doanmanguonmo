@@ -140,6 +140,199 @@ function formatIsoUtc(val) {
   return s;
 }
 
+// Phân bổ sân con thực tế chuẩn xác từng cụm sân Buôn Ma Thuột
+function getFieldSubPitches(fieldId) {
+  const id = Number(fieldId) || 0;
+  switch (id) {
+    case 5: // SVĐ Buôn Ma Thuột: DUY NHẤT 1 SÂN 11
+      return [
+        {
+          id: "SAN_11_1",
+          code: "11-1",
+          name: "Sân 11 - SVĐ Buôn Ma Thuột",
+          tag: "Sân 11 SVĐ",
+          category: "SAN_11",
+          categoryName: "Sân lớn 11 người (Chuẩn VFF)",
+          capacity: "11 - 18 người / đội",
+          turf: "Cỏ tự nhiên chuẩn thi đấu quốc gia (CLB Đắk Lắk, 20.000 chỗ)",
+          basePrice: 1000000,
+          highlight: "Sân vận động chính tỉnh Đắk Lắk, mặt cỏ tự nhiên chuẩn quốc gia",
+          desc: "Sân cỏ tự nhiên chuẩn thi đấu, sân nhà CLB Đắk Lắk sức chứa 20.000 chỗ."
+        }
+      ];
+
+    case 6: // Sân bóng đá C1: 2 sân 5, 1 sân 7 ghép (KHÔNG CÓ SÂN 11)
+      return [
+        {
+          id: "SAN_5_1",
+          code: "5-1",
+          name: "Sân con 5 - Số 1",
+          tag: "Sân 5 Số 1",
+          category: "SAN_5",
+          categoryName: "Sân mini 5 người",
+          capacity: "5 - 7 người / đội",
+          turf: "Cỏ nhân tạo ngoài trời (nguồn Tuấn Việt)",
+          basePrice: 250000,
+          highlight: "Quy mô 2 sân 5 người ngoài trời, mặt cỏ bám giày",
+          desc: "Mặt cỏ êm chân, vạch kẻ thi đấu rõ nét ngoài trời."
+        },
+        {
+          id: "SAN_5_2",
+          code: "5-2",
+          name: "Sân con 5 - Số 2",
+          tag: "Sân 5 Số 2",
+          category: "SAN_5",
+          categoryName: "Sân mini 5 người",
+          capacity: "5 - 7 người / đội",
+          turf: "Cỏ nhân tạo ngoài trời (nguồn Tuấn Việt)",
+          basePrice: 250000,
+          highlight: "Dàn đèn LED chiếu sáng ban đêm",
+          desc: "Dàn đèn LED 400W siêu sáng không chói mắt."
+        },
+        {
+          id: "SAN_7_1",
+          code: "7-1",
+          name: "Sân con 7 - Ghép giải D-League",
+          tag: "Sân 7 Ghép",
+          category: "SAN_7",
+          categoryName: "Sân bán chuyên 7 người",
+          capacity: "7 - 9 người / đội",
+          turf: "Ghép 2 sân 5 đá giải sân 7",
+          basePrice: 400000,
+          highlight: "Từng tổ chức Giải sân 7 Đắk Lắk D-League 2025 (Báo Tuổi Trẻ & Văn Hóa)",
+          desc: "Ghép 2 sân 5 thành sân 7 thi đấu giải phong trào."
+        }
+      ];
+
+    case 7: // Sân bóng đá Manchester: 3 sân 5 (KHÔNG CÓ SÂN 7, KHÔNG CÓ SÂN 11)
+      return [
+        {
+          id: "SAN_5_1",
+          code: "5-1",
+          name: "Sân con 5 - Số 1 (36m × 19m)",
+          tag: "Sân 5 Số 1",
+          category: "SAN_5",
+          categoryName: "Sân mini 5 người",
+          capacity: "5 - 7 người / đội",
+          turf: "Cỏ nhân tạo tiêu chuẩn 36m × 19m (nguồn Tuấn Việt)",
+          basePrice: 250000,
+          highlight: "Kích thước 36m × 19m chuẩn thi đấu mini",
+          desc: "Mặt sân 36m × 19m sạch đẹp, hệ thống thoát nước tốt."
+        },
+        {
+          id: "SAN_5_2",
+          code: "5-2",
+          name: "Sân con 5 - Số 2 (36m × 19m)",
+          tag: "Sân 5 Số 2",
+          category: "SAN_5",
+          categoryName: "Sân mini 5 người",
+          capacity: "5 - 7 người / đội",
+          turf: "Cỏ nhân tạo tiêu chuẩn 36m × 19m (nguồn Tuấn Việt)",
+          basePrice: 250000,
+          highlight: "Kích thước 36m × 19m, bóng êm chân",
+          desc: "Mặt sân 36m × 19m chất lượng cỏ tốt."
+        },
+        {
+          id: "SAN_5_3",
+          code: "5-3",
+          name: "Sân con 5 - Số 3 Rộng (41m × 36m)",
+          tag: "Sân 5 Rộng",
+          category: "SAN_5",
+          categoryName: "Sân mini 5 người",
+          capacity: "5 - 7 người / đội",
+          turf: "Cỏ nhân tạo kích thước đại 41m × 36m (nguồn Tuấn Việt)",
+          basePrice: 280000,
+          highlight: "Sân rộng ngoại cỡ 41m × 36m cực thoáng",
+          desc: "Kích thước lớn 41m × 36m, không gian rộng rãi."
+        }
+      ];
+
+    case 10: // Sân Bóng Đá Ngọc Anh: 3 sân 5 (KHÔNG CÓ SÂN 7, KHÔNG CÓ SÂN 11)
+      return [
+        {
+          id: "SAN_5_1",
+          code: "5-1",
+          name: "Sân con 5 - Số 1 (36m × 19m)",
+          tag: "Sân 5 Số 1",
+          category: "SAN_5",
+          categoryName: "Sân mini 5 người",
+          capacity: "5 - 7 người / đội",
+          turf: "Cỏ nhân tạo 50mm (nguồn Tuấn Việt & Google Maps)",
+          basePrice: 250000,
+          highlight: "Review Google Maps xác nhận cụm 3 sân 5 người",
+          desc: "Mặt sân 36m × 19m cỏ bám chân tốt."
+        },
+        {
+          id: "SAN_5_2",
+          code: "5-2",
+          name: "Sân con 5 - Số 2 (36m × 19m)",
+          tag: "Sân 5 Số 2",
+          category: "SAN_5",
+          categoryName: "Sân mini 5 người",
+          capacity: "5 - 7 người / đội",
+          turf: "Cỏ nhân tạo 50mm (nguồn Tuấn Việt & Google Maps)",
+          basePrice: 250000,
+          highlight: "Hệ thống đèn LED ban đêm",
+          desc: "Mặt sân 36m × 19m thi đấu buổi tối sáng rõ."
+        },
+        {
+          id: "SAN_5_3",
+          code: "5-3",
+          name: "Sân con 5 - Số 3 Rộng (41m × 36m)",
+          tag: "Sân 5 Rộng",
+          category: "SAN_5",
+          categoryName: "Sân mini 5 người",
+          capacity: "5 - 7 người / đội",
+          turf: "Cỏ nhân tạo rộng 41m × 36m (nguồn Tuấn Việt)",
+          basePrice: 280000,
+          highlight: "Ô sân rộng 41m × 36m thông thoáng",
+          desc: "Sân lớn 41m × 36m thích hợp giao lưu thi đấu đông người."
+        }
+      ];
+
+    case 11: // Sân vận động ĐTL: 6 sân 5, 2 sân 7, 1 sân 11 (ĐẦY ĐỦ CẢ 3 LOẠI SÂN)
+      return [
+        { id: "SAN_5_1", code: "5-1", name: "Sân con 5 - Số 1 (40m × 18m)", tag: "Sân 5 Số 1", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 40m × 18m", basePrice: 250000, desc: "Kích thước 40m × 18m." },
+        { id: "SAN_5_2", code: "5-2", name: "Sân con 5 - Số 2 (40m × 18m)", tag: "Sân 5 Số 2", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 40m × 18m", basePrice: 250000, desc: "Kích thước 40m × 18m." },
+        { id: "SAN_5_3", code: "5-3", name: "Sân con 5 - Số 3 (40m × 18m)", tag: "Sân 5 Số 3", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 40m × 18m", basePrice: 250000, desc: "Kích thước 40m × 18m." },
+        { id: "SAN_5_4", code: "5-4", name: "Sân con 5 - Số 4 (40m × 18m)", tag: "Sân 5 Số 4", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 40m × 18m", basePrice: 250000, desc: "Kích thước 40m × 18m." },
+        { id: "SAN_5_5", code: "5-5", name: "Sân con 5 - Số 5 (40m × 18m)", tag: "Sân 5 Số 5", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 40m × 18m", basePrice: 250000, desc: "Kích thước 40m × 18m." },
+        { id: "SAN_5_6", code: "5-6", name: "Sân con 5 - Số 6 (40m × 18m)", tag: "Sân 5 Số 6", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 40m × 18m", basePrice: 250000, desc: "Kích thước 40m × 18m." },
+        { id: "SAN_7_1", code: "7-1", name: "Sân con 7 - Số 1 (58m × 40m)", tag: "Sân 7 Số 1", category: "SAN_7", categoryName: "Sân bán chuyên 7 người", capacity: "7 - 9 người / đội", turf: "Cỏ FIFA Pro 58m × 40m", basePrice: 400000, desc: "Sân 7 người kích thước lớn 58m × 40m." },
+        { id: "SAN_7_2", code: "7-2", name: "Sân con 7 - Số 2 (58m × 40m)", tag: "Sân 7 Số 2", category: "SAN_7", categoryName: "Sân bán chuyên 7 người", capacity: "7 - 9 người / đội", turf: "Cỏ FIFA Pro 58m × 40m", basePrice: 400000, desc: "Sân 7 người 58m × 40m cực kỳ rộng rãi." },
+        { id: "SAN_11_1", code: "11-1", name: "Sân 11 - Toàn sân ĐTL (83m × 58m)", tag: "Sân 11 ĐTL", category: "SAN_11", categoryName: "Sân lớn 11 người (Chuẩn VFF)", capacity: "11 - 18 người / đội", turf: "Mặt sân 83m × 58m chuẩn thi đấu", basePrice: 850000, desc: "Kích thước xác thực 83m × 58m." }
+      ];
+
+    case 12: // Sân bóng đá Tân Thái Long: 2 sân có mái che (KHÔNG CÓ SÂN 7, KHÔNG CÓ SÂN 11)
+      return [
+        { id: "SAN_5_1", code: "5-1", name: "Sân con 5 - Số 1 (Có mái che)", tag: "Sân 5 Mái che 1", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo trong nhà có mái che (DakLak360)", basePrice: 260000, desc: "Mở 06:00 - 23:00, không lo mưa nắng." },
+        { id: "SAN_5_2", code: "5-2", name: "Sân con 5 - Số 2 (Có mái che)", tag: "Sân 5 Mái che 2", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo trong nhà có mái che (DakLak360)", basePrice: 260000, desc: "Dàn đèn LED cao cấp trong nhà mái che." }
+      ];
+
+    case 17: // SVĐ Trường ĐH Tây Nguyên: DUY NHẤT 1 SÂN 11 (KHÔNG CÓ SÂN 5)
+      return [
+        { id: "SAN_11_1", code: "11-1", name: "Sân 11 - SVĐ ĐH Tây Nguyên", tag: "Sân 11 ĐHTN", category: "SAN_11", categoryName: "Sân lớn 11 người (Chuẩn VFF)", capacity: "11 - 18 người / đội", turf: "Sân SVĐ chính ĐHTN (VCK Giải sân 7 VĐQG)", basePrice: 850000, desc: "Sân vận động chính trong khuôn viên ĐH Tây Nguyên." }
+      ];
+
+    case 19: // Sân bóng đá Ban Mê Sport: 3 sân 5, 1 sân 7 (KHÔNG CÓ SÂN 11)
+      return [
+        { id: "SAN_5_1", code: "5-1", name: "Sân con 5 - Số 1 (38m × 18m)", tag: "Sân 5 Số 1", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 38m × 18m (Tuấn Việt)", basePrice: 250000, desc: "Kích thước xác thực 38m × 18m." },
+        { id: "SAN_5_2", code: "5-2", name: "Sân con 5 - Số 2 (38m × 18m)", tag: "Sân 5 Số 2", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 38m × 18m (Tuấn Việt)", basePrice: 250000, desc: "Kích thước xác thực 38m × 18m." },
+        { id: "SAN_5_3", code: "5-3", name: "Sân con 5 - Số 3 (38m × 18m)", tag: "Sân 5 Số 3", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 38m × 18m (Tuấn Việt)", basePrice: 250000, desc: "Kích thước xác thực 38m × 18m." },
+        { id: "SAN_7_1", code: "7-1", name: "Sân con 7 - Tiêu chuẩn (53m × 38m)", tag: "Sân 7 Chuẩn", category: "SAN_7", categoryName: "Sân bán chuyên 7 người", capacity: "7 - 9 người / đội", turf: "Cỏ FIFA Pro 53m × 38m (Tuấn Việt & DakLak360)", basePrice: 400000, desc: "Sân 7 người kích thước thực tế 53m × 38m." }
+      ];
+
+    case 22: // Sân An Dương Vương: Đã đóng cửa vĩnh viễn
+      return [];
+
+    default: // 9 sân phong trào còn lại: CHỈ CÓ SÂN 5 MINI (KHÔNG CÓ SÂN 7, KHÔNG CÓ SÂN 11)
+      return [
+        { id: "SAN_5_1", code: "5-1", name: "Sân con 5 - Số 1", tag: "Sân 5 Số 1", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 50mm chống trượt", basePrice: 250000, desc: "Mặt sân cỏ nhân tạo mini 5 người." },
+        { id: "SAN_5_2", code: "5-2", name: "Sân con 5 - Số 2", tag: "Sân 5 Số 2", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 50mm", basePrice: 250000, desc: "Dàn đèn LED 400W siêu sáng." }
+      ];
+  }
+}
+
 // Auto-cancel bookings pending deposit after 30 minutes
 async function autoCancelExpiredBookings() {
   try {
@@ -436,13 +629,7 @@ const server = http.createServer(async (req, res) => {
       const dateStr = query.date || new Date().toISOString().slice(0, 10);
       const reqSub = String(query.subPitch || query.subField || query.pitchSize || "SAN_5_1").toUpperCase();
 
-      const SUB_PITCHES_LIST = [
-        { id: "SAN_5_1", code: "5-1", name: "Sân con 5 - Số 1", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 50mm chống trượt", basePrice: 250000, highlight: "Mặt cỏ mới thay, êm ái, bám giày" },
-        { id: "SAN_5_2", code: "5-2", name: "Sân con 5 - Số 2", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo FIFA Standard", basePrice: 250000, highlight: "Dàn đèn LED 400W chống lóa khi đá đêm" },
-        { id: "SAN_7_1", code: "7-1", name: "Sân con 7 - Số 1", category: "SAN_7", categoryName: "Sân bán chuyên 7 người", capacity: "7 - 9 người / đội", turf: "Cỏ FIFA Pro 2 sao & Khán đài", basePrice: 400000, highlight: "Kích thước 30x50m chuẩn giải phong trào" },
-        { id: "SAN_7_2", code: "7-2", name: "Sân con 7 - Số 2", category: "SAN_7", categoryName: "Sân bán chuyên 7 người", capacity: "7 - 9 người / đội", turf: "Cỏ nhân tạo đệm cao su giảm chấn", basePrice: 400000, highlight: "Rộng rãi, thoáng mát, khu khởi động riêng" },
-        { id: "SAN_11_1", code: "11-1", name: "Sân con 11 - Tiêu chuẩn", category: "SAN_11", categoryName: "Sân lớn 11 người (Chuẩn VFF)", capacity: "11 - 14 người / đội", turf: "Sân 60m x 100m cỏ chuẩn quốc gia", basePrice: 800000, highlight: "Sân thi đấu giải lớn, có cabin trọng tài & khán đài" },
-      ];
+      const SUB_PITCHES_LIST = getFieldSubPitches(fieldId);
 
       const VENUE_OWNERS = {
         5: { ownerName: "Anh Tuấn (Chủ nhiệm SVĐ)", phone: "0905 123 456" },
@@ -468,9 +655,11 @@ const server = http.createServer(async (req, res) => {
         25: { ownerName: "Anh Định (Chủ cụm sân)", phone: "0934 890 123" },
       };
 
-      const selectedSubPitch = SUB_PITCHES_LIST.find((sp) => sp.id === reqSub || sp.code === reqSub)
-        || SUB_PITCHES_LIST.find((sp) => sp.category === reqSub)
-        || SUB_PITCHES_LIST[0];
+      const selectedSubPitch = SUB_PITCHES_LIST.length > 0 
+        ? (SUB_PITCHES_LIST.find((sp) => sp.id === reqSub || sp.code === reqSub)
+          || SUB_PITCHES_LIST.find((sp) => sp.category === reqSub)
+          || SUB_PITCHES_LIST[0])
+        : { id: "SAN_NONE", name: "Sân đang bảo trì", categoryName: "Bảo trì", category: "MAINTENANCE" };
 
       const isWeekend = [0, 6].includes(new Date(`${dateStr}T12:00:00+07:00`).getDay());
       const dayType = isWeekend ? "WEEKEND" : "WEEKDAY";
@@ -552,13 +741,7 @@ const server = http.createServer(async (req, res) => {
       if (!fieldRows) {
         return sendJson(res, 404, { message: "Không tìm thấy sân bóng" });
       }
-      const SUB_PITCHES_LIST = [
-        { id: "SAN_5_1", code: "5-1", name: "Sân con 5 - Số 1", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 50mm chống trượt", basePrice: 250000, highlight: "Mặt cỏ mới thay, êm ái, bám giày" },
-        { id: "SAN_5_2", code: "5-2", name: "Sân con 5 - Số 2", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo FIFA Standard", basePrice: 250000, highlight: "Dàn đèn LED 400W chống lóa khi đá đêm" },
-        { id: "SAN_7_1", code: "7-1", name: "Sân con 7 - Số 1", category: "SAN_7", categoryName: "Sân bán chuyên 7 người", capacity: "7 - 9 người / đội", turf: "Cỏ FIFA Pro 2 sao & Khán đài", basePrice: 400000, highlight: "Kích thước 30x50m chuẩn giải phong trào" },
-        { id: "SAN_7_2", code: "7-2", name: "Sân con 7 - Số 2", category: "SAN_7", categoryName: "Sân bán chuyên 7 người", capacity: "7 - 9 người / đội", turf: "Cỏ nhân tạo đệm cao su giảm chấn", basePrice: 400000, highlight: "Rộng rãi, thoáng mát, khu khởi động riêng" },
-        { id: "SAN_11_1", code: "11-1", name: "Sân con 11 - Tiêu chuẩn", category: "SAN_11", categoryName: "Sân lớn 11 người (Chuẩn VFF)", capacity: "11 - 14 người / đội", turf: "Sân 60m x 100m cỏ chuẩn quốc gia", basePrice: 800000, highlight: "Sân thi đấu giải lớn, có cabin trọng tài & khán đài" },
-      ];
+      const SUB_PITCHES_LIST = getFieldSubPitches(fieldId);
       return sendJson(res, 200, {
         fieldId,
         fieldName: fieldRows.name,
@@ -639,13 +822,7 @@ const server = http.createServer(async (req, res) => {
       const bookingDate = body.bookingDate || new Date().toISOString().slice(0, 10);
       const reqSub = String(body.subPitchId || body.subField || body.pitchSize || "SAN_5_1").toUpperCase();
 
-      const SUB_PITCHES_LIST = [
-        { id: "SAN_5_1", code: "5-1", name: "Sân con 5 - Số 1", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo 50mm chống trượt", basePrice: 250000, highlight: "Mặt cỏ mới thay, êm ái, bám giày" },
-        { id: "SAN_5_2", code: "5-2", name: "Sân con 5 - Số 2", category: "SAN_5", categoryName: "Sân mini 5 người", capacity: "5 - 7 người / đội", turf: "Cỏ nhân tạo FIFA Standard", basePrice: 250000, highlight: "Dàn đèn LED 400W chống lóa khi đá đêm" },
-        { id: "SAN_7_1", code: "7-1", name: "Sân con 7 - Số 1", category: "SAN_7", categoryName: "Sân bán chuyên 7 người", capacity: "7 - 9 người / đội", turf: "Cỏ FIFA Pro 2 sao & Khán đài", basePrice: 400000, highlight: "Kích thước 30x50m chuẩn giải phong trào" },
-        { id: "SAN_7_2", code: "7-2", name: "Sân con 7 - Số 2", category: "SAN_7", categoryName: "Sân bán chuyên 7 người", capacity: "7 - 9 người / đội", turf: "Cỏ nhân tạo đệm cao su giảm chấn", basePrice: 400000, highlight: "Rộng rãi, thoáng mát, khu khởi động riêng" },
-        { id: "SAN_11_1", code: "11-1", name: "Sân con 11 - Tiêu chuẩn", category: "SAN_11", categoryName: "Sân lớn 11 người (Chuẩn VFF)", capacity: "11 - 14 người / đội", turf: "Sân 60m x 100m cỏ chuẩn quốc gia", basePrice: 800000, highlight: "Sân thi đấu giải lớn, có cabin trọng tài & khán đài" },
-      ];
+      const SUB_PITCHES_LIST = getFieldSubPitches(fieldId);
 
       const VENUE_OWNERS = {
         5: { ownerName: "Anh Tuấn (Chủ nhiệm SVĐ)", phone: "0905 123 456" },
@@ -671,9 +848,11 @@ const server = http.createServer(async (req, res) => {
         25: { ownerName: "Anh Định (Chủ cụm sân)", phone: "0934 890 123" },
       };
 
-      const selectedSubPitch = SUB_PITCHES_LIST.find((sp) => sp.id === reqSub || sp.code === reqSub)
-        || SUB_PITCHES_LIST.find((sp) => sp.category === reqSub)
-        || SUB_PITCHES_LIST[0];
+      const selectedSubPitch = SUB_PITCHES_LIST.length > 0 
+        ? (SUB_PITCHES_LIST.find((sp) => sp.id === reqSub || sp.code === reqSub)
+          || SUB_PITCHES_LIST.find((sp) => sp.category === reqSub)
+          || SUB_PITCHES_LIST[0])
+        : { id: "SAN_NONE", name: "Sân đang bảo trì", categoryName: "Bảo trì", category: "MAINTENANCE" };
 
       const subPitchTag = `[${selectedSubPitch.name}]`;
       const rawCustomerName = String(body.customerName || "Khách hàng").trim();
