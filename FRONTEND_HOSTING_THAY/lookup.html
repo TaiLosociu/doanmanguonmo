@@ -28,7 +28,7 @@
         <a href="./index.html#bang-gia">💰 Bảng giá</a>
         <a href="./lookup.html" style="color: var(--primary); font-weight: 800;">🔍 Tra cứu vé</a>
         <a href="./cv.html" style="color: #16a34a; font-weight: 700;">👨‍💻 CV Lê Duy Tài</a>
-        <a class="btn-nav-admin" href="./admin.html">⚙️ Cổng Quản trị</a>
+        <div id="adminNavLookupArea" style="display: inline-block;"></div>
       </nav>
     </div>
   </header>
@@ -193,6 +193,12 @@
     let countdownTimerInterval = null;
 
     document.addEventListener("DOMContentLoaded", () => {
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      const admArea = document.getElementById("adminNavLookupArea");
+      if (admArea && savedUser && (savedUser.role === "ADMIN" || savedUser.role === "STAFF")) {
+        admArea.innerHTML = '<a class="btn-nav-admin" href="./admin.html">⚙️ Cổng Quản trị</a>';
+      }
+
       renderRecentChips();
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code") || params.get("bookingCode");

@@ -19,7 +19,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Sân vận động trung tâm Buôn Ma Thuột, mặt sân chất lượng cao, dàn đèn chuẩn thi đấu giải.",
-    imageUrl: "https://images.unsplash.com/photo-1529900245534-47fbf02ef190?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 11 người / đội",
     turf: "Cỏ tự nhiên & nhân tạo Pro",
     size: "60m x 100m"
@@ -33,7 +33,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân cỏ nhân tạo 5 người, không gian thoáng đãng, phục vụ nước uống và trang phục.",
-    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo 50mm",
     size: "20m x 40m"
@@ -47,7 +47,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng mini phong cách hiện đại, dàn đèn chiếu sáng tốt, khu để xe rộng rãi.",
-    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo cao cấp",
     size: "20m x 40m"
@@ -61,7 +61,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Cụm sân cỏ mini chất lượng cao, mặt cỏ êm, tổ chức giải đấu phong trào thường xuyên.",
-    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ FIFA giảm chấn",
     size: "20m x 40m"
@@ -75,7 +75,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân mini thoáng mát, nằm ngay trung tâm Tân Lập, có căn tin phục vụ giải khát.",
-    imageUrl: "https://images.unsplash.com/photo-1529900245534-47fbf02ef190?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1556056504-5c7696c4c28d?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo Monofilament",
     size: "20m x 40m"
@@ -89,7 +89,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng nhân tạo chất lượng tốt, giá cả học sinh - sinh viên, đặt sân dễ dàng.",
-    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo êm ái",
     size: "20m x 40m"
@@ -103,7 +103,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Mặt cỏ mới bảo dưỡng, hệ thống lưới chắn an toàn, bãi giữ xe máy và ô tô tiện lợi.",
-    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1533107862482-0e6974b06ec4?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo Pro",
     size: "20m x 40m"
@@ -117,7 +117,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Tổ hợp sân 7 và sân 5 hiện đại hàng đầu khu Y Moan, có khán đài mini cổ vũ.",
-    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1589487391730-58f20eb2c308?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 9 người / đội",
     turf: "Cỏ nhân tạo chuẩn thi đấu",
     size: "30m x 50m"
@@ -131,7 +131,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng mini cỏ nhân tạo chất lượng cao, thoát nước tốt, hoạt động từ 6h đến 22h.",
-    imageUrl: "https://images.unsplash.com/photo-1529900245534-47fbf02ef190?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1563299796-17596ed6b017?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo 50mm",
     size: "20m x 40m"
@@ -145,7 +145,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân mini sinh viên Ea Tam, không khí thể thao sôi động, giá ưu đãi cho học sinh sinh viên.",
-    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo bền đẹp",
     size: "20m x 40m"
@@ -159,7 +159,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Sân 7 người rộng rãi, tổ chức các giải đấu cơ quan và giao lưu câu lạc bộ tại Buôn Ma Thuột.",
-    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 9 người / đội",
     turf: "Mặt cỏ sân 7 chuẩn giải",
     size: "30m x 50m"
@@ -173,7 +173,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Mặt cỏ cao cấp, đèn led sáng rõ, phục vụ nước ngọt đá lạnh miễn phí cho đội đặt sân.",
-    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo cao cấp",
     size: "20m x 40m"
@@ -187,7 +187,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Sân bóng đá trong khuôn viên trường ĐH Tây Nguyên, kích thước chuẩn, không gian rợp bóng mát.",
-    imageUrl: "https://images.unsplash.com/photo-1529900245534-47fbf02ef190?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 11 người / đội",
     turf: "Cỏ tự nhiên & nhân tạo",
     size: "30m x 50m"
@@ -201,7 +201,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân mini khu vực CĐ Sư Phạm Đắk Lắk, môi trường thể thao thân thiện, tiện ích đầy đủ.",
-    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo chất lượng",
     size: "20m x 40m"
@@ -215,7 +215,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Trung tâm thể thao Ban Mê Sport hiện đại bậc nhất phố núi, cỏ nhân tạo cao cấp, phòng thay đồ VIP.",
-    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 9 người / đội",
     turf: "Cỏ nhân tạo Pro VIP",
     size: "30m x 50m"
@@ -229,7 +229,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng mini 5 người mặt cỏ êm, dàn đèn hiện đại, phục vụ đồ uống giải khát.",
-    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo êm",
     size: "20m x 40m"
@@ -243,7 +243,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng cỏ nhân tạo chất lượng tốt, giá thành hợp lý, phong trào bóng đá sôi nổi.",
-    imageUrl: "https://images.unsplash.com/photo-1529900245534-47fbf02ef190?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo phong trào",
     size: "20m x 40m"
@@ -257,7 +257,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân mini gia đình tiện lợi, trang thiết bị mới, hỗ trợ mượn bóng và áo bib tập.",
-    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1524015368236-bbf6f72545b6?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo mới",
     size: "20m x 40m"
@@ -271,7 +271,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Khu liên hợp thể thao Đức Thịnh với cụm sân 7 và sân 5, hệ thống chiếu sáng chuẩn thi đấu đêm.",
-    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1471295253337-3ceaaedca402?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 9 người / đội",
     turf: "Cỏ nhân tạo đạt chuẩn",
     size: "30m x 50m"
@@ -285,7 +285,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng mini khu vực Hòa Khánh, mặt cỏ xanh mượt, phù hợp giao lưu bóng đá địa phương.",
-    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo sân mini",
     size: "20m x 40m"
@@ -299,7 +299,7 @@ const DEFAULT_FIELDS = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân cỏ nhân tạo Hòa Thuận, phục vụ đam mê bóng đá bà con nông thôn mới và thanh thiếu niên.",
-    imageUrl: "https://images.unsplash.com/photo-1529900245534-47fbf02ef190?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo chuẩn sân 5",
     size: "20m x 40m"

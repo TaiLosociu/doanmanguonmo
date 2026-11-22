@@ -639,12 +639,22 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("reportDate").value = getTodayString();
-      const savedAdmin = localStorage.getItem("football_admin_logged");
-      if (savedAdmin) {
-        showDashboard(JSON.parse(savedAdmin));
-      }
-      syncAdminFieldsFromApi();
-      syncAdminUsersFromApi();
+      try {
+        const savedAdmin = localStorage.getItem("football_admin_logged");
+        if (savedAdmin) {
+          const parsed = JSON.parse(savedAdmin);
+          if (parsed && (parsed.role === "ADMIN" || parsed.role === "STAFF")) {
+            showDashboard(parsed);
+            syncAdminFieldsFromApi();
+            syncAdminUsersFromApi();
+            return;
+          }
+        }
+      } catch (e) {}
+
+      localStorage.removeItem("football_admin_logged");
+      document.getElementById("adminLoginScreen").style.display = "flex";
+      document.getElementById("adminShell").style.display = "none";
     });
 
     function quickFillAdmin(role) {

@@ -56,6 +56,7 @@ export default function LookupPage() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [countdown, setCountdown] = useState<number>(0);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Cancel modal
   const [cancelModal, setCancelModal] = useState(false);
@@ -66,6 +67,15 @@ export default function LookupPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    try {
+      const authUser = JSON.parse(
+        window.localStorage.getItem("football_auth_user") ||
+          window.localStorage.getItem("auth-user") ||
+          "null",
+      );
+      setCurrentUser(authUser);
+    } catch {}
+
     try {
       const saved = JSON.parse(window.localStorage.getItem("my-bookings") || "[]");
       if (Array.isArray(saved) && saved.length > 0) {
@@ -122,8 +132,12 @@ export default function LookupPage() {
       const result = await response.json();
       if (response.ok && result) {
         setBooking(result);
-        if (result.status === "PENDING" && typeof result.expiresInSeconds === "number") {
-          setCountdown(result.expiresInSeconds);
+        const createdMs = result.createdAt ? new Date(result.createdAt).getTime() : Date.now();
+        const diffMs = Date.now() - createdMs;
+        const calculatedRemainingSec = Math.max(0, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
+        const remSec = typeof result.expiresInSeconds === "number" ? result.expiresInSeconds : calculatedRemainingSec;
+        if (result.status === "PENDING" && remSec > 0) {
+          setCountdown(remSec);
         } else {
           setCountdown(0);
         }
@@ -239,7 +253,9 @@ export default function LookupPage() {
           <nav className="nav-links">
             <a href="/">← Về trang chủ đặt sân</a>
             <a href="/cv" style={{ color: "#16a34a", fontWeight: "700" }}>👨‍💻 CV Lê Duy Tài</a>
-            <a className="btn-nav-admin" href="/admin">⚙️ Cổng Quản trị ↗</a>
+            {(currentUser?.role === "ADMIN" || currentUser?.role === "STAFF") && (
+              <a className="btn-nav-admin" href="/admin">⚙️ Cổng Quản trị ↗</a>
+            )}
           </nav>
         </div>
       </header>
@@ -304,7 +320,7 @@ export default function LookupPage() {
             </div>
 
             <button type="submit" className="primary-button" style={{ height: "44px" }} disabled={busy}>
-              {busy ? "Đang tra..." : "Tra cứu vé <span>→</span>"}
+              {busy ? "Đang tra..." : "Tra cứu vé →"}
             </button>
           </form>
 

@@ -303,11 +303,22 @@ export default function AdminPage() {
 
   useEffect(() => {
     const savedToken = window.localStorage.getItem("admin-token") ?? "";
-    const savedRole = window.localStorage.getItem("user-role") ?? "ADMIN";
-    const savedName = window.localStorage.getItem("user-name") ?? "Lê Duy Tài (IT24M)";
-    setToken(savedToken);
-    setUserRole(savedRole);
-    setUserName(savedName);
+    const savedRole = window.localStorage.getItem("user-role") ?? "";
+    const savedName = window.localStorage.getItem("user-name") ?? "";
+
+    // Strictly enforce ADMIN or STAFF role: Customers cannot access admin dashboard
+    if (savedToken && (savedRole === "ADMIN" || savedRole === "STAFF")) {
+      setToken(savedToken);
+      setUserRole(savedRole);
+      setUserName(savedName || "Quản trị viên hệ thống");
+    } else {
+      setToken("");
+      setUserRole("");
+      setUserName("");
+      window.localStorage.removeItem("admin-token");
+      window.localStorage.removeItem("user-role");
+      window.localStorage.removeItem("user-name");
+    }
     setDate(todayInVietnam());
   }, []);
 

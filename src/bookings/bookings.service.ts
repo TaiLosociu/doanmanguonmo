@@ -150,7 +150,7 @@ export class BookingsService {
     return this.prisma.$transaction(async (tx) => {
       // 1. Transaction Lock to prevent race conditions
       const lockKey = `booking:${dto.fieldId}:${dto.bookingDate}`;
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
 
       // 2. Validate field status
       const field = await tx.field.findUnique({ where: { id: dto.fieldId } });
@@ -260,7 +260,34 @@ export class BookingsService {
       throw new NotFoundException("Không tìm thấy đơn đặt sân với mã và số điện thoại này");
     }
 
-    return booking;
+    const createdAtMs = booking.createdAt ? new Date(booking.createdAt).getTime() : Date.now();
+    const diffMs = Date.now() - createdAtMs;
+    const isExpired = diffMs > 30 * 60 * 1000 && booking.status === BookingStatus.PENDING;
+    const remainingSec = Math.max(0, Math.floor((30 * 60 * 1000 - diffMs) / 1000));
+
+    if (isExpired) {
+      await this.prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          status: BookingStatus.CANCELLED,
+          cancelReason: "Tự động hủy: Quá hạn 30 phút chưa thanh toán tiền cọc",
+        },
+      });
+      booking.status = BookingStatus.CANCELLED;
+      booking.cancelReason = "Tự động hủy: Quá hạn 30 phút chưa thanh toán tiền cọc";
+    }
+
+    const price = Number(booking.totalPrice);
+    const depositAmount = Math.max(100000, Math.round(price * 0.3));
+    const qrUrl = `https://img.vietqr.io/image/970422-02304200699999-compact2.png?amount=${depositAmount}&addInfo=${encodeURIComponent(booking.bookingCode)}&accountName=LE%20DUY%20TAI`;
+
+    return {
+      ...booking,
+      expiresInSeconds: remainingSec,
+      isExpired,
+      depositAmount,
+      qrUrl,
+    };
   }
 
   async listBookings(query: BookingQueryDto, currentUser?: AuthenticatedUser) {
@@ -304,7 +331,7 @@ export class BookingsService {
 
   async confirmBooking(id: number, currentUser?: AuthenticatedUser, ip?: string) {
     return this.prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(${id})`;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(${id})`;
       const booking = await tx.booking.findUnique({
         where: { id },
         include: { invoice: true },

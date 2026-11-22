@@ -112,7 +112,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Sân vận động trung tâm Buôn Ma Thuột, mặt sân chất lượng cao, dàn đèn chuẩn thi đấu giải.",
-    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 11 người / đội",
     turf: "Cỏ tự nhiên & nhân tạo Pro",
   },
@@ -126,7 +126,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân cỏ nhân tạo 5 người, không gian thoáng đãng, phục vụ nước uống và trang phục.",
-    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo 50mm",
   },
@@ -140,7 +140,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng mini phong cách hiện đại, dàn đèn chiếu sáng tốt, khu để xe rộng rãi.",
-    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo cao cấp",
   },
@@ -154,7 +154,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Cụm sân cỏ mini chất lượng cao, mặt cỏ êm, tổ chức giải đấu phong trào thường xuyên.",
-    imageUrl: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1511886929837-354d827aae26?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ FIFA giảm chấn",
   },
@@ -168,7 +168,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân mini thoáng mát, nằm ngay trung tâm Tân Lập, có căn tin phục vụ giải khát.",
-    imageUrl: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1556056504-5c7696c4c28d?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo Monofilament",
   },
@@ -182,7 +182,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng nhân tạo chất lượng tốt, giá cả học sinh - sinh viên, đặt sân dễ dàng.",
-    imageUrl: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo êm ái",
   },
@@ -196,7 +196,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Mặt cỏ mới bảo dưỡng, hệ thống lưới chắn an toàn, bãi giữ xe máy và ô tô tiện lợi.",
-    imageUrl: "https://images.unsplash.com/photo-1556056504-5c7696c4c28d?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1533107862482-0e6974b06ec4?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo Pro",
   },
@@ -210,7 +210,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Tổ hợp sân 7 và sân 5 hiện đại hàng đầu khu Y Moan, có khán đài mini cổ vũ.",
-    imageUrl: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1589487391730-58f20eb2c308?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 9 người / đội",
     turf: "Cỏ nhân tạo chuẩn thi đấu",
   },
@@ -224,7 +224,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng mini cỏ nhân tạo chất lượng cao, thoát nước tốt, hoạt động từ 6h đến 22h.",
-    imageUrl: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1563299796-17596ed6b017?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo 50mm",
   },
@@ -238,7 +238,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân mini sinh viên Ea Tam, không khí thể thao sôi động, giá ưu đãi cho học sinh sinh viên.",
-    imageUrl: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo bền đẹp",
   },
@@ -252,7 +252,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Sân 7 người rộng rãi, tổ chức các giải đấu cơ quan và giao lưu câu lạc bộ tại Buôn Ma Thuột.",
-    imageUrl: "https://images.unsplash.com/photo-1524015368236-bbf6f72545b6?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 9 người / đội",
     turf: "Mặt cỏ sân 7 chuẩn giải",
   },
@@ -266,7 +266,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Mặt cỏ cao cấp, đèn led sáng rõ, phục vụ nước ngọt đá lạnh miễn phí cho đội đặt sân.",
-    imageUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo cao cấp",
   },
@@ -280,7 +280,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Sân bóng đá trong khuôn viên trường ĐH Tây Nguyên, kích thước chuẩn, không gian rợp bóng mát.",
-    imageUrl: "https://images.unsplash.com/photo-1459865264687-595d652de67e?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 11 người / đội",
     turf: "Cỏ tự nhiên & nhân tạo",
   },
@@ -294,7 +294,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân mini khu vực CĐ Sư Phạm Đắk Lắk, môi trường thể thao thân thiện, tiện ích đầy đủ.",
-    imageUrl: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo chất lượng",
   },
@@ -308,7 +308,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Trung tâm thể thao Ban Mê Sport hiện đại bậc nhất phố núi, cỏ nhân tạo cao cấp, phòng thay đồ VIP.",
-    imageUrl: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 9 người / đội",
     turf: "Cỏ nhân tạo Pro VIP",
   },
@@ -322,7 +322,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng mini 5 người mặt cỏ êm, dàn đèn hiện đại, phục vụ đồ uống giải khát.",
-    imageUrl: "https://images.unsplash.com/photo-1516762689617-e1cffcef479d?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo êm",
   },
@@ -336,7 +336,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng cỏ nhân tạo chất lượng tốt, giá thành hợp lý, phong trào bóng đá sôi nổi.",
-    imageUrl: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo phong trào",
   },
@@ -350,7 +350,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân mini gia đình tiện lợi, trang thiết bị mới, hỗ trợ mượn bóng và áo bib tập.",
-    imageUrl: "https://images.unsplash.com/photo-1589487391730-58f20eb2c308?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1524015368236-bbf6f72545b6?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo mới",
   },
@@ -364,7 +364,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_7",
     status: "ACTIVE",
     description: "Khu liên hợp thể thao Đức Thịnh với cụm sân 7 và sân 5, hệ thống chiếu sáng chuẩn thi đấu đêm.",
-    imageUrl: "https://images.unsplash.com/photo-1563299796-17596ed6b017?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1471295253337-3ceaaedca402?w=900&auto=format&fit=crop&q=80",
     capacity: "7 - 9 người / đội",
     turf: "Cỏ nhân tạo đạt chuẩn",
   },
@@ -378,7 +378,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân bóng mini khu vực Hòa Khánh, mặt cỏ xanh mượt, phù hợp giao lưu bóng đá địa phương.",
-    imageUrl: "https://images.unsplash.com/photo-1570498839593-e565b3d4f6fe?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo sân mini",
   },
@@ -392,7 +392,7 @@ const DEFAULT_FIELDS: FieldInfo[] = [
     fieldType: "SAN_5",
     status: "ACTIVE",
     description: "Sân cỏ nhân tạo Hòa Thuận, phục vụ đam mê bóng đá bà con nông thôn mới và thanh thiếu niên.",
-    imageUrl: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=900&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=900&auto=format&fit=crop&q=80",
     capacity: "5 - 7 người / đội",
     turf: "Cỏ nhân tạo chuẩn sân 5",
   },
@@ -1006,7 +1006,9 @@ export default function Home() {
                 <span>👤</span> Đăng nhập / Đăng ký
               </button>
             )}
-            <a className="btn-nav-admin" href="/admin">⚙️ Cổng Quản trị</a>
+            {(currentUser?.role === "ADMIN" || currentUser?.role === "STAFF") && (
+              <a className="btn-nav-admin" href="/admin">⚙️ Cổng Quản trị</a>
+            )}
           </div>
 
           <button
@@ -1048,7 +1050,9 @@ export default function Home() {
             <a href="#danh-gia" onClick={() => setMobileMenuOpen(false)}>⭐ Đánh giá khách hàng</a>
             <a href="#hoi-dap" onClick={() => setMobileMenuOpen(false)}>❓ Câu hỏi thường gặp</a>
             <a href="/lookup" onClick={() => setMobileMenuOpen(false)}>🔍 Tra cứu vé đặt sân</a>
-            <a href="/admin" style={{ color: "var(--primary)", fontWeight: "700" }} onClick={() => setMobileMenuOpen(false)}>⚙️ Cổng Quản trị / Nhân viên</a>
+            {(currentUser?.role === "ADMIN" || currentUser?.role === "STAFF") && (
+              <a href="/admin" style={{ color: "var(--primary)", fontWeight: "700" }} onClick={() => setMobileMenuOpen(false)}>⚙️ Cổng Quản trị / Nhân viên</a>
+            )}
           </div>
         )}
       </header>
@@ -1520,20 +1524,20 @@ export default function Home() {
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "10px" }}>
                   <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                    <img src={activePitch.imageUrl || "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&auto=format&fit=crop&q=80"} alt={`${activePitch.name} - Toàn cảnh`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={activePitch.imageUrl || "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80"} alt={`${activePitch.name} - Toàn cảnh`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#4ade80", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Toàn cảnh cụm sân</span>
                   </div>
                   <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                    <img src="https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=600&auto=format&fit=crop&q=80" alt="Mặt cỏ nhân tạo 50mm mới" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#38bdf8", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Cỏ nhân tạo 50mm</span>
+                    <img src="https://images.unsplash.com/photo-1511886929837-354d827aae26?w=900&auto=format&fit=crop&q=80" alt="Mặt cỏ nhân tạo Pro chuẩn FIFA" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#38bdf8", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Mặt cỏ chuẩn FIFA</span>
                   </div>
                   <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&auto=format&fit=crop&q=80" alt="Dàn đèn chiếu sáng ban đêm" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src="https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=900&auto=format&fit=crop&q=80" alt="Dàn đèn LED 400W chiếu sáng đêm" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#facc15", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Đèn LED 400W đêm</span>
                   </div>
                   <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                    <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=600&auto=format&fit=crop&q=80" alt="Cầu môn & Khán đài" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#f472b6", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Cầu môn & Khán đài</span>
+                    <img src="https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=900&auto=format&fit=crop&q=80" alt="Khung thành & Lưới thi đấu" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#f472b6", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Khung thành &amp; Lưới</span>
                   </div>
                 </div>
               </div>
