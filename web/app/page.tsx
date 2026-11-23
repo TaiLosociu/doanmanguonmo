@@ -749,6 +749,113 @@ function money(value: number | string): string {
 }
 
 
+
+const MAX_CLUB_MEMBERS = 15;
+
+type ClubMember = {
+  userId: number;
+  name: string;
+  phone: string;
+  role: "CAPTAIN" | "CO_CAPTAIN" | "MEMBER";
+  joinedAt: string;
+};
+
+type FootballClub = {
+  id: number;
+  name: string;
+  shortName: string;
+  avatar: string;
+  banner: string;
+  captainId: number;
+  captainName: string;
+  description: string;
+  ward: string;
+  level: "VUI_VE" | "TRUNG_BINH" | "BAN_CHUYEN";
+  elo: number;
+  rank: string;
+  wins: number; draws: number; losses: number;
+  goalsFor: number; goalsAgainst: number;
+  members: ClubMember[];
+  createdAt: string;
+  isRecruiting: boolean;
+};
+
+function getEloRank(elo: number): string {
+  if (elo >= 1600) return "💎 KIM CƯƠNG";
+  if (elo >= 1400) return "🥇 VÀNG";
+  if (elo >= 1100) return "🥈 BẠC";
+  if (elo >= 800) return "🥉 ĐỒNG";
+  return "🆕 MỚI";
+}
+
+function getEloColor(elo: number): string {
+  if (elo >= 1600) return "#7c3aed";
+  if (elo >= 1400) return "#ca8a04";
+  if (elo >= 1100) return "#64748b";
+  if (elo >= 800) return "#b45309";
+  return "#94a3b8";
+}
+
+const DEFAULT_CLUBS: FootballClub[] = [
+  {
+    id: 1, name: "FC Sân Nhà Ban Mê", shortName: "SNBM", avatar: "⚽",
+    banner: "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-chuan-va-dep_101638538.jpg",
+    captainId: 1, captainName: "Lê Duy Tài",
+    description: "Câu lạc bộ chính thức của hệ thống Sân Nhà FC tại Buôn Ma Thuột.",
+    ward: "Phường Tân Tiến", level: "TRUNG_BINH",
+    elo: 1200, rank: "🥈 BẠC",
+    wins: 12, draws: 3, losses: 5, goalsFor: 48, goalsAgainst: 28,
+    members: [
+      { userId: 1, name: "Lê Duy Tài", phone: "0896890399", role: "CAPTAIN", joinedAt: "2026-10-01" },
+      { userId: 2, name: "Kpa Trần Quang Thịnh", phone: "0905123456", role: "CO_CAPTAIN", joinedAt: "2026-10-01" },
+      { userId: 100, name: "Nguyễn Minh Hoàng", phone: "0914567890", role: "MEMBER", joinedAt: "2026-10-05" },
+      { userId: 101, name: "Trần Đức Long", phone: "0932111222", role: "MEMBER", joinedAt: "2026-10-10" },
+      { userId: 102, name: "Lê Quốc Hùng", phone: "0918999888", role: "MEMBER", joinedAt: "2026-10-12" }
+    ],
+    createdAt: "2026-10-01", isRecruiting: true
+  },
+  {
+    id: 2, name: "FC Ea Tam Warrior", shortName: "EATW", avatar: "🦁",
+    banner: "https://atsport.vn/wp-content/uploads/2021/08/kich-thuoc-san-bong-da-7-nguoi-co-nhan-tao-1-1-960x960.jpg",
+    captainId: 3, captainName: "Nguyễn Anh Tuấn",
+    description: "Đội bóng phong trào mạnh nhất khu vực Ea Tam, chuyên thi đấu sân 7.",
+    ward: "Phường Ea Tam", level: "BAN_CHUYEN",
+    elo: 1450, rank: "🥇 VÀNG",
+    wins: 18, draws: 2, losses: 3, goalsFor: 65, goalsAgainst: 20,
+    members: [
+      { userId: 3, name: "Nguyễn Anh Tuấn", phone: "0935444777", role: "CAPTAIN", joinedAt: "2026-09-15" },
+      { userId: 103, name: "Phạm Văn Đức", phone: "0943567890", role: "CO_CAPTAIN", joinedAt: "2026-09-15" },
+      { userId: 104, name: "Trần Hữu Phúc", phone: "0918234567", role: "MEMBER", joinedAt: "2026-09-20" },
+      { userId: 105, name: "Nguyễn Thanh Tùng", phone: "0932678901", role: "MEMBER", joinedAt: "2026-09-22" },
+      { userId: 106, name: "Lê Minh Quân", phone: "0905789012", role: "MEMBER", joinedAt: "2026-10-01" },
+      { userId: 107, name: "Võ Duy Mạnh", phone: "0914890123", role: "MEMBER", joinedAt: "2026-10-05" }
+    ],
+    createdAt: "2026-09-15", isRecruiting: true
+  },
+  {
+    id: 3, name: "FC Voi Chiến Tây Nguyên", shortName: "VCTN", avatar: "🐘",
+    banner: "https://5.imimg.com/data5/SELLER/Default/2023/8/335821545/AO/WO/DU/19508713/football-artificial-grass-1000x1000.jpg",
+    captainId: 5, captainName: "Trần Quốc Cường",
+    description: "Đội bóng mạnh nhất giải phong trào Đắk Lắk, nhiều lần vô địch giải sân 7.",
+    ward: "Phường Tân Lập", level: "BAN_CHUYEN",
+    elo: 1680, rank: "💎 KIM CƯƠNG",
+    wins: 25, draws: 5, losses: 2, goalsFor: 88, goalsAgainst: 15,
+    members: [
+      { userId: 5, name: "Trần Quốc Cường", phone: "0912345678", role: "CAPTAIN", joinedAt: "2026-08-01" },
+      { userId: 111, name: "Lê Văn Hùng", phone: "0943678901", role: "CO_CAPTAIN", joinedAt: "2026-08-01" },
+      { userId: 112, name: "Phạm Minh Tuấn", phone: "0918789012", role: "MEMBER", joinedAt: "2026-08-05" },
+      { userId: 113, name: "Nguyễn Đình Trọng", phone: "0932890123", role: "MEMBER", joinedAt: "2026-08-10" },
+      { userId: 114, name: "Hồ Anh Quân", phone: "0905901234", role: "MEMBER", joinedAt: "2026-08-15" },
+      { userId: 115, name: "Vũ Tiến Dũng", phone: "0914012345", role: "MEMBER", joinedAt: "2026-08-20" },
+      { userId: 116, name: "Đỗ Hữu Dũng", phone: "0963123456", role: "MEMBER", joinedAt: "2026-09-01" },
+      { userId: 117, name: "Nguyễn Văn Toàn", phone: "0918234567", role: "MEMBER", joinedAt: "2026-09-05" },
+      { userId: 118, name: "Trần Phi Sơn", phone: "0935345678", role: "MEMBER", joinedAt: "2026-09-10" },
+      { userId: 119, name: "Lê Công Vinh", phone: "0906456789", role: "MEMBER", joinedAt: "2026-09-15" }
+    ],
+    createdAt: "2026-08-01", isRecruiting: false
+  }
+];
+
 type MatchmakingPost = {
   id: number;
   teamName: string;
@@ -935,6 +1042,89 @@ export default function Home() {
   const [tourTab, setTourTab] = useState<"BRACKET" | "STANDINGS">("BRACKET");
 
   // Bản đồ & GPS
+
+  // FC Club System
+  const [clubs, setClubs] = useState<FootballClub[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const s = window.localStorage.getItem("football_clubs");
+        if (s) return JSON.parse(s);
+      } catch {}
+    }
+    return DEFAULT_CLUBS;
+  });
+  const [clubFilter, setClubFilter] = useState<string>("ALL");
+  const [createClubOpen, setCreateClubOpen] = useState<boolean>(false);
+  const [clubDetailOpen, setClubDetailOpen] = useState<FootballClub | null>(null);
+  const [ccName, setCcName] = useState<string>("");
+  const [ccShort, setCcShort] = useState<string>("");
+  const [ccCaptain, setCcCaptain] = useState<string>("");
+  const [ccPhone2, setCcPhone2] = useState<string>("");
+  const [ccWard, setCcWard] = useState<string>("Phường Tân Tiến");
+  const [ccLevel2, setCcLevel2] = useState<"VUI_VE" | "TRUNG_BINH" | "BAN_CHUYEN">("TRUNG_BINH");
+  const [ccAvatar, setCcAvatar] = useState<string>("⚽");
+  const [ccDesc2, setCcDesc2] = useState<string>("");
+
+  function handleJoinClub(clubId: number) {
+    if (!currentUser) {
+      alert("⚠️ Bạn cần đăng nhập để gia nhập câu lạc bộ!");
+      return;
+    }
+    const updated = clubs.map((c) => {
+      if (c.id === clubId) {
+        if (c.members.length >= MAX_CLUB_MEMBERS) {
+          alert("⚠️ FC đã đủ " + MAX_CLUB_MEMBERS + " thành viên!");
+          return c;
+        }
+        const existing = clubs.find((cc) => cc.members.some((m) => m.userId === currentUser.id));
+        if (existing) {
+          alert("⚠️ Bạn đã là thành viên của FC " + existing.name + "!");
+          return c;
+        }
+        if (c.members.some((m) => m.userId === currentUser.id)) return c;
+        return {
+          ...c,
+          members: [...c.members, {
+            userId: currentUser.id,
+            name: currentUser.fullName,
+            phone: currentUser.phone || "",
+            role: "MEMBER" as const,
+            joinedAt: new Date().toISOString().split("T")[0]
+          }]
+        };
+      }
+      return c;
+    });
+    setClubs(updated);
+    if (typeof window !== "undefined") window.localStorage.setItem("football_clubs", JSON.stringify(updated));
+    alert("🎉 Gia nhập thành công!");
+  }
+
+  function handleCreateClubSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!currentUser) { alert("⚠️ Cần đăng nhập!"); return; }
+    if (!ccName || !ccPhone2 || ccPhone2.length < 9) { alert("⚠️ Tên CLB & SĐT bắt buộc!"); return; }
+    const existing = clubs.find((c) => c.members.some((m) => m.userId === currentUser.id));
+    if (existing) { alert("⚠️ Bạn đã là thành viên của FC " + existing.name + "!"); return; }
+
+    const newClub: FootballClub = {
+      id: Date.now(), name: ccName, shortName: ccShort || ccName.substring(0, 4).toUpperCase(),
+      avatar: ccAvatar, banner: "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-rong-rai_101640962.jpg",
+      captainId: currentUser.id, captainName: ccCaptain || currentUser.fullName,
+      description: ccDesc2 || "CLB bóng đá phong trào tại BMT.",
+      ward: ccWard, level: ccLevel2, elo: 1000, rank: getEloRank(1000),
+      wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0,
+      members: [{ userId: currentUser.id, name: ccCaptain || currentUser.fullName, phone: ccPhone2, role: "CAPTAIN", joinedAt: new Date().toISOString().split("T")[0] }],
+      createdAt: new Date().toISOString().split("T")[0], isRecruiting: true
+    };
+    const updated = [...clubs, newClub];
+    setClubs(updated);
+    if (typeof window !== "undefined") window.localStorage.setItem("football_clubs", JSON.stringify(updated));
+    setCreateClubOpen(false);
+    setCcName(""); setCcShort(""); setCcDesc2("");
+    alert("🎉 FC " + ccName + " đã được tạo! ELO: 1000 (🥉 ĐỒNG)");
+  }
+
   const [mapFilter, setMapFilter] = useState<"ALL" | "SAN_5" | "SAN_7" | "SAN_11">("ALL");
   const [gpsNotice, setGpsNotice] = useState<string>("");
 
@@ -984,7 +1174,8 @@ export default function Home() {
 
   function handleCreateMatchSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!cmTeam || !cmCaptain || !cmPhone) return;
+    if (!currentUser) { alert("⚠️ Bạn cần đăng nhập để đăng tin tìm đối!"); return; }
+    if (!cmTeam || !cmCaptain || !cmPhone || cmPhone.length < 9) { alert("⚠️ Tên đội, đội trưởng và SĐT (tối thiểu 9 số) là bắt buộc!"); return; }
     const field = fieldsList.find((f) => f.id === cmFieldId) || fieldsList[0];
     const levelLabels = {
       "VUI_VE": "Dưỡng sinh (Vui vẻ)",
@@ -1610,19 +1801,24 @@ export default function Home() {
         <div className="topbar">
           <a className="brand" href="/">
             <div className="brand-icon">⚽</div>
-            <div>SÂN<span>NHÀ</span> <small style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>FOOTBALL CLUB</small></div>
+            <div style={{ color: "#ffffff" }}>SÂN<span style={{ color: "#329dd2" }}>NHÀ</span> <span style={{ background: "#eb2f33", color: "#ffffff", padding: "2px 6px", borderRadius: "4px", fontSize: "9px", fontWeight: 900, marginLeft: "4px", letterSpacing: "0.5px" }}>BMT</span></div>
           </a>
 
           <nav className="nav-links">
-            <a href="#ban-do-san">🗺️ Bản đồ BMT</a>
-            <a href="#cap-keo">🤝 Cáp kèo</a>
-            <a href="#giai-dau">🏆 Giải đấu</a>
-            <a href="#danh-sach-san">🏟️ Danh sách sân</a>
-            <a href="#dat-san">📅 Lịch sân trống</a>
-            <a href="#bang-gia">💰 Bảng giá</a>
-            <a href="#danh-gia">⭐ Đánh giá</a>
-            <a href="#hoi-dap">❓ Hỏi &amp; Đáp</a>
-            <a href="/lookup">🔍 Tra cứu vé</a>
+            <div className="nav-group-pill">
+              <a href="#danh-sach-san" title="Danh mục 20 cụm sân Buôn Ma Thuột">🏟️ Sân bóng</a>
+              <a href="#dat-san" title="Xem lịch các ca trống & đặt ca">📅 Lịch ca trống</a>
+              <a href="#ban-do-san" title="Định vị GPS & bản đồ cụm sân">🗺️ Radar GPS</a>
+            </div>
+            <div className="nav-group-pill">
+              <a href="#cap-keo" title="Sàn cáp kèo giao lưu phủi">🤝 Cáp kèo</a>
+              <a href="#hoi-nhom" title="Câu lạc bộ 15 người & leo rank">🛡️ FC &amp; Leo rank</a>
+              <a href="#giai-dau" title="Cúp Tứ Hùng Ban Mê">🏆 Giải đấu</a>
+            </div>
+            <div className="nav-group-pill">
+              <a href="#bang-gia" title="Bảng giá chuẩn các loại sân">💰 Bảng giá</a>
+              <a href="/lookup" title="Tra cứu mã phiếu đặt sân">🔍 Tra cứu vé</a>
+            </div>
           </nav>
 
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -1907,7 +2103,7 @@ export default function Home() {
       <section className="section-wrap" id="ban-do-san" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
         <div className="section-head-modern" style={{ marginBottom: "20px" }}>
           <div>
-            <span className="section-tag" style={{ background: "#eff6ff", color: "#2563eb", borderColor: "#bfdbfe" }}>🗺️ BẢN ĐỒ SỐ ĐỊA LÝ BUÔN MA THUỘT</span>
+            <span className="module-tag tag-cyan">🗺️ BẢN ĐỒ SỐ &amp; RADAR GPS BUÔN MA THUỘT</span>
             <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Bản đồ vị trí 20 cụm sân &amp; Định vị GPS</h2>
             <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
               Khám phá tọa độ các sân bóng thật tại Đắk Lắk, tự động tính khoảng cách tìm sân gần bạn nhất và chỉ đường Google Maps một chạm.
@@ -2028,7 +2224,7 @@ export default function Home() {
       <section className="section-wrap" id="cap-keo" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
         <div className="section-head-modern" style={{ marginBottom: "20px" }}>
           <div>
-            <span className="section-tag" style={{ background: "#fef2f2", color: "#dc2626", borderColor: "#fecaca" }}>🤝 SÀN GIAO LƯU PHONG TRÀO BAN MÊ</span>
+            <span className="module-tag tag-red">🤝 SÀN CÁP KÈO BÓNG ĐÁ PHỦI BAN MÊ</span>
             <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Cáp kèo thi đấu &amp; Tuyển cầu thủ</h2>
             <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
               Nơi các đội bóng đá phủi BMT giao lưu cọ xát, bắt đối nhanh chóng theo trình độ và thỏa thuận tiền sân.
@@ -2038,8 +2234,8 @@ export default function Home() {
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             <button
               type="button"
-              className="primary-button"
-              onClick={() => setCreateMatchOpen(true)}
+              className="btn-accent-red"
+              onClick={() => { if (!currentUser) { alert("⚠️ Đăng nhập tài khoản để đăng tin tìm đối!"); return; } setCreateMatchOpen(true); }}
               style={{ padding: "10px 18px", fontSize: "13px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "8px" }}
             >
               <span>➕</span> Đăng tin tìm đối / Cáp kèo
@@ -2139,8 +2335,8 @@ export default function Home() {
                           setActiveMatchToAccept(post);
                           setAcceptMatchOpen(true);
                         }}
-                        className="primary-button"
-                        style={{ flex: 1, padding: "9px", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}
+                        className="btn-accent-red"
+                        style={{ flex: 1, padding: "9px", fontSize: "12px", fontWeight: 700, justifyContent: "center", borderRadius: "8px" }}
                       >
                         🤝 Bắt đối ngay
                       </button>
@@ -2162,11 +2358,99 @@ export default function Home() {
         </div>
       </section>
 
+      
+      {/* SECTION: HỆ THỐNG CÂU LẠC BỘ (FC) & HỘI NHÓM - LEO RANK */}
+      <section className="section-wrap" id="hoi-nhom" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
+        <div className="section-head-modern" style={{ marginBottom: "20px" }}>
+          <div>
+            <span className="module-tag tag-dark">🛡️ HỆ THỐNG FC &amp; HỘI NHÓM - LEO RANK ELO</span>
+            <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Tạo FC &amp; Leo Rank ELO</h2>
+            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
+              Tạo câu lạc bộ bóng đá (FC) tối đa 15 thành viên, tham gia giải đấu, tích lũy ELO để leo hạng.
+            </p>
+          </div>
+          <button type="button" className="primary-button" onClick={() => { if (!currentUser) { alert("⚠️ Đăng nhập để tạo FC!"); return; } setCreateClubOpen(true); }} style={{ padding: "10px 18px", fontSize: "13px", fontWeight: "700" }}>
+            ➕ Tạo FC mới
+          </button>
+        </div>
+
+        {/* ELO Ranking Guide */}
+        <div style={{ background: "linear-gradient(135deg, #f5f3ff, #ede9fe, #f0fdf4)", border: "1px solid #c4b5fd", borderRadius: "14px", padding: "14px", marginBottom: "16px" }}>
+          <div style={{ fontSize: "12px", fontWeight: "800", color: "#5b21b6", marginBottom: "8px" }}>📊 Hệ thống Rank ELO:</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", fontSize: "11px" }}>
+            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "#fef3c7", color: "#b45309", fontWeight: 700 }}>🥉 Đồng (800-1099)</span>
+            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "#f1f5f9", color: "#64748b", fontWeight: 700 }}>🥈 Bạc (1100-1399)</span>
+            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "#fefce8", color: "#ca8a04", fontWeight: 700 }}>🥇 Vàng (1400-1599)</span>
+            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "#f5f3ff", color: "#7c3aed", fontWeight: 700 }}>💎 Kim Cương (1600+)</span>
+          </div>
+        </div>
+
+        {/* Filter tabs */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+          {[{ k: "ALL", l: "Tất cả" }, { k: "RECRUITING", l: "🟢 Đang tuyển" }, { k: "VUI_VE", l: "🍻 Dưỡng sinh" }, { k: "TRUNG_BINH", l: "⚡ Phong trào" }, { k: "BAN_CHUYEN", l: "🔥 Chuyên nghiệp" }].map((t) => (
+            <button key={t.k} type="button" className={`quick-day-btn ${clubFilter === t.k ? "active" : ""}`} onClick={() => setClubFilter(t.k)} style={{ fontSize: "12px", padding: "6px 14px" }}>{t.l}</button>
+          ))}
+        </div>
+
+        {/* Club Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(310px, 1fr))", gap: "18px" }}>
+          {clubs
+            .filter((c) => {
+              if (clubFilter === "ALL") return true;
+              if (clubFilter === "RECRUITING") return c.isRecruiting;
+              return c.level === clubFilter;
+            })
+            .sort((a, b) => b.elo - a.elo)
+            .map((club) => {
+              const isMember = currentUser && club.members.some((m) => m.userId === currentUser.id);
+              const isFull = club.members.length >= MAX_CLUB_MEMBERS;
+
+              return (
+                <div key={club.id} style={{ background: "#ffffff", border: "1.5px solid #e2e8f0", borderRadius: "16px", overflow: "hidden", boxShadow: "var(--shadow-sm)" }}>
+                  <div style={{ position: "relative", height: "100px" }}>
+                    <img src={club.banner} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={club.name} />
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(transparent 30%, rgba(0,0,0,0.6))" }} />
+                    <div style={{ position: "absolute", bottom: "8px", left: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontSize: "28px", background: "rgba(255,255,255,0.9)", width: "44px", height: "44px", borderRadius: "12px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{club.avatar}</span>
+                      <div>
+                        <strong style={{ fontSize: "15px", color: "#ffffff", display: "block", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>{club.name}</strong>
+                        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.9)" }}>{club.ward}</span>
+                      </div>
+                    </div>
+                    <div style={{ position: "absolute", top: "8px", right: "8px", background: "rgba(0,0,0,0.6)", color: getEloColor(club.elo), padding: "3px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "800" }}>{club.rank} · {club.elo} ELO</div>
+                  </div>
+
+                  <div style={{ padding: "14px" }}>
+                    <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "8px" }}>{club.description}</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
+                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "#f0fdf4", color: "#166534" }}>👤 {club.members.length}/{MAX_CLUB_MEMBERS}</span>
+                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "#eff6ff", color: "#1d4ed8" }}>🏆 {club.wins}W · {club.draws}D · {club.losses}L</span>
+                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "#fef3c7", color: "#92400e" }}>⚽ {club.goalsFor} BT - {club.goalsAgainst} BB</span>
+                      {club.isRecruiting && <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "#dcfce7", color: "#15803d" }}>🟢 Đang tuyển</span>}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "#334155", marginBottom: "10px" }}>🎖️ Đội trưởng: <strong>{club.captainName}</strong></div>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      {isMember ? (
+                        <div style={{ flex: 1, textAlign: "center", fontSize: "11px", fontWeight: 700, color: "#166534", background: "#dcfce7", padding: "8px", borderRadius: "8px" }}>✓ Bạn là thành viên</div>
+                      ) : isFull ? (
+                        <div style={{ flex: 1, textAlign: "center", fontSize: "11px", fontWeight: 700, color: "#991b1b", background: "#fee2e2", padding: "8px", borderRadius: "8px" }}>Đã đủ 15 người</div>
+                      ) : (
+                        <button type="button" onClick={() => handleJoinClub(club.id)} className="primary-button" style={{ flex: 1, padding: "8px", fontSize: "11px", fontWeight: 700, justifyContent: "center" }}>🤝 Gia nhập</button>
+                      )}
+                      <button type="button" onClick={() => setClubDetailOpen(club)} className="outline-button" style={{ padding: "8px 12px", fontSize: "11px" }}>👁️ Chi tiết</button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </section>
+
       {/* SECTION 3: QUẢN LÝ GIẢI ĐẤU MINI & BẢNG XẾP HẠNG (TOURNAMENT HUB) */}
       <section className="section-wrap" id="giai-dau" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
         <div className="section-head-modern" style={{ marginBottom: "20px" }}>
           <div>
-            <span className="section-tag" style={{ background: "#fefce8", color: "#ca8a04", borderColor: "#fef08a" }}>🏆 GIẢI ĐẤU PHONG TRÀO BAN MÊ</span>
+            <span className="module-tag tag-cyan">🏆 GIẢI ĐẤU PHONG TRÀO BAN MÊ 2026</span>
             <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Cúp Tứ Hùng Ban Mê 2026</h2>
             <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
               Cập nhật kết quả trực tiếp, nhánh đấu loại trực tiếp Knock-out và bảng xếp hạng điểm số tự động.
@@ -4339,6 +4623,87 @@ export default function Home() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      
+      {/* MODAL: TẠO CÂU LẠC BỘ */}
+      {createClubOpen && (
+        <div className="modal-backdrop" style={{ display: "flex" }}>
+          <div className="modal-card" style={{ maxWidth: "520px", maxHeight: "90vh", overflowY: "auto" }}>
+            <div className="modal-header">
+              <div>
+                <h3 style={{ fontSize: "18px", margin: 0 }}>➕ Tạo Câu lạc bộ bóng đá (FC)</h3>
+                <p style={{ fontSize: "12px", color: "#64748b", margin: "2px 0 0 0" }}>Tạo đội bóng riêng, tuyển thành viên và leo rank ELO</p>
+              </div>
+              <button type="button" className="modal-close" onClick={() => setCreateClubOpen(false)}>✕</button>
+            </div>
+            <form onSubmit={handleCreateClubSubmit} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "12px" }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Tên CLB: *</label>
+                  <input type="text" required value={ccName} onChange={(e) => setCcName(e.target.value)} placeholder="VD: FC Sân Nhà Ban Mê" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Viết tắt:</label>
+                  <input type="text" maxLength={6} value={ccShort} onChange={(e) => setCcShort(e.target.value.toUpperCase())} placeholder="SNBM" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px", textTransform: "uppercase" }} />
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Đội trưởng: *</label>
+                  <input type="text" required value={ccCaptain} onChange={(e) => setCcCaptain(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>SĐT: *</label>
+                  <input type="text" required value={ccPhone2} onChange={(e) => setCcPhone2(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px", fontFamily: "monospace" }} />
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                <button type="submit" className="primary-button" style={{ flex: 1, padding: "11px", fontWeight: 700 }}>🏟️ Tạo câu lạc bộ</button>
+                <button type="button" className="outline-button" style={{ padding: "11px 18px" }} onClick={() => setCreateClubOpen(false)}>Hủy</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CHI TIẾT CÂU LẠC BỘ */}
+      {clubDetailOpen && (
+        <div className="modal-backdrop" style={{ display: "flex" }}>
+          <div className="modal-card" style={{ maxWidth: "540px", maxHeight: "90vh", overflowY: "auto" }}>
+            <div className="modal-header">
+              <h3 style={{ fontSize: "18px", margin: 0 }}>🏟️ {clubDetailOpen.name}</h3>
+              <button type="button" className="modal-close" onClick={() => setClubDetailOpen(null)}>✕</button>
+            </div>
+            <div style={{ padding: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "16px" }}>
+                <span style={{ fontSize: "48px", background: "#f1f5f9", width: "64px", height: "64px", borderRadius: "16px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{clubDetailOpen.avatar}</span>
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: 800, color: getEloColor(clubDetailOpen.elo) }}>{clubDetailOpen.rank} · {clubDetailOpen.elo} ELO</div>
+                  <div style={{ fontSize: "12px", color: "#64748b" }}>📍 {clubDetailOpen.ward}</div>
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: "16px" }}>
+                <div style={{ background: "#f0fdf4", borderRadius: "10px", padding: "12px", textAlign: "center" }}><div style={{ fontSize: "20px", fontWeight: 800, color: "#16a34a" }}>{clubDetailOpen.wins}</div><div style={{ fontSize: "10px", color: "#64748b" }}>Thắng</div></div>
+                <div style={{ background: "#fefce8", borderRadius: "10px", padding: "12px", textAlign: "center" }}><div style={{ fontSize: "20px", fontWeight: 800, color: "#ca8a04" }}>{clubDetailOpen.draws}</div><div style={{ fontSize: "10px", color: "#64748b" }}>Hòa</div></div>
+                <div style={{ background: "#fef2f2", borderRadius: "10px", padding: "12px", textAlign: "center" }}><div style={{ fontSize: "20px", fontWeight: 800, color: "#dc2626" }}>{clubDetailOpen.losses}</div><div style={{ fontSize: "10px", color: "#64748b" }}>Thua</div></div>
+                <div style={{ background: "#eff6ff", borderRadius: "10px", padding: "12px", textAlign: "center" }}><div style={{ fontSize: "20px", fontWeight: 800, color: "#2563eb" }}>{clubDetailOpen.goalsFor}</div><div style={{ fontSize: "10px", color: "#64748b" }}>Bàn thắng</div></div>
+              </div>
+              <div style={{ fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>📋 Thành viên ({clubDetailOpen.members.length}/{MAX_CLUB_MEMBERS}):</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "250px", overflowY: "auto" }}>
+                {clubDetailOpen.members.map((m, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: i % 2 === 0 ? "#f8fafc" : "#fff", borderRadius: "6px", fontSize: "12px" }}>
+                    <span style={{ fontWeight: 700 }}>{i + 1}. {m.name} <span style={{ fontSize: "10px", color: "#64748b" }}>{m.role === "CAPTAIN" ? "🎖️" : m.role === "CO_CAPTAIN" ? "⭐" : ""}</span></span>
+                    <span style={{ color: "#64748b", fontFamily: "monospace" }}>📞 {m.phone}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ padding: "0 20px 20px" }}>
+              <button type="button" className="outline-button" style={{ width: "100%", padding: "10px" }} onClick={() => setClubDetailOpen(null)}>Đóng</button>
+            </div>
           </div>
         </div>
       )}

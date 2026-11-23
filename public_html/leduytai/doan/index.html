@@ -8,6 +8,13 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <style>
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); }
+      70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+  </style>
 </head>
 <body>
   <!-- Top announcement bar -->
@@ -20,19 +27,24 @@
     <div class="topbar">
       <a class="brand" href="./index.html">
         <div class="brand-icon">⚽</div>
-        <div>SÂN<span>NHÀ</span> <small style="font-size: 11px; color: #64748b; font-weight: 700;">FOOTBALL CLUB</small></div>
+        <div style="color: #ffffff;">SÂN<span style="color: #329dd2;">NHÀ</span> <span style="background: #eb2f33; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 900; margin-left: 4px; letter-spacing: 0.5px;">BMT</span></div>
       </a>
 
       <nav class="nav-links">
-        <a href="#ban-do-san">🗺️ Bản đồ BMT</a>
-        <a href="#cap-keo">🤝 Cáp kèo</a>
-        <a href="#giai-dau">🏆 Giải đấu</a>
-        <a href="#danh-sach-san">🏟️ Danh sách sân</a>
-        <a href="#dat-san">📅 Lịch sân trống</a>
-        <a href="#bang-gia">💰 Bảng giá</a>
-        <a href="#danh-gia">⭐ Đánh giá</a>
-        <a href="#hoi-dap">❓ Hỏi &amp; Đáp</a>
-        <a href="./lookup.html">🔍 Tra cứu vé</a>
+        <div class="nav-group-pill">
+          <a href="#danh-sach-san" title="Danh mục 20 cụm sân Buôn Ma Thuột">🏟️ Sân bóng</a>
+          <a href="#dat-san" title="Xem lịch các ca trống & đặt ca">📅 Lịch ca trống</a>
+          <a href="#ban-do-san" title="Định vị GPS & bản đồ cụm sân">🗺️ Radar GPS</a>
+        </div>
+        <div class="nav-group-pill">
+          <a href="#cap-keo" title="Sàn cáp kèo giao lưu phủi">🤝 Cáp kèo</a>
+          <a href="#hoi-nhom" title="Câu lạc bộ 15 người & leo rank">🛡️ FC &amp; Leo rank</a>
+          <a href="#giai-dau" title="Cúp Tứ Hùng Ban Mê">🏆 Giải đấu</a>
+        </div>
+        <div class="nav-group-pill">
+          <a href="#bang-gia" title="Bảng giá chuẩn các loại sân">💰 Bảng giá</a>
+          <a href="./lookup.html" title="Tra cứu mã phiếu đặt sân">🔍 Tra cứu vé</a>
+        </div>
       </nav>
 
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -197,6 +209,56 @@
     </div>
   </div>
 
+  
+  <!-- SECTION: HỆ THỐNG CÂU LẠC BỘ (FC) & HỘI NHÓM - LEO RANK -->
+  <section class="section-wrap" id="hoi-nhom" style="background: #ffffff; border-radius: 24px; padding: 36px 32px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 32px;">
+    <div class="section-head-modern" style="margin-bottom: 20px;">
+      <div>
+        <span class="module-tag tag-dark">🛡️ HỆ THỐNG FC &amp; HỘI NHÓM - LEO RANK ELO</span>
+        <h2 style="margin-top: 6px; font-size: 26px;">Tạo FC &amp; Leo Rank ELO</h2>
+        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Tạo câu lạc bộ bóng đá (FC) tối đa 15 thành viên, tham gia giải đấu, tích lũy ELO để leo hạng từ Đồng → Bạc → Vàng → Kim Cương.</p>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button type="button" class="primary-button" onclick="openCreateClubModal()" style="padding: 10px 18px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+          <span>➕</span> Tạo FC mới
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter tabs cho CLB -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; align-items: center;">
+      <span style="font-size: 12px; font-weight: 700; color: #475569;">Lọc:</span>
+      <button type="button" class="quick-day-btn active" onclick="currentClubFilter='ALL'; renderClubs('ALL'); this.parentElement.querySelectorAll('.quick-day-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');" style="font-size: 12px; padding: 6px 14px;">Tất cả FC</button>
+      <button type="button" class="quick-day-btn" onclick="currentClubFilter='RECRUITING'; renderClubs('RECRUITING'); this.parentElement.querySelectorAll('.quick-day-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');" style="font-size: 12px; padding: 6px 14px;">🟢 Đang tuyển</button>
+      <button type="button" class="quick-day-btn" onclick="currentClubFilter='VUI_VE'; renderClubs('VUI_VE'); this.parentElement.querySelectorAll('.quick-day-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');" style="font-size: 12px; padding: 6px 14px;">🍻 Dưỡng sinh</button>
+      <button type="button" class="quick-day-btn" onclick="currentClubFilter='TRUNG_BINH'; renderClubs('TRUNG_BINH'); this.parentElement.querySelectorAll('.quick-day-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');" style="font-size: 12px; padding: 6px 14px;">⚡ Phong trào</button>
+      <button type="button" class="quick-day-btn" onclick="currentClubFilter='BAN_CHUYEN'; renderClubs('BAN_CHUYEN'); this.parentElement.querySelectorAll('.quick-day-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');" style="font-size: 12px; padding: 6px 14px;">🔥 Chuyên nghiệp</button>
+    </div>
+
+    <!-- ELO Ranking Guide -->
+    <div style="background: #080f1b; border: 1px solid #1e3355; border-radius: 16px; padding: 18px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(8,15,27,0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div style="font-size: 13px; font-weight: 800; color: #329dd2; display: flex; align-items: center; gap: 8px;">
+          <span>📊</span> HỆ THỐNG PHÂN HẠNG LEO RANK ELO BAN MÊ (Tối đa 15 người/FC)
+        </div>
+        <span style="font-size: 11px; color: #8ea8c7;">Thắng +25 ELO · Hòa +5 ELO · Thua -15 ELO</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px;">
+        <span style="padding: 5px 12px; border-radius: 999px; background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); font-weight: 700;">🆕 Mới (&lt;800 ELO)</span>
+        <span style="padding: 5px 12px; border-radius: 999px; background: rgba(180, 83, 9, 0.15); color: #f59e0b; border: 1px solid rgba(180, 83, 9, 0.3); font-weight: 700;">🥉 Đồng (800-1099 ELO)</span>
+        <span style="padding: 5px 12px; border-radius: 999px; background: rgba(203, 213, 225, 0.15); color: #e2e8f0; border: 1px solid rgba(203, 213, 225, 0.3); font-weight: 700;">🥈 Bạc (1100-1399 ELO)</span>
+        <span style="padding: 5px 12px; border-radius: 999px; background: rgba(202, 138, 4, 0.15); color: #facc15; border: 1px solid rgba(202, 138, 4, 0.3); font-weight: 700;">🥇 Vàng (1400-1599 ELO)</span>
+        <span style="padding: 5px 12px; border-radius: 999px; background: rgba(50, 157, 210, 0.2); color: #329dd2; border: 1px solid #329dd2; font-weight: 800; box-shadow: 0 0 10px rgba(50,157,210,0.3);">💎 Kim Cương (1600+ ELO)</span>
+      </div>
+    </div>
+
+    <!-- Grid danh sách CLB -->
+    <div id="clubsListContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 18px;">
+      <!-- Render tự động qua app.js -->
+    </div>
+  </section>
+
   <!-- UI-01 & UI-03: Danh mục sân bóng -->
   <section class="section-wrap" id="danh-sach-san">
     <div class="section-head-modern">
@@ -224,7 +286,7 @@
   <section class="section-wrap" id="ban-do-san" style="background: #ffffff; border-radius: 24px; padding: 36px 32px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 32px;">
     <div class="section-head-modern" style="margin-bottom: 20px;">
       <div>
-        <span class="section-tag" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">🗺️ BẢN ĐỒ SỐ ĐỊA LÝ BUÔN MA THUỘT</span>
+        <span class="module-tag tag-cyan">🗺️ BẢN ĐỒ SỐ &amp; RADAR GPS BUÔN MA THUỘT</span>
         <h2 style="margin-top: 6px; font-size: 26px;">Bản đồ tương tác 20 cụm sân &amp; Định vị GPS</h2>
         <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Khám phá vị trí các cụm sân bóng thật tại Đắk Lắk, tự động tìm sân gần bạn nhất qua GPS và chỉ đường một chạm.</p>
       </div>
@@ -248,7 +310,7 @@
     </div>
 
     <!-- Leaflet Map Canvas -->
-    <div id="pitchMapContainer" style="width: 100%; height: 480px; border-radius: 18px; border: 2px solid #86efac; box-shadow: 0 6px 20px rgba(0,0,0,0.06); z-index: 1;"></div>
+    <div id="pitchMapContainer" style="width: 100%; height: 480px; border-radius: 18px; border: 2px solid #329dd2; box-shadow: 0 6px 20px rgba(0,0,0,0.06); z-index: 1;"></div>
     <div style="margin-top: 10px; font-size: 12px; color: #64748b; display: flex; justify-content: space-between; flex-wrap: wrap;">
       <span>💡 <em>Bấm vào từng quả bóng ⚽ trên bản đồ để xem chi tiết sân, bấm 'Đặt sân này' hoặc 'Chỉ đường Google Maps'.</em></span>
       <span>Nguồn bản đồ: OpenStreetMap (Đắk Lắk)</span>
@@ -259,14 +321,14 @@
   <section class="section-wrap" id="cap-keo" style="background: #ffffff; border-radius: 24px; padding: 36px 32px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 32px;">
     <div class="section-head-modern" style="margin-bottom: 20px;">
       <div>
-        <span class="section-tag" style="background: #fef2f2; color: #dc2626; border-color: #fecaca;">🤝 SÀN GIAO LƯU PHONG TRÀO BAN MÊ</span>
+        <span class="module-tag tag-red">🤝 SÀN CÁP KÈO BÓNG ĐÁ PHỦI BAN MÊ</span>
         <h2 style="margin-top: 6px; font-size: 26px;">Cáp kèo thi đấu &amp; Tuyển cầu thủ</h2>
         <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Nơi các đội bóng đá phủi BMT giao lưu cọ xát, bắt đối nhanh chóng theo trình độ và thỏa thuận tiền sân.</p>
       </div>
 
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button type="button" class="primary-button" onclick="openCreateMatchModal()" style="padding: 10px 18px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
-          <span>➕</span> Đăng tin tìm đối / Cáp kèo
+        <button type="button" class="btn-accent-red" onclick="openCreateMatchModal()" style="padding: 10px 20px; font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
+          <span>➕</span> ĐĂNG TIN TÌM ĐỐI / CÁP KÈO
         </button>
       </div>
     </div>
@@ -291,7 +353,7 @@
   <section class="section-wrap" id="giai-dau" style="background: #ffffff; border-radius: 24px; padding: 36px 32px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 32px;">
     <div class="section-head-modern" style="margin-bottom: 20px;">
       <div>
-        <span class="section-tag" style="background: #fefce8; color: #ca8a04; border-color: #fef08a;">🏆 GIẢI ĐẤU PHONG TRÀO BAN MÊ</span>
+        <span class="module-tag tag-cyan">🏆 GIẢI ĐẤU PHONG TRÀO BAN MÊ 2026</span>
         <h2 style="margin-top: 6px; font-size: 26px;">Cúp Tứ Hùng Ban Mê 2026</h2>
         <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Cập nhật kết quả trực tiếp, nhánh đấu loại trực tiếp Knock-out và bảng xếp hạng điểm số tự động.</p>
       </div>
@@ -901,7 +963,7 @@
         <button type="button" class="modal-close-btn" onclick="closeApiConfigModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 12px 16px; margin-bottom: 14px;">
+        <div style="background: #f0fdf4; border: 1px solid #329dd2; border-radius: 12px; padding: 12px 16px; margin-bottom: 14px;">
           <div style="font-size: 13px; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px;">
             <span>🟢</span> Cơ sở dữ liệu Neon PostgreSQL Cloud: ĐANG BẬT (24/7)
           </div>
@@ -1069,6 +1131,7 @@
       if (typeof initPitchMap === 'function') initPitchMap();
       if (typeof renderMatchmaking === 'function') renderMatchmaking();
       if (typeof renderTournament === 'function') renderTournament();
+      if (typeof renderClubs === 'function') renderClubs();
     });
 
     // Toggle Mobile Menu
@@ -2627,6 +2690,107 @@
           </button>
           <button type="button" class="outline-button" style="padding: 11px 18px;" onclick="closeAcceptMatchModal()">
             Đóng
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL: TẠO CÂU LẠC BỘ MỚI -->
+  <div class="modal-backdrop" id="createClubModal" style="display: none;">
+    <div class="modal-card" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 18px; margin: 0; color: #0f172a;">➕ Tạo Câu lạc bộ bóng đá (FC)</h3>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Tạo đội bóng riêng, tuyển thành viên và tham gia giải đấu leo rank</p>
+        </div>
+        <button type="button" class="modal-close" onclick="closeCreateClubModal()">✕</button>
+      </div>
+
+      <form onsubmit="submitCreateClub(event)" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Tên Câu lạc bộ: *</label>
+            <input type="text" id="ccClubName" required placeholder="VD: FC Sân Nhà Ban Mê" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Tên viết tắt:</label>
+            <input type="text" id="ccShortName" maxlength="6" placeholder="VD: SNBM" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; text-transform: uppercase;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Tên Đội trưởng: *</label>
+            <input type="text" id="ccCaptainName" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">SĐT Đội trưởng: *</label>
+            <input type="text" id="ccPhone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; font-family: monospace;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Khu vực:</label>
+            <select id="ccWard" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <option value="Phường Tân Tiến">P. Tân Tiến</option>
+              <option value="Phường Tân Lập">P. Tân Lập</option>
+              <option value="Phường Tân Lợi">P. Tân Lợi</option>
+              <option value="Phường Ea Tam">P. Ea Tam</option>
+              <option value="Phường Tân An">P. Tân An</option>
+              <option value="Phường Thành Nhất">P. Thành Nhất</option>
+              <option value="Phường Khánh Xuân">P. Khánh Xuân</option>
+              <option value="Xã Hòa Khánh">X. Hòa Khánh</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Trình độ:</label>
+            <select id="ccLevel" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <option value="VUI_VE">Dưỡng sinh</option>
+              <option value="TRUNG_BINH" selected>Phong trào</option>
+              <option value="BAN_CHUYEN">Chuyên nghiệp</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Biểu tượng:</label>
+            <select id="ccAvatar" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 16px;">
+              <option value="⚽">⚽</option>
+              <option value="🦁">🦁</option>
+              <option value="🐘">🐘</option>
+              <option value="🦅">🦅</option>
+              <option value="⚡">⚡</option>
+              <option value="🔥">🔥</option>
+              <option value="🌟">🌟</option>
+              <option value="💪">💪</option>
+              <option value="☕">☕</option>
+              <option value="🎓">🎓</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-weight: 700; font-size: 13px;">Mô tả đội bóng:</label>
+          <input type="text" id="ccDesc" placeholder="VD: Đội bóng sinh viên yêu thích cọ xát, đá fair-play" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+        </div>
+
+        <div style="background: #f5f3ff; border: 1px solid #c4b5fd; border-radius: 10px; padding: 12px; font-size: 12px; color: #5b21b6;">
+          <strong>📋 Lưu ý khi tạo FC:</strong>
+          <ul style="margin: 6px 0 0 16px; line-height: 1.6;">
+            <li>Mỗi tài khoản chỉ được tham gia <strong>1 câu lạc bộ</strong></li>
+            <li>Tối đa <strong>15 thành viên</strong> / FC</li>
+            <li>ELO khởi điểm: <strong>1000 (🥉 Đồng)</strong></li>
+            <li>Thắng +25 ELO, Hòa +5 ELO, Thua -15 ELO</li>
+          </ul>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 6px;">
+          <button type="submit" class="primary-button" style="flex: 1; padding: 11px; font-weight: 700;">
+            🏟️ Tạo câu lạc bộ
+          </button>
+          <button type="button" class="outline-button" style="padding: 11px 18px;" onclick="closeCreateClubModal()">
+            Hủy
           </button>
         </div>
       </form>

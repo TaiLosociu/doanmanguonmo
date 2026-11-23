@@ -907,6 +907,10 @@ const DEFAULT_TOURNAMENT_DATA = {
 let pitchLeafletMap = null;
 let pitchMarkers = [];
 
+let userLocationMarker = null;
+let userLat = null;
+let userLng = null;
+
 function initPitchMap() {
   const mapContainer = document.getElementById("pitchMapContainer");
   if (!mapContainer) return;
@@ -927,6 +931,68 @@ function initPitchMap() {
   }).addTo(pitchLeafletMap);
 
   renderPitchMarkers();
+
+  // Tự động lấy vị trí người dùng khi mở bản đồ
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        showUserLocationOnMap(userLat, userLng);
+      },
+      () => {
+        // Nếu từ chối GPS -> dùng vị trí trung tâm BMT
+        userLat = 12.6865;
+        userLng = 108.0450;
+        showUserLocationOnMap(userLat, userLng, true);
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  }
+}
+
+function showUserLocationOnMap(lat, lng, isDefault = false) {
+  if (!pitchLeafletMap) return;
+
+  // Xóa marker cũ nếu có
+  if (userLocationMarker) {
+    pitchLeafletMap.removeLayer(userLocationMarker);
+  }
+
+  const userIcon = L.divIcon({
+    className: 'user-location-marker',
+    html: '<div style="background: #2563eb; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 3px solid #ffffff; box-shadow: 0 0 20px rgba(37,99,235,0.6); animation: pulse 2s infinite; cursor: pointer;">📍</div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -38]
+  });
+
+  userLocationMarker = L.marker([lat, lng], { icon: userIcon, zIndexOffset: 1000 }).addTo(pitchLeafletMap);
+  userLocationMarker.bindPopup(
+    '<div style="font-family: inherit; padding: 4px; min-width: 180px;">' +
+    '<strong style="font-size: 14px; color: #2563eb; display: block; margin-bottom: 4px;">📍 Vị trí của bạn</strong>' +
+    '<div style="font-size: 11px; color: #64748b; margin-bottom: 2px;">' + (isDefault ? 'Vị trí mặc định: Trung tâm BMT' : 'GPS định vị thực tế') + '</div>' +
+    '<div style="font-size: 11px; color: #334155; font-family: monospace;">' + lat.toFixed(5) + ', ' + lng.toFixed(5) + '</div>' +
+    '</div>'
+  );
+
+  // Thêm vòng tròn vùng phủ sóng
+  L.circle([lat, lng], {
+    color: '#2563eb',
+    fillColor: '#3b82f6',
+    fillOpacity: 0.1,
+    radius: 500,
+    weight: 1
+  }).addTo(pitchLeafletMap);
+
+  // Cập nhật popup mỗi marker sân bóng thêm khoảng cách thực tế
+  updatePitchDistances(lat, lng);
+}
+
+function updatePitchDistances(uLat, uLng) {
+  if (!pitchLeafletMap) return;
+  // Re-render pitch markers để hiển thị khoảng cách
+  renderPitchMarkers(document.getElementById('mapFilterType')?.value || 'ALL');
 }
 
 function renderPitchMarkers(filterType = "ALL") {
@@ -941,37 +1007,53 @@ function renderPitchMarkers(filterType = "ALL") {
     return subs.some(s => s.category === filterType);
   });
 
+  // Sắp xếp theo khoảng cách gần nhất nếu có vị trí user
+  if (userLat && userLng) {
+    fields.forEach(f => {
+      f._distance = calculateDistance(userLat, userLng, f.lat || 12.6865, f.lng || 108.0450);
+    });
+    fields.sort((a, b) => (a._distance || 999) - (b._distance || 999));
+  }
+
   fields.forEach(field => {
     if (!field.lat || !field.lng) return;
 
+    const distText = (userLat && userLng) ? calculateDistance(userLat, userLng, field.lat, field.lng) + ' km' : '';
+
     const customIcon = L.divIcon({
       className: 'pitch-map-marker',
-      html: `<div style="background: #16a34a; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2.5px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.35); font-weight: bold; cursor: pointer;">⚽</div>`,
-      iconSize: [34, 34],
-      iconAnchor: [17, 34],
-      popupAnchor: [0, -32]
+      html: '<div style="background: #329dd2; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; border: 2.5px solid #ffffff; box-shadow: 0 4px 14px rgba(0,0,0,0.4); font-weight: bold; cursor: pointer;">⚽</div>',
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -34]
     });
 
     const marker = L.marker([field.lat, field.lng], { icon: customIcon }).addTo(pitchLeafletMap);
 
-    const popupHtml = `
-      <div style="font-family: inherit; width: 240px; padding: 2px;">
-        <img src="${field.imageUrl}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" alt="${field.name}" />
-        <strong style="font-size: 14px; color: #0f172a; display: block; margin-bottom: 4px;">${field.name}</strong>
-        <div style="font-size: 11px; color: #166534; font-weight: 700; margin-bottom: 4px;">📍 ${field.ward} · ${field.address || ''}</div>
-        <div style="font-size: 11px; color: #475569; margin-bottom: 8px;">${field.description}</div>
-        <div style="display: flex; gap: 6px;">
-          <button type="button" onclick="selectPitchAndScroll(${field.id})" style="flex: 1; background: #16a34a; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
-            ⚡ Đặt sân này
-          </button>
-          <a href="https://www.google.com/maps/dir/?api=1&destination=${field.lat},${field.lng}" target="_blank" style="background: #0284c7; color: white; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center;">
-            🧭 Chỉ đường
-          </a>
-        </div>
-      </div>
-    `;
+    // Link chỉ đường Google Maps chuẩn: nếu có vị trí user thì dùng origin, không thì chỉ destination
+    const gmapOrigin = (userLat && userLng) ? '&origin=' + userLat + ',' + userLng : '';
+    const gmapLink = 'https://www.google.com/maps/dir/?api=1' + gmapOrigin + '&destination=' + field.lat + ',' + field.lng + '&travelmode=driving';
+    const gmapViewLink = 'https://www.google.com/maps/search/?api=1&query=' + field.lat + ',' + field.lng;
 
-    marker.bindPopup(popupHtml);
+    const subs = (typeof getFieldSubPitches === "function") ? getFieldSubPitches(field) : [];
+    const subTypes = [...new Set(subs.map(s => s.category === 'SAN_5' ? 'Sân 5' : s.category === 'SAN_7' ? 'Sân 7' : 'Sân 11'))].join(' · ');
+
+    const popupHtml =
+      '<div style="font-family: inherit; width: 260px; padding: 2px;">' +
+      '<img src="' + field.imageUrl + '" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" alt="' + field.name + '" />' +
+      '<strong style="font-size: 14px; color: #0f172a; display: block; margin-bottom: 4px;">' + field.name + '</strong>' +
+      (distText ? '<div style="font-size: 11px; color: #2563eb; font-weight: 800; margin-bottom: 4px;">📏 Cách bạn: ' + distText + '</div>' : '') +
+      '<div style="font-size: 11px; color: #166534; font-weight: 700; margin-bottom: 4px;">📍 ' + field.ward + ' · ' + (field.address || '') + '</div>' +
+      '<div style="font-size: 11px; color: #475569; margin-bottom: 4px;">📞 ' + (field.phone || '0896890399') + (subTypes ? ' · ' + subTypes : '') + '</div>' +
+      '<div style="font-size: 11px; color: #475569; margin-bottom: 8px; line-height: 1.4;">' + field.description + '</div>' +
+      '<div style="display: flex; gap: 5px; flex-wrap: wrap;">' +
+      '<button type="button" onclick="selectPitchAndScroll(' + field.id + ')" style="flex: 1; background: #329dd2; color: white; border: none; padding: 7px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">⚡ Đặt sân</button>' +
+      '<a href="' + gmapLink + '" target="_blank" style="background: #0284c7; color: white; padding: 7px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center;">🧭 Chỉ đường</a>' +
+      '<a href="' + gmapViewLink + '" target="_blank" style="background: #7c3aed; color: white; padding: 7px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center;">📌 GG Map</a>' +
+      '</div>' +
+      '</div>';
+
+    marker.bindPopup(popupHtml, { maxWidth: 280 });
     pitchMarkers.push(marker);
   });
 }
@@ -1026,7 +1108,7 @@ function findNearestPitch() {
         if (marker) marker.openPopup();
 
         if (resultNotice) {
-          resultNotice.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: 8px; font-weight: 700;">📍 Sân gần bạn nhất: <strong>${nearestField.name}</strong> (Cách khoảng <strong>${minDistance} km</strong>) · ${nearestField.address}</div>`;
+          resultNotice.innerHTML = `<div style="background: rgba(50, 157, 210, 0.12); border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: 8px; font-weight: 700;">📍 Sân gần bạn nhất: <strong>${nearestField.name}</strong> (Cách khoảng <strong>${minDistance} km</strong>) · ${nearestField.address}</div>`;
         }
       }
     },
@@ -1088,7 +1170,7 @@ function renderMatchmaking(filter = "ALL") {
     const levelColor = post.level === "BAN_CHUYEN" ? "#b91c1c" : post.level === "TRUNG_BINH" ? "#166534" : "#1d4ed8";
 
     return `
-      <div style="background: #ffffff; border: 1.5px solid ${isOpen ? '#cbd5e1' : '#e2e8f0'}; border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: all 0.25s ease;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='${isOpen ? '#cbd5e1' : '#e2e8f0'}'">
+      <div style="background: #ffffff; border: 1.5px solid ${isOpen ? '#cbd5e1' : '#e2e8f0'}; border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: all 0.25s ease;" onmouseover="this.style.borderColor='#329dd2'" onmouseout="this.style.borderColor='${isOpen ? '#cbd5e1' : '#e2e8f0'}'">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -1098,7 +1180,7 @@ function renderMatchmaking(filter = "ALL") {
                 <small style="color: #64748b;">Đội trưởng: ${post.captainName} · ${post.createdAt}</small>
               </div>
             </div>
-            <span style="font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 800; background: ${isOpen ? '#dcfce7' : '#fee2e2'}; color: ${isOpen ? '#15803d' : '#991b1b'};">
+            <span style="font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 800; background: ${isOpen ? 'rgba(50, 157, 210, 0.15)' : 'rgba(235, 47, 51, 0.15)'}; color: ${isOpen ? '#176b94' : '#eb2f33'}; border: 1px solid ${isOpen ? 'rgba(50, 157, 210, 0.3)' : 'rgba(235, 47, 51, 0.3)'};">
               ${isOpen ? '● ĐANG TÌM ĐỐI' : '✓ ĐÃ CÁP KÈO'}
             </span>
           </div>
@@ -1124,7 +1206,7 @@ function renderMatchmaking(filter = "ALL") {
 
         <div style="display: flex; gap: 8px; margin-top: 6px;">
           ${isOpen ? `
-            <button type="button" onclick="openAcceptMatchModal(${post.id})" class="primary-button" style="flex: 1; padding: 9px; font-size: 12px; font-weight: 700; justify-content: center;">
+            <button type="button" onclick="openAcceptMatchModal(${post.id})" class="btn-accent-red" style="flex: 1; padding: 9px; font-size: 12px; font-weight: 700; justify-content: center; border-radius: 8px;">
               🤝 Bắt đối ngay
             </button>
           ` : `
@@ -1147,7 +1229,19 @@ function renderMatchmaking(filter = "ALL") {
 let activeMatchIdToAccept = null;
 
 function openCreateMatchModal() {
+  // Kiểm tra đăng nhập trước khi mở form
+  const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  if (!authUser) {
+    alert("⚠️ Bạn cần đăng nhập để đăng tin tìm đối!\nHãy bấm nút \"Đăng nhập / Đăng ký\" trên thanh menu.");
+    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
+    return;
+  }
   document.getElementById("createMatchModal").style.display = "flex";
+  // Auto-fill thông tin từ tài khoản đang đăng nhập
+  const captainInput = document.getElementById("cmCaptainName");
+  const phoneInput = document.getElementById("cmPhone");
+  if (captainInput && !captainInput.value) captainInput.value = authUser.fullName || '';
+  if (phoneInput && !phoneInput.value) phoneInput.value = authUser.phone || '';
   // Fill pitch select options
   const select = document.getElementById("cmFieldSelect");
   if (select) {
@@ -1163,9 +1257,21 @@ function closeCreateMatchModal() {
 
 function submitMatchPost(e) {
   e.preventDefault();
+  // Bắt buộc đăng nhập để đăng tin cáp kèo
+  const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  if (!authUser) {
+    alert("⚠️ Bạn cần đăng nhập tài khoản để đăng tin tìm đối!\nHãy bấm nút \"Đăng nhập / Đăng ký\" trên thanh menu.");
+    closeCreateMatchModal();
+    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
+    return;
+  }
   const teamName = document.getElementById("cmTeamName").value.trim();
-  const captainName = document.getElementById("cmCaptainName").value.trim();
+  const captainName = document.getElementById("cmCaptainName").value.trim() || authUser.fullName;
   const phone = document.getElementById("cmPhone").value.trim();
+  if (!phone || phone.length < 9) {
+    alert("⚠️ Số điện thoại / Zalo là bắt buộc (tối thiểu 9 số) để đội bạn liên hệ bắt đối!");
+    return;
+  }
   const fieldId = Number(document.getElementById("cmFieldSelect").value);
   const matchDate = document.getElementById("cmDateInput").value;
   const timeSlot = document.getElementById("cmTimeSlot").value;
@@ -1218,6 +1324,13 @@ function submitMatchPost(e) {
 }
 
 function openAcceptMatchModal(postId) {
+  // Kiểm tra đăng nhập
+  const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  if (!authUser) {
+    alert("⚠️ Bạn cần đăng nhập để bắt đối!\nHãy bấm \"Đăng nhập / Đăng ký\" trên thanh menu.");
+    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
+    return;
+  }
   activeMatchIdToAccept = postId;
   const posts = getMatchmakingPosts();
   const post = posts.find(p => p.id === postId);
@@ -1304,7 +1417,7 @@ function renderTournamentBracket(data) {
     return `
       <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm); position: relative;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
-          <span style="font-size: 12px; font-weight: 800; color: #16a34a; letter-spacing: 0.5px;">${m.round}</span>
+          <span style="font-size: 12px; font-weight: 800; color: #329dd2; letter-spacing: 0.5px;">${m.round}</span>
           <span style="font-size: 11px; color: #64748b;">${m.time}</span>
         </div>
 
@@ -1325,7 +1438,7 @@ function renderTournamentBracket(data) {
         </div>
 
         ${m.winner ? `
-          <div style="margin-top: 10px; font-size: 11px; text-align: center; color: #15803d; font-weight: 700; background: #dcfce7; padding: 4px; border-radius: 6px;">
+          <div style="margin-top: 10px; font-size: 11px; text-align: center; color: #176b94; font-weight: 700; background: #e6f4fb; padding: 4px; border-radius: 6px;">
             Đội chiến thắng: ${m.winner}
           </div>
         ` : ''}
@@ -1351,7 +1464,7 @@ function renderTournamentStandings(data) {
         <td style="padding: 12px 8px;">${s.gf}</td>
         <td style="padding: 12px 8px;">${s.ga}</td>
         <td style="padding: 12px 8px; font-weight: 700;">${s.gd}</td>
-        <td style="padding: 12px 8px; font-weight: 800; color: #15803d; font-size: 16px; background: #f0fdf4;">${s.points}</td>
+        <td style="padding: 12px 8px; font-weight: 800; color: #176b94; font-size: 16px; background: #f0fdf4;">${s.points}</td>
       </tr>
     `;
   }).join("");
@@ -1360,6 +1473,15 @@ function renderTournamentStandings(data) {
 function initStorage() {
   if (!localStorage.getItem("football_fields")) {
     localStorage.setItem("football_fields", JSON.stringify(DEFAULT_FIELDS));
+  }
+  if (!localStorage.getItem("football_clubs")) {
+    localStorage.setItem("football_clubs", JSON.stringify(DEFAULT_CLUBS));
+  }
+  if (!localStorage.getItem("football_matchmaking")) {
+    localStorage.setItem("football_matchmaking", JSON.stringify(DEFAULT_MATCHMAKING_POSTS));
+  }
+  if (!localStorage.getItem("football_tournaments")) {
+    localStorage.setItem("football_tournaments", JSON.stringify(DEFAULT_TOURNAMENT_DATA));
   }
   if (!localStorage.getItem("my-bookings")) {
     localStorage.setItem("my-bookings", JSON.stringify([
@@ -1395,5 +1517,409 @@ if (typeof window !== "undefined") {
   window.formatMoney = formatMoney;
   window.getTodayString = getTodayString;
   window.getFieldSubPitches = getFieldSubPitches;
+  window.DEFAULT_CLUBS = DEFAULT_CLUBS;
+  window.DEFAULT_MATCHMAKING_POSTS = DEFAULT_MATCHMAKING_POSTS;
+  window.DEFAULT_TOURNAMENT_DATA = DEFAULT_TOURNAMENT_DATA;
 }
 
+
+// ==========================================
+// 6. HỆ THỐNG CÂU LẠC BỘ (FC) & HỘI NHÓM - LEO RANK
+// ==========================================
+const MAX_CLUB_MEMBERS = 15;
+
+const DEFAULT_CLUBS = [
+  {
+    id: 1,
+    name: "FC Sân Nhà Ban Mê",
+    shortName: "SNBM",
+    avatar: "⚽",
+    banner: "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-chuan-va-dep_101638538.jpg",
+    captainId: 1,
+    captainName: "Lê Duy Tài",
+    description: "Câu lạc bộ chính thức của hệ thống đặt sân Sân Nhà FC tại Buôn Ma Thuột.",
+    ward: "Phường Tân Tiến",
+    fieldPreference: "Sân bóng đá C1",
+    level: "TRUNG_BINH",
+    elo: 1200,
+    rank: "🥈 BẠC",
+    wins: 12, draws: 3, losses: 5,
+    goalsFor: 48, goalsAgainst: 28,
+    members: [
+      { userId: 1, name: "Lê Duy Tài", phone: "0896890399", role: "CAPTAIN", joinedAt: "2026-10-01" },
+      { userId: 2, name: "Kpa Trần Quang Thịnh", phone: "0905123456", role: "CO_CAPTAIN", joinedAt: "2026-10-01" },
+      { userId: 100, name: "Nguyễn Minh Hoàng", phone: "0914567890", role: "MEMBER", joinedAt: "2026-10-05" },
+      { userId: 101, name: "Trần Đức Long", phone: "0932111222", role: "MEMBER", joinedAt: "2026-10-10" },
+      { userId: 102, name: "Lê Quốc Hùng", phone: "0918999888", role: "MEMBER", joinedAt: "2026-10-12" }
+    ],
+    createdAt: "2026-10-01",
+    isRecruiting: true
+  },
+  {
+    id: 2,
+    name: "FC Ea Tam Warrior",
+    shortName: "EATW",
+    avatar: "🦁",
+    banner: "https://atsport.vn/wp-content/uploads/2021/08/kich-thuoc-san-bong-da-7-nguoi-co-nhan-tao-1-1-960x960.jpg",
+    captainId: 3,
+    captainName: "Nguyễn Anh Tuấn",
+    description: "Đội bóng phong trào mạnh nhất khu vực Ea Tam, chuyên thi đấu sân 7.",
+    ward: "Phường Ea Tam",
+    fieldPreference: "SVĐ ĐH Tây Nguyên",
+    level: "BAN_CHUYEN",
+    elo: 1450,
+    rank: "🥇 VÀNG",
+    wins: 18, draws: 2, losses: 3,
+    goalsFor: 65, goalsAgainst: 20,
+    members: [
+      { userId: 3, name: "Nguyễn Anh Tuấn", phone: "0935444777", role: "CAPTAIN", joinedAt: "2026-09-15" },
+      { userId: 103, name: "Phạm Văn Đức", phone: "0943567890", role: "CO_CAPTAIN", joinedAt: "2026-09-15" },
+      { userId: 104, name: "Trần Hữu Phúc", phone: "0918234567", role: "MEMBER", joinedAt: "2026-09-20" },
+      { userId: 105, name: "Nguyễn Thanh Tùng", phone: "0932678901", role: "MEMBER", joinedAt: "2026-09-22" },
+      { userId: 106, name: "Lê Minh Quân", phone: "0905789012", role: "MEMBER", joinedAt: "2026-10-01" },
+      { userId: 107, name: "Võ Duy Mạnh", phone: "0914890123", role: "MEMBER", joinedAt: "2026-10-05" },
+      { userId: 108, name: "Bùi Hoàng Long", phone: "0963901234", role: "MEMBER", joinedAt: "2026-10-10" }
+    ],
+    createdAt: "2026-09-15",
+    isRecruiting: true
+  },
+  {
+    id: 3,
+    name: "FC Cà Phê Ban Mê",
+    shortName: "CFBM",
+    avatar: "☕",
+    banner: "https://image.made-in-china.com/202f0j00QIzeVHbmrscn/Football-Artificial-Grass-Carpets-Astro-Turf-for-Football-Stadium.webp",
+    captainId: 4,
+    captainName: "Hoàng Minh Đức",
+    description: "Đội bóng anh em cà phê sáng BMT, đá lành tính dưỡng sinh buổi sáng.",
+    ward: "Phường Tân Tiến",
+    fieldPreference: "Sân Bóng Đá Ngọc Anh",
+    level: "VUI_VE",
+    elo: 950,
+    rank: "🥉 ĐỒNG",
+    wins: 5, draws: 4, losses: 8,
+    goalsFor: 22, goalsAgainst: 35,
+    members: [
+      { userId: 4, name: "Hoàng Minh Đức", phone: "0906448004", role: "CAPTAIN", joinedAt: "2026-10-05" },
+      { userId: 109, name: "Ngô Thanh Bình", phone: "0918345678", role: "MEMBER", joinedAt: "2026-10-06" },
+      { userId: 110, name: "Đặng Văn Hải", phone: "0935456789", role: "MEMBER", joinedAt: "2026-10-08" }
+    ],
+    createdAt: "2026-10-05",
+    isRecruiting: true
+  },
+  {
+    id: 4,
+    name: "FC Voi Chiến Tây Nguyên",
+    shortName: "VCTN",
+    avatar: "🐘",
+    banner: "https://5.imimg.com/data5/SELLER/Default/2023/8/335821545/AO/WO/DU/19508713/football-artificial-grass-1000x1000.jpg",
+    captainId: 5,
+    captainName: "Trần Quốc Cường",
+    description: "Đội bóng mạnh nhất giải phong trào Đắk Lắk, nhiều lần vô địch giải sân 7.",
+    ward: "Phường Tân Lập",
+    fieldPreference: "Sân Ban Mê Sport",
+    level: "BAN_CHUYEN",
+    elo: 1680,
+    rank: "💎 KIM CƯƠNG",
+    wins: 25, draws: 5, losses: 2,
+    goalsFor: 88, goalsAgainst: 15,
+    members: [
+      { userId: 5, name: "Trần Quốc Cường", phone: "0912345678", role: "CAPTAIN", joinedAt: "2026-08-01" },
+      { userId: 111, name: "Lê Văn Hùng", phone: "0943678901", role: "CO_CAPTAIN", joinedAt: "2026-08-01" },
+      { userId: 112, name: "Phạm Minh Tuấn", phone: "0918789012", role: "MEMBER", joinedAt: "2026-08-05" },
+      { userId: 113, name: "Nguyễn Đình Trọng", phone: "0932890123", role: "MEMBER", joinedAt: "2026-08-10" },
+      { userId: 114, name: "Hồ Anh Quân", phone: "0905901234", role: "MEMBER", joinedAt: "2026-08-15" },
+      { userId: 115, name: "Vũ Tiến Dũng", phone: "0914012345", role: "MEMBER", joinedAt: "2026-08-20" },
+      { userId: 116, name: "Đỗ Hữu Dũng", phone: "0963123456", role: "MEMBER", joinedAt: "2026-09-01" },
+      { userId: 117, name: "Nguyễn Văn Toàn", phone: "0918234567", role: "MEMBER", joinedAt: "2026-09-05" },
+      { userId: 118, name: "Trần Phi Sơn", phone: "0935345678", role: "MEMBER", joinedAt: "2026-09-10" },
+      { userId: 119, name: "Lê Công Vinh", phone: "0906456789", role: "MEMBER", joinedAt: "2026-09-15" }
+    ],
+    createdAt: "2026-08-01",
+    isRecruiting: false
+  }
+];
+
+function getClubs() {
+  try {
+    const saved = localStorage.getItem("football_clubs");
+    return saved ? JSON.parse(saved) : DEFAULT_CLUBS;
+  } catch { return DEFAULT_CLUBS; }
+}
+
+function saveClubs(clubs) {
+  localStorage.setItem("football_clubs", JSON.stringify(clubs));
+}
+
+function getEloRank(elo) {
+  if (elo >= 1600) return "💎 KIM CƯƠNG";
+  if (elo >= 1400) return "🥇 VÀNG";
+  if (elo >= 1100) return "🥈 BẠC";
+  if (elo >= 800) return "🥉 ĐỒNG";
+  return "🆕 MỚI";
+}
+
+function getEloColor(elo) {
+  if (elo >= 1600) return "#7c3aed";
+  if (elo >= 1400) return "#ca8a04";
+  if (elo >= 1100) return "#64748b";
+  if (elo >= 800) return "#b45309";
+  return "#94a3b8";
+}
+
+function renderClubs(filter = "ALL") {
+  const container = document.getElementById("clubsListContainer");
+  if (!container) return;
+
+  const clubs = getClubs().filter(c => {
+    if (filter === "ALL") return true;
+    if (filter === "RECRUITING") return c.isRecruiting;
+    return c.level === filter;
+  }).sort((a, b) => b.elo - a.elo);
+
+  if (clubs.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b; background: #f8fafc; border-radius: 14px;">Chưa có câu lạc bộ nào. Hãy bấm "Tạo FC mới" để tạo đội bóng đầu tiên!</div>';
+    return;
+  }
+
+  container.innerHTML = clubs.map((club, idx) => {
+    const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+    const isMember = authUser && club.members.some(m => m.userId === authUser.id);
+    const isCaptain = authUser && club.captainId === authUser.id;
+    const memberCount = club.members.length;
+    const isFull = memberCount >= MAX_CLUB_MEMBERS;
+
+    return '<div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); transition: all 0.2s;" onmouseover="this.style.borderColor=\'#329dd2\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
+      '<div style="position: relative; height: 100px;">' +
+      '<img src="' + club.banner + '" style="width: 100%; height: 100%; object-fit: cover;" alt="' + club.name + '" />' +
+      '<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent 30%, rgba(0,0,0,0.6));"></div>' +
+      '<div style="position: absolute; bottom: 8px; left: 12px; display: flex; align-items: center; gap: 8px;">' +
+      '<span style="font-size: 28px; background: rgba(255,255,255,0.9); width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">' + club.avatar + '</span>' +
+      '<div>' +
+      '<strong style="font-size: 15px; color: #ffffff; display: block; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">' + club.name + '</strong>' +
+      '<span style="font-size: 11px; color: rgba(255,255,255,0.9); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">' + club.ward + '</span>' +
+      '</div></div>' +
+      '<div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: ' + getEloColor(club.elo) + '; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; backdrop-filter: blur(4px);">' + club.rank + ' · ' + club.elo + ' ELO</div>' +
+      '</div>' +
+      '<div style="padding: 14px;">' +
+      '<div style="font-size: 12px; color: #64748b; margin-bottom: 8px; line-height: 1.4;">' + club.description + '</div>' +
+      '<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">' +
+      '<span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #f0fdf4; color: #166534;">👤 ' + memberCount + '/' + MAX_CLUB_MEMBERS + ' thành viên</span>' +
+      '<span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #eff6ff; color: #1d4ed8;">🏆 ' + club.wins + 'W · ' + club.draws + 'D · ' + club.losses + 'L</span>' +
+      '<span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #fef3c7; color: #92400e;">⚽ ' + club.goalsFor + ' BT - ' + club.goalsAgainst + ' BB</span>' +
+      (club.isRecruiting ? '<span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(50, 157, 210, 0.12); color: #176b94; border: 1px solid rgba(50, 157, 210, 0.25);">🟢 Đang tuyển</span>' : '<span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(235, 47, 51, 0.12); color: #eb2f33; border: 1px solid rgba(235, 47, 51, 0.25);">🔴 Đã đủ</span>') +
+      '</div>' +
+      '<div style="font-size: 11px; color: #334155; margin-bottom: 10px;">🎖️ Đội trưởng: <strong>' + club.captainName + '</strong> · 📞 ' + (club.members[0]?.phone || '') + '</div>' +
+      '<div style="display: flex; gap: 6px;">' +
+      (isMember
+        ? '<div style="flex: 1; text-align: center; font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 8px; border-radius: 8px;">✓ Bạn là thành viên' + (isCaptain ? ' (Đội trưởng)' : '') + '</div>'
+        : (isFull
+          ? '<div style="flex: 1; text-align: center; font-size: 11px; font-weight: 700; color: #991b1b; background: #fee2e2; padding: 8px; border-radius: 8px;">Đội đã đủ 15 người</div>'
+          : '<button type="button" onclick="joinClub(' + club.id + ')" class="primary-button" style="flex: 1; padding: 8px; font-size: 11px; font-weight: 700; justify-content: center;">🤝 Xin gia nhập</button>'
+        )
+      ) +
+      '<button type="button" onclick="viewClubDetail(' + club.id + ')" class="outline-button" style="padding: 8px 12px; font-size: 11px;">👁️ Chi tiết</button>' +
+      '</div></div></div>';
+  }).join("");
+}
+
+function joinClub(clubId) {
+  const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  if (!authUser) {
+    alert("⚠️ Bạn cần đăng nhập để gia nhập câu lạc bộ!");
+    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
+    return;
+  }
+
+  const clubs = getClubs();
+  const club = clubs.find(c => c.id === clubId);
+  if (!club) return;
+
+  if (club.members.length >= MAX_CLUB_MEMBERS) {
+    alert("⚠️ FC " + club.name + " đã đủ " + MAX_CLUB_MEMBERS + " thành viên, không thể gia nhập!");
+    return;
+  }
+
+  // Kiểm tra đã gia nhập CLB khác chưa
+  const existingClub = clubs.find(c => c.members.some(m => m.userId === authUser.id));
+  if (existingClub) {
+    alert("⚠️ Bạn đã là thành viên của FC " + existingClub.name + "!\nMỗi tài khoản chỉ được tham gia 1 câu lạc bộ. Hãy rời đội cũ trước khi gia nhập đội mới.");
+    return;
+  }
+
+  if (club.members.some(m => m.userId === authUser.id)) {
+    alert("Bạn đã là thành viên của FC " + club.name + " rồi!");
+    return;
+  }
+
+  club.members.push({
+    userId: authUser.id,
+    name: authUser.fullName,
+    phone: authUser.phone || "",
+    role: "MEMBER",
+    joinedAt: getTodayString()
+  });
+
+  saveClubs(clubs);
+  renderClubs();
+  alert("🎉 Chúc mừng! Bạn đã gia nhập FC " + club.name + " thành công!\n📞 Hãy liên hệ Đội trưởng " + club.captainName + " để nhận lịch tập và phân công vị trí.");
+}
+
+function viewClubDetail(clubId) {
+  const clubs = getClubs();
+  const club = clubs.find(c => c.id === clubId);
+  if (!club) return;
+
+  const membersHtml = club.members.map((m, i) => {
+    const roleLabel = m.role === "CAPTAIN" ? "🎖️ Đội trưởng" : m.role === "CO_CAPTAIN" ? "⭐ Phó đội" : "👤 Thành viên";
+    return '<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: ' + (i % 2 === 0 ? '#f8fafc' : '#ffffff') + '; border-radius: 6px; font-size: 12px;">' +
+      '<div style="display: flex; align-items: center; gap: 8px;">' +
+      '<span style="font-weight: 700; color: #0f172a;">' + (i + 1) + '. ' + m.name + '</span>' +
+      '<span style="font-size: 10px; color: #64748b;">' + roleLabel + '</span>' +
+      '</div>' +
+      '<span style="color: #64748b; font-family: monospace;">📞 ' + m.phone + '</span>' +
+      '</div>';
+  }).join("");
+
+  const detailHtml =
+    '<div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">' +
+    '<span style="font-size: 48px; background: #f1f5f9; width: 64px; height: 64px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">' + club.avatar + '</span>' +
+    '<div>' +
+    '<h3 style="margin: 0; font-size: 20px; color: #0f172a;">' + club.name + '</h3>' +
+    '<div style="font-size: 12px; color: #64748b; margin-top: 2px;">📍 ' + club.ward + ' · 🏟️ ' + club.fieldPreference + '</div>' +
+    '<div style="margin-top: 4px; font-size: 13px; font-weight: 800; color: ' + getEloColor(club.elo) + ';">' + club.rank + ' · ' + club.elo + ' ELO</div>' +
+    '</div></div>' +
+    '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">' +
+    '<div style="background: #f0fdf4; border-radius: 10px; padding: 12px; text-align: center;"><div style="font-size: 20px; font-weight: 800; color: #16a34a;">' + club.wins + '</div><div style="font-size: 10px; color: #64748b;">Thắng</div></div>' +
+    '<div style="background: #fefce8; border-radius: 10px; padding: 12px; text-align: center;"><div style="font-size: 20px; font-weight: 800; color: #ca8a04;">' + club.draws + '</div><div style="font-size: 10px; color: #64748b;">Hòa</div></div>' +
+    '<div style="background: #fef2f2; border-radius: 10px; padding: 12px; text-align: center;"><div style="font-size: 20px; font-weight: 800; color: #dc2626;">' + club.losses + '</div><div style="font-size: 10px; color: #64748b;">Thua</div></div>' +
+    '<div style="background: #eff6ff; border-radius: 10px; padding: 12px; text-align: center;"><div style="font-size: 20px; font-weight: 800; color: #2563eb;">' + club.goalsFor + '</div><div style="font-size: 10px; color: #64748b;">Bàn thắng</div></div>' +
+    '</div>' +
+    '<div style="margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #0f172a;">📋 Danh sách thành viên (' + club.members.length + '/' + MAX_CLUB_MEMBERS + '):</div>' +
+    '<div style="display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto;">' + membersHtml + '</div>';
+
+  // Show in a simple alert-style modal
+  const existing = document.getElementById("clubDetailModal");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "clubDetailModal";
+  modal.className = "modal-backdrop";
+  modal.style.display = "flex";
+  modal.innerHTML =
+    '<div class="modal-card" style="max-width: 540px; max-height: 90vh; overflow-y: auto;">' +
+    '<div class="modal-header"><div><h3 style="margin: 0; font-size: 18px;">🏟️ Chi tiết Câu lạc bộ</h3></div>' +
+    '<button type="button" class="modal-close" onclick="document.getElementById(\'clubDetailModal\').remove()">✕</button></div>' +
+    '<div style="padding: 20px;">' + detailHtml + '</div>' +
+    '<div style="padding: 0 20px 20px; display: flex; gap: 10px;">' +
+    '<button type="button" class="outline-button" style="flex: 1; padding: 10px;" onclick="document.getElementById(\'clubDetailModal\').remove()">Đóng</button>' +
+    '</div></div>';
+  document.body.appendChild(modal);
+}
+
+let currentClubFilter = "ALL";
+
+function openCreateClubModal() {
+  const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  if (!authUser) {
+    alert("⚠️ Bạn cần đăng nhập để tạo câu lạc bộ!");
+    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
+    return;
+  }
+  // Kiểm tra đã có CLB chưa
+  const clubs = getClubs();
+  const existingClub = clubs.find(c => c.members.some(m => m.userId === authUser.id));
+  if (existingClub) {
+    alert("⚠️ Bạn đã là thành viên của FC " + existingClub.name + "!\nHãy rời đội cũ trước khi tạo đội mới.");
+    return;
+  }
+
+  document.getElementById("createClubModal").style.display = "flex";
+  const captainInput = document.getElementById("ccCaptainName");
+  const phoneInput = document.getElementById("ccPhone");
+  if (captainInput) captainInput.value = authUser.fullName || "";
+  if (phoneInput) phoneInput.value = authUser.phone || "";
+}
+
+function closeCreateClubModal() {
+  document.getElementById("createClubModal").style.display = "none";
+}
+
+function submitCreateClub(e) {
+  e.preventDefault();
+  const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  if (!authUser) return;
+
+  const clubName = document.getElementById("ccClubName").value.trim();
+  const shortName = document.getElementById("ccShortName").value.trim().toUpperCase();
+  const captainName = document.getElementById("ccCaptainName").value.trim() || authUser.fullName;
+  const phone = document.getElementById("ccPhone").value.trim();
+  const ward = document.getElementById("ccWard").value;
+  const level = document.getElementById("ccLevel").value;
+  const description = document.getElementById("ccDesc").value.trim() || "Câu lạc bộ bóng đá phong trào tại Buôn Ma Thuột.";
+  const avatar = document.getElementById("ccAvatar").value || "⚽";
+
+  if (!clubName || !phone || phone.length < 9) {
+    alert("⚠️ Tên CLB và Số điện thoại đội trưởng là bắt buộc!");
+    return;
+  }
+
+  const clubs = getClubs();
+  const newClub = {
+    id: Date.now(),
+    name: clubName,
+    shortName: shortName || clubName.substring(0, 4).toUpperCase(),
+    avatar,
+    banner: "https://img5.thuthuatphanmem.vn/uploads/2021/12/11/hinh-anh-san-co-bong-da-rong-rai_101640962.jpg",
+    captainId: authUser.id,
+    captainName,
+    description,
+    ward,
+    fieldPreference: "",
+    level,
+    elo: 1000,
+    rank: getEloRank(1000),
+    wins: 0, draws: 0, losses: 0,
+    goalsFor: 0, goalsAgainst: 0,
+    members: [
+      { userId: authUser.id, name: captainName, phone, role: "CAPTAIN", joinedAt: getTodayString() }
+    ],
+    createdAt: getTodayString(),
+    isRecruiting: true
+  };
+
+  clubs.push(newClub);
+  saveClubs(clubs);
+  closeCreateClubModal();
+  renderClubs();
+  alert("🎉 FC " + clubName + " đã được tạo thành công!\n🎖️ Bạn là Đội trưởng. ELO khởi điểm: 1000 (🥉 ĐỒNG)\n📢 Hãy chia sẻ để tuyển thành viên (tối đa " + MAX_CLUB_MEMBERS + " người).");
+}
+
+// Export mới cho window
+if (typeof window !== "undefined") {
+  window.getClubs = getClubs;
+  window.saveClubs = saveClubs;
+  window.renderClubs = renderClubs;
+  window.joinClub = joinClub;
+  window.viewClubDetail = viewClubDetail;
+  window.openCreateClubModal = openCreateClubModal;
+  window.closeCreateClubModal = closeCreateClubModal;
+  window.submitCreateClub = submitCreateClub;
+  window.initPitchMap = initPitchMap;
+  window.renderPitchMarkers = renderPitchMarkers;
+  window.findNearestPitch = findNearestPitch;
+  window.selectPitchAndScroll = selectPitchAndScroll;
+  window.renderMatchmaking = renderMatchmaking;
+  window.openCreateMatchModal = openCreateMatchModal;
+  window.closeCreateMatchModal = closeCreateMatchModal;
+  window.submitMatchPost = submitMatchPost;
+  window.openAcceptMatchModal = openAcceptMatchModal;
+  window.closeAcceptMatchModal = closeAcceptMatchModal;
+  window.confirmAcceptMatch = confirmAcceptMatch;
+  window.switchTournamentTab = switchTournamentTab;
+  window.renderTournament = renderTournament;
+  window.renderTournamentBracket = renderTournamentBracket;
+  window.renderTournamentStandings = renderTournamentStandings;
+  window.showUserLocationOnMap = showUserLocationOnMap;
+  window.MAX_CLUB_MEMBERS = MAX_CLUB_MEMBERS;
+}
