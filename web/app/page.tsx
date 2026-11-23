@@ -395,6 +395,8 @@ function getFieldSubPitches(field: FieldInfo | { id: number; name?: string } | n
 const SUB_PITCHES: SubPitchItem[] = getFieldSubPitches({ id: 6 });
 
 type FieldInfo = {
+  lat?: number;
+  lng?: number;
   id: number;
   name: string;
   ward?: string | null;
@@ -746,12 +748,305 @@ function money(value: number | string): string {
   return new Intl.NumberFormat("vi-VN").format(Number(value)) + "đ";
 }
 
+
+type MatchmakingPost = {
+  id: number;
+  teamName: string;
+  captainName: string;
+  phone: string;
+  fieldId: number;
+  fieldName: string;
+  fieldType: "SAN_5" | "SAN_7" | "SAN_11";
+  matchDate: string;
+  timeSlot: string;
+  level: "VUI_VE" | "TRUNG_BINH" | "BAN_CHUYEN";
+  levelLabel: string;
+  betRule: "CHIA_DOI" | "THUA_BAO" | "KEO_NUOC";
+  betLabel: string;
+  status: "OPEN" | "MATCHED";
+  matchedBy?: string | null;
+  avatar: string;
+  description: string;
+  createdAt: string;
+};
+
+const DEFAULT_MATCHMAKING_POSTS: MatchmakingPost[] = [
+  {
+    id: 1,
+    teamName: "FC Ban Mê Phủi",
+    captainName: "Anh Tuấn",
+    phone: "0905123456",
+    fieldId: 6,
+    fieldName: "Sân bóng đá C1",
+    fieldType: "SAN_5",
+    matchDate: "2026-11-24",
+    timeSlot: "17:30 - 19:00",
+    level: "TRUNG_BINH",
+    levelLabel: "Trung bình (Phong trào)",
+    betRule: "CHIA_DOI",
+    betLabel: "Tiền sân 5-5",
+    status: "OPEN",
+    avatar: "🦁",
+    description: "Đội gồm anh em công sở, đá vui vẻ cọ xát sau giờ làm, không va chạm mạnh.",
+    createdAt: "10 phút trước"
+  },
+  {
+    id: 2,
+    teamName: "FC Ea Kao Trẻ",
+    captainName: "Hoàng Long",
+    phone: "0914888999",
+    fieldId: 19,
+    fieldName: "Sân bóng đá Ban Mê Sport",
+    fieldType: "SAN_7",
+    matchDate: "2026-11-24",
+    timeSlot: "19:00 - 20:30",
+    level: "BAN_CHUYEN",
+    levelLabel: "Khá - Chiến (Cọ xát)",
+    betRule: "THUA_BAO",
+    betLabel: "Đội thua trả sân",
+    status: "OPEN",
+    avatar: "⚡",
+    description: "Cần tìm đối sân 7 cứng chân, thể lực tốt để tập dượt trước giải D-League Đắk Lắk.",
+    createdAt: "1 giờ trước"
+  },
+  {
+    id: 3,
+    teamName: "FC Bác Sĩ Đắk Lắk",
+    captainName: "Bác sĩ Minh",
+    phone: "0935112233",
+    fieldId: 10,
+    fieldName: "Sân Bóng Đá Ngọc Anh",
+    fieldType: "SAN_5",
+    matchDate: "2026-11-25",
+    timeSlot: "06:30 - 08:00",
+    level: "VUI_VE",
+    levelLabel: "Dưỡng sinh (Vui vẻ)",
+    betRule: "KEO_NUOC",
+    betLabel: "Tiền sân 5-5 + Kèo nước",
+    status: "MATCHED",
+    matchedBy: "FC Dược Phẩm Ban Mê",
+    avatar: "🩺",
+    description: "Giao lưu thể dục buổi sáng, giữ sức khỏe và tinh thần thoải mái.",
+    createdAt: "3 giờ trước"
+  },
+  {
+    id: 4,
+    teamName: "FC Sinh Viên Tây Nguyên",
+    captainName: "Quang Thịnh",
+    phone: "0896890399",
+    fieldId: 17,
+    fieldName: "SVĐ Trường ĐH Tây Nguyên",
+    fieldType: "SAN_11",
+    matchDate: "2026-11-26",
+    timeSlot: "16:00 - 18:00",
+    level: "TRUNG_BINH",
+    levelLabel: "Trung bình (Phong trào)",
+    betRule: "CHIA_DOI",
+    betLabel: "Tiền sân 5-5",
+    status: "OPEN",
+    avatar: "🎓",
+    description: "Giao lưu sân 11 người mặt cỏ chuẩn VFF, cọ xát hữu nghị với các trường và câu lạc bộ bạn.",
+    createdAt: "Hôm nay"
+  }
+];
+
+const DEFAULT_TOURNAMENT_DATA = {
+  name: "Cúp Tứ Hùng Ban Mê 2026",
+  status: "Đang diễn ra",
+  roundName: "Vòng Chung Kết & Bảng A",
+  bracketMatches: [
+    {
+      id: "BK1",
+      round: "Bán kết 1",
+      time: "17:30 · 28/11/2026",
+      field: "Sân bóng C1 (Sân 7)",
+      team1: { name: "FC Cà Phê Ban Mê", score: 4 },
+      team2: { name: "FC Đại Ngàn Xanh", score: 2 },
+      status: "FINISHED",
+      winner: "FC Cà Phê Ban Mê"
+    },
+    {
+      id: "BK2",
+      round: "Bán kết 2",
+      time: "19:00 · 28/11/2026",
+      field: "Sân bóng C1 (Sân 7)",
+      team1: { name: "FC Voi Chiến Krông Pắc", score: 3 },
+      team2: { name: "FC Buôn Ma Thuột United", score: 5 },
+      status: "FINISHED",
+      winner: "FC Buôn Ma Thuột United"
+    },
+    {
+      id: "CK",
+      round: "Trận Chung Kết Tranh Ngôi Vô Địch 🏆",
+      time: "18:00 · 30/11/2026",
+      field: "SVĐ Buôn Ma Thuột (Sân 11)",
+      team1: { name: "FC Cà Phê Ban Mê", score: null },
+      team2: { name: "FC Buôn Ma Thuột United", score: null },
+      status: "UPCOMING",
+      winner: null
+    }
+  ],
+  standings: [
+    { rank: 1, team: "FC Buôn Ma Thuột United", played: 3, won: 3, drawn: 0, lost: 0, gf: 12, ga: 4, gd: "+8", pts: 9 },
+    { rank: 2, team: "FC Cà Phê Ban Mê", played: 3, won: 2, drawn: 0, lost: 1, gf: 9, ga: 5, gd: "+4", pts: 6 },
+    { rank: 3, team: "FC Đại Ngàn Xanh", played: 3, won: 1, drawn: 0, lost: 2, gf: 6, ga: 8, gd: "-2", pts: 3 },
+    { rank: 4, team: "FC Voi Chiến Krông Pắc", played: 3, won: 0, drawn: 0, lost: 3, gf: 3, ga: 13, gd: "-10", pts: 0 }
+  ]
+};
+
 export default function Home() {
   const [date, setDate] = useState("");
   const [fieldsList, setFieldsList] = useState<FieldInfo[]>(DEFAULT_FIELDS);
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [filterType, setFilterType] = useState<"ALL" | "SAN_5" | "SAN_7" | "SAN_11">("ALL");
   const [filterWard, setFilterWard] = useState<string>("ALL");
+
+  // State cho 3 tính năng mới: Bản đồ BMT, Sàn Cáp kèo & Giải đấu phong trào
+  const [matchPosts, setMatchPosts] = useState<MatchmakingPost[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const s = window.localStorage.getItem("football_matchmaking");
+        if (s) return JSON.parse(s);
+      } catch (e) {}
+    }
+    return DEFAULT_MATCHMAKING_POSTS;
+  });
+  const [matchFilter, setMatchFilter] = useState<string>("ALL");
+  const [createMatchOpen, setCreateMatchOpen] = useState<boolean>(false);
+  const [acceptMatchOpen, setAcceptMatchOpen] = useState<boolean>(false);
+  const [activeMatchToAccept, setActiveMatchToAccept] = useState<MatchmakingPost | null>(null);
+
+  // Form Đăng tin
+  const [cmTeam, setCmTeam] = useState<string>("");
+  const [cmCaptain, setCmCaptain] = useState<string>("");
+  const [cmPhone, setCmPhone] = useState<string>("");
+  const [cmFieldId, setCmFieldId] = useState<number>(6);
+  const [cmDate, setCmDate] = useState<string>("");
+  const [cmSlot, setCmSlot] = useState<string>("17:30 - 19:00");
+  const [cmLevel, setCmLevel] = useState<"VUI_VE" | "TRUNG_BINH" | "BAN_CHUYEN">("TRUNG_BINH");
+  const [cmBet, setCmBet] = useState<"CHIA_DOI" | "THUA_BAO" | "KEO_NUOC">("CHIA_DOI");
+  const [cmDesc, setCmDesc] = useState<string>("");
+
+  // Form Bắt đối
+  const [amTeam, setAmTeam] = useState<string>("");
+  const [amPhone, setAmPhone] = useState<string>("");
+
+  // Giải đấu
+  const [tourTab, setTourTab] = useState<"BRACKET" | "STANDINGS">("BRACKET");
+
+  // Bản đồ & GPS
+  const [mapFilter, setMapFilter] = useState<"ALL" | "SAN_5" | "SAN_7" | "SAN_11">("ALL");
+  const [gpsNotice, setGpsNotice] = useState<string>("");
+
+  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return Math.round(R * c * 10) / 10;
+  }
+
+  function handleFindNearestPitch() {
+    setGpsNotice("Đang quét định vị GPS của bạn...");
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const uLat = pos.coords.latitude;
+          const uLng = pos.coords.longitude;
+          let nearest = fieldsList[0];
+          let minD = 999999;
+          fieldsList.forEach((f) => {
+            const fLat = f.lat || 12.6865;
+            const fLng = f.lng || 108.0450;
+            const d = calculateDistance(uLat, uLng, fLat, fLng);
+            if (d < minD) {
+              minD = d;
+              nearest = f;
+            }
+          });
+          setSelectedPitchId(nearest.id);
+          setGpsNotice(`📍 Sân gần bạn nhất: ${nearest.name} (${nearest.ward}) · Cách bạn khoảng ${minD} km`);
+        },
+        () => {
+          setSelectedPitchId(5);
+          setGpsNotice("📍 Vị trí trung tâm Buôn Ma Thuột: SVĐ Buôn Ma Thuột (2 Nguyễn Công Trứ)");
+        },
+        { timeout: 8000 }
+      );
+    } else {
+      setSelectedPitchId(5);
+      setGpsNotice("📍 Vị trí trung tâm Buôn Ma Thuột: SVĐ Buôn Ma Thuột (2 Nguyễn Công Trứ)");
+    }
+  }
+
+  function handleCreateMatchSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!cmTeam || !cmCaptain || !cmPhone) return;
+    const field = fieldsList.find((f) => f.id === cmFieldId) || fieldsList[0];
+    const levelLabels = {
+      "VUI_VE": "Dưỡng sinh (Vui vẻ)",
+      "TRUNG_BINH": "Trung bình (Phong trào)",
+      "BAN_CHUYEN": "Khá - Chiến (Cọ xát)"
+    };
+    const betLabels = {
+      "CHIA_DOI": "Tiền sân 5-5",
+      "THUA_BAO": "Đội thua trả sân",
+      "KEO_NUOC": "Kèo nước ngọt"
+    };
+
+    const newPost: MatchmakingPost = {
+      id: Date.now(),
+      teamName: cmTeam,
+      captainName: cmCaptain,
+      phone: cmPhone,
+      fieldId: field.id,
+      fieldName: field.name,
+      fieldType: field.fieldType,
+      matchDate: cmDate || "2026-11-25",
+      timeSlot: cmSlot,
+      level: cmLevel,
+      levelLabel: levelLabels[cmLevel] || "Phong trào",
+      betRule: cmBet,
+      betLabel: betLabels[cmBet] || "Tiền sân 5-5",
+      status: "OPEN",
+      avatar: "⚡",
+      description: cmDesc || "Kèo giao lưu hữu nghị, đá đẹp, văn minh.",
+      createdAt: "Vừa xong"
+    };
+
+    const updated = [newPost, ...matchPosts];
+    setMatchPosts(updated);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("football_matchmaking", JSON.stringify(updated));
+    }
+    setCreateMatchOpen(false);
+    setCmTeam("");
+    setCmCaptain("");
+    setCmDesc("");
+    alert("🎉 Đã đăng tin tìm đối thành công lên Sàn phủi Buôn Ma Thuột!");
+  }
+
+  function handleAcceptMatchSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!activeMatchToAccept || !amTeam || !amPhone) return;
+
+    const updated = matchPosts.map((p) => {
+      if (p.id === activeMatchToAccept.id) {
+        return { ...p, status: "MATCHED" as const, matchedBy: amTeam };
+      }
+      return p;
+    });
+
+    setMatchPosts(updated);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("football_matchmaking", JSON.stringify(updated));
+    }
+    setAcceptMatchOpen(false);
+    alert(`🤝 Chúc mừng! Bạn đã bắt đối thành công với ${activeMatchToAccept.teamName}! Hãy gọi ${activeMatchToAccept.phone} để chốt màu áo nhé.`);
+  }
 
   // Selected complex & sub-pitch state
   const [selectedPitchId, setSelectedPitchId] = useState<number>(6); // Mặc định Sân C1 (có sân 5 và sân 7)
@@ -1319,6 +1614,9 @@ export default function Home() {
           </a>
 
           <nav className="nav-links">
+            <a href="#ban-do-san">🗺️ Bản đồ BMT</a>
+            <a href="#cap-keo">🤝 Cáp kèo</a>
+            <a href="#giai-dau">🏆 Giải đấu</a>
             <a href="#danh-sach-san">🏟️ Danh sách sân</a>
             <a href="#dat-san">📅 Lịch sân trống</a>
             <a href="#bang-gia">💰 Bảng giá</a>
@@ -1604,7 +1902,377 @@ export default function Home() {
         </div>
       </div>
 
-      {/* UI-01 & UI-03: Danh mục sân bóng Buôn Ma Thuột */}
+      
+      {/* SECTION 1: BẢN ĐỒ TƯƠNG TÁC & ĐỊNH VỊ GPS BUÔN MA THUỘT */}
+      <section className="section-wrap" id="ban-do-san" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
+        <div className="section-head-modern" style={{ marginBottom: "20px" }}>
+          <div>
+            <span className="section-tag" style={{ background: "#eff6ff", color: "#2563eb", borderColor: "#bfdbfe" }}>🗺️ BẢN ĐỒ SỐ ĐỊA LÝ BUÔN MA THUỘT</span>
+            <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Bản đồ vị trí 20 cụm sân &amp; Định vị GPS</h2>
+            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
+              Khám phá tọa độ các sân bóng thật tại Đắk Lắk, tự động tính khoảng cách tìm sân gần bạn nhất và chỉ đường Google Maps một chạm.
+            </p>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={handleFindNearestPitch}
+              style={{ padding: "10px 18px", fontSize: "13px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "8px" }}
+            >
+              <span>📍</span> Tìm sân gần tôi nhất (GPS)
+            </button>
+          </div>
+        </div>
+
+        {gpsNotice && (
+          <div style={{ background: "#f0fdf4", border: "1px solid #86efac", color: "#166534", padding: "12px 16px", borderRadius: "10px", fontWeight: "700", marginBottom: "16px", fontSize: "13px" }}>
+            {gpsNotice}
+          </div>
+        )}
+
+        {/* Bộ lọc loại sân trên bản đồ */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px", alignItems: "center" }}>
+          <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Lọc loại sân:</span>
+          {(["ALL", "SAN_5", "SAN_7", "SAN_11"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              className={`quick-day-btn ${mapFilter === t ? "active" : ""}`}
+              onClick={() => setMapFilter(t)}
+              style={{ fontSize: "12px", padding: "6px 14px" }}
+            >
+              {t === "ALL" ? "Tất cả sân" : t === "SAN_5" ? "⚽ Sân 5" : t === "SAN_7" ? "🏆 Sân 7" : "⭐ Sân 11"}
+            </button>
+          ))}
+        </div>
+
+        {/* Grid thẻ sân có bản đồ chỉ đường & đặt sân */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: "16px" }}>
+          {fieldsList
+            .filter((f) => {
+              if (f.status === "MAINTENANCE" || f.id === 22) return false;
+              if (mapFilter === "ALL") return true;
+              const subs = getFieldSubPitches(f);
+              return subs.some((s) => s.category === mapFilter);
+            })
+            .slice(0, 8)
+            .map((f) => {
+              const isSelected = f.id === selectedPitchId;
+              const fLat = f.lat || 12.6865;
+              const fLng = f.lng || 108.0450;
+              return (
+                <div
+                  key={f.id}
+                  style={{
+                    border: isSelected ? "2px solid #16a34a" : "1.5px solid #e2e8f0",
+                    background: isSelected ? "#f0fdf4" : "#ffffff",
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    boxShadow: "var(--shadow-sm)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  <div style={{ position: "relative", height: "120px" }}>
+                    <img src={f.imageUrl || ""} alt={f.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <span style={{ position: "absolute", top: "8px", right: "8px", background: "rgba(15, 23, 42, 0.75)", color: "#ffffff", padding: "3px 8px", borderRadius: "999px", fontSize: "10px", fontWeight: "700" }}>
+                      📍 {f.ward}
+                    </span>
+                  </div>
+
+                  <div style={{ padding: "14px" }}>
+                    <strong style={{ fontSize: "15px", color: "#0f172a", display: "block", marginBottom: "4px" }}>{f.name}</strong>
+                    <div style={{ fontSize: "11px", color: "#64748b", marginBottom: "8px", lineHeight: "1.4" }}>
+                      🏠 {f.address}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "#166534", fontWeight: "600", marginBottom: "12px" }}>
+                      📞 {f.phone || "0896890399"}
+                    </div>
+
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <button
+                        type="button"
+                        className="primary-button"
+                        onClick={() => {
+                          setSelectedPitchId(f.id);
+                          const el = document.getElementById("dat-san");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }}
+                        style={{ flex: 1, padding: "8px 10px", fontSize: "11px", fontWeight: "700", justifyContent: "center" }}
+                      >
+                        ⚡ Đặt ca sân
+                      </button>
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${fLat},${fLng}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="outline-button"
+                        style={{ padding: "8px 12px", fontSize: "11px", display: "inline-flex", alignItems: "center", textDecoration: "none", color: "#0284c7" }}
+                        title="Chỉ đường Google Maps"
+                      >
+                        🧭 Chỉ đường
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </section>
+
+      {/* SECTION 2: SÀN CÁP KÈO & TÌM ĐỐI GIAO LƯU BUÔN MA THUỘT */}
+      <section className="section-wrap" id="cap-keo" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
+        <div className="section-head-modern" style={{ marginBottom: "20px" }}>
+          <div>
+            <span className="section-tag" style={{ background: "#fef2f2", color: "#dc2626", borderColor: "#fecaca" }}>🤝 SÀN GIAO LƯU PHONG TRÀO BAN MÊ</span>
+            <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Cáp kèo thi đấu &amp; Tuyển cầu thủ</h2>
+            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
+              Nơi các đội bóng đá phủi BMT giao lưu cọ xát, bắt đối nhanh chóng theo trình độ và thỏa thuận tiền sân.
+            </p>
+          </div>
+
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => setCreateMatchOpen(true)}
+              style={{ padding: "10px 18px", fontSize: "13px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "8px" }}
+            >
+              <span>➕</span> Đăng tin tìm đối / Cáp kèo
+            </button>
+          </div>
+        </div>
+
+        {/* Filter tabs */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "18px", alignItems: "center" }}>
+          <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Trình độ:</span>
+          {[
+            { key: "ALL", label: "Tất cả kèo" },
+            { key: "VUI_VE", label: "🍻 Dưỡng sinh (Vui vẻ)" },
+            { key: "TRUNG_BINH", label: "⚡ Trung bình (Phong trào)" },
+            { key: "BAN_CHUYEN", label: "🔥 Khá - Chiến (Cọ xát)" },
+            { key: "OPEN", label: "🟢 Đang chờ bắt đối" }
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`quick-day-btn ${matchFilter === tab.key ? "active" : ""}`}
+              onClick={() => setMatchFilter(tab.key)}
+              style={{ fontSize: "12px", padding: "6px 14px" }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Grid danh sách kèo */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "18px" }}>
+          {matchPosts
+            .filter((p) => {
+              if (matchFilter === "ALL") return true;
+              if (matchFilter === "OPEN") return p.status === "OPEN";
+              return p.level === matchFilter;
+            })
+            .map((post) => {
+              const isOpen = post.status === "OPEN";
+              const levelBg = post.level === "BAN_CHUYEN" ? "#fef2f2" : post.level === "TRUNG_BINH" ? "#f0fdf4" : "#eff6ff";
+              const levelColor = post.level === "BAN_CHUYEN" ? "#b91c1c" : post.level === "TRUNG_BINH" ? "#166534" : "#1d4ed8";
+
+              return (
+                <div
+                  key={post.id}
+                  style={{
+                    background: "#ffffff",
+                    border: `1.5px solid ${isOpen ? "#cbd5e1" : "#e2e8f0"}`,
+                    borderRadius: "16px",
+                    padding: "20px",
+                    boxShadow: "var(--shadow-sm)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between"
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ fontSize: "26px", background: "#f1f5f9", width: "44px", height: "44px", borderRadius: "12px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                          {post.avatar || "⚽"}
+                        </span>
+                        <div>
+                          <strong style={{ fontSize: "16px", color: "#0f172a", display: "block" }}>{post.teamName}</strong>
+                          <small style={{ color: "#64748b" }}>Đội trưởng: {post.captainName} · {post.createdAt}</small>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "999px", fontWeight: "800", background: isOpen ? "#dcfce7" : "#fee2e2", color: isOpen ? "#15803d" : "#991b1b" }}>
+                        {isOpen ? "● ĐANG TÌM ĐỐI" : "✓ ĐÃ CÁP KÈO"}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "14px" }}>
+                      <span style={{ fontSize: "11px", fontWeight: "700", background: levelBg, color: levelColor, padding: "3px 8px", borderRadius: "6px" }}>
+                        🎯 {post.levelLabel}
+                      </span>
+                      <span style={{ fontSize: "11px", fontWeight: "700", background: "#fef3c7", color: "#92400e", padding: "3px 8px", borderRadius: "6px" }}>
+                        💰 {post.betLabel}
+                      </span>
+                      <span style={{ fontSize: "11px", fontWeight: "700", background: "#f1f5f9", color: "#334155", padding: "3px 8px", borderRadius: "6px" }}>
+                        ⚽ {post.fieldType === "SAN_11" ? "Sân 11" : post.fieldType === "SAN_7" ? "Sân 7" : "Sân 5"}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: "13px", color: "#334155", background: "#f8fafc", borderRadius: "10px", padding: "12px", marginBottom: "12px", lineHeight: "1.5" }}>
+                      <div>🏟️ <strong>Sân:</strong> {post.fieldName}</div>
+                      <div>📅 <strong>Thời gian:</strong> {post.timeSlot} (Ngày {post.matchDate})</div>
+                      <div style={{ marginTop: "6px", color: "#475569", fontStyle: "italic" }}>"{post.description}"</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "8px", marginTop: "6px" }}>
+                    {isOpen ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveMatchToAccept(post);
+                          setAcceptMatchOpen(true);
+                        }}
+                        className="primary-button"
+                        style={{ flex: 1, padding: "9px", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}
+                      >
+                        🤝 Bắt đối ngay
+                      </button>
+                    ) : (
+                      <div style={{ flex: 1, textAlign: "center", fontSize: "12px", fontWeight: "700", color: "#166534", background: "#dcfce7", padding: "8px", borderRadius: "8px" }}>
+                        Đã cáp với: {post.matchedBy || "Đội bạn"}
+                      </div>
+                    )}
+                    <a href={`tel:${post.phone}`} className="outline-button" style={{ padding: "9px 12px", fontSize: "12px", display: "inline-flex", alignItems: "center" }} title="Gọi điện">
+                      📞
+                    </a>
+                    <a href={`https://zalo.me/${post.phone}`} target="_blank" rel="noreferrer" className="outline-button" style={{ padding: "9px 12px", fontSize: "12px", color: "#0284c7", borderColor: "#bae6fd", display: "inline-flex", alignItems: "center" }} title="Nhắn Zalo">
+                      💬
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </section>
+
+      {/* SECTION 3: QUẢN LÝ GIẢI ĐẤU MINI & BẢNG XẾP HẠNG (TOURNAMENT HUB) */}
+      <section className="section-wrap" id="giai-dau" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
+        <div className="section-head-modern" style={{ marginBottom: "20px" }}>
+          <div>
+            <span className="section-tag" style={{ background: "#fefce8", color: "#ca8a04", borderColor: "#fef08a" }}>🏆 GIẢI ĐẤU PHONG TRÀO BAN MÊ</span>
+            <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Cúp Tứ Hùng Ban Mê 2026</h2>
+            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
+              Cập nhật kết quả trực tiếp, nhánh đấu loại trực tiếp Knock-out và bảng xếp hạng điểm số tự động.
+            </p>
+          </div>
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              type="button"
+              className={`quick-day-btn ${tourTab === "BRACKET" ? "active" : ""}`}
+              onClick={() => setTourTab("BRACKET")}
+              style={{ fontSize: "13px", fontWeight: "700", padding: "8px 16px" }}
+            >
+              ⚔️ Nhánh đấu Knock-out
+            </button>
+            <button
+              type="button"
+              className={`quick-day-btn ${tourTab === "STANDINGS" ? "active" : ""}`}
+              onClick={() => setTourTab("STANDINGS")}
+              style={{ fontSize: "13px", fontWeight: "700", padding: "8px 16px" }}
+            >
+              📊 Bảng xếp hạng điểm số
+            </button>
+          </div>
+        </div>
+
+        {tourTab === "BRACKET" ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "18px" }}>
+            {DEFAULT_TOURNAMENT_DATA.bracketMatches.map((m) => {
+              const isFinished = m.status === "FINISHED";
+              const t1Win = isFinished && (m.team1.score ?? 0) > (m.team2.score ?? 0);
+              const t2Win = isFinished && (m.team2.score ?? 0) > (m.team1.score ?? 0);
+
+              return (
+                <div key={m.id} style={{ background: "#ffffff", border: "1.5px solid #e2e8f0", borderRadius: "14px", padding: "18px", boxShadow: "var(--shadow-sm)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "1px solid #f1f5f9", paddingBottom: "8px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: "800", color: "#16a34a", letterSpacing: "0.5px" }}>{m.round}</span>
+                    <span style={{ fontSize: "11px", color: "#64748b" }}>{m.time}</span>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "8px", background: t1Win ? "#f0fdf4" : "#f8fafc", fontWeight: t1Win ? "800" : "600", color: t1Win ? "#166534" : "#334155" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span>{t1Win ? "👑" : "⚪"}</span> {m.team1.name}
+                      </span>
+                      <span style={{ fontSize: "16px", fontWeight: "800" }}>{m.team1.score !== null ? m.team1.score : "-"}</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "8px", background: t2Win ? "#f0fdf4" : "#f8fafc", fontWeight: t2Win ? "800" : "600", color: t2Win ? "#166534" : "#334155" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span>{t2Win ? "👑" : "⚪"}</span> {m.team2.name}
+                      </span>
+                      <span style={{ fontSize: "16px", fontWeight: "800" }}>{m.team2.score !== null ? m.team2.score : "-"}</span>
+                    </div>
+                  </div>
+
+                  {m.winner && (
+                    <div style={{ marginTop: "10px", fontSize: "11px", textAlign: "center", color: "#15803d", fontWeight: "700", background: "#dcfce7", padding: "4px", borderRadius: "6px" }}>
+                      Đội chiến thắng: {m.winner}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left", background: "#ffffff", borderRadius: "12px", overflow: "hidden", border: "1px solid #e2e8f0" }}>
+              <thead>
+                <tr style={{ background: "#f8fafc", color: "#475569", fontWeight: "800", borderBottom: "2px solid #e2e8f0", textAlign: "center" }}>
+                  <th style={{ padding: "12px 8px", width: "50px" }}>Hạng</th>
+                  <th style={{ padding: "12px 8px", textAlign: "left" }}>Đội bóng</th>
+                  <th style={{ padding: "12px 8px" }}>Trận</th>
+                  <th style={{ padding: "12px 8px", color: "#16a34a" }}>Thắng</th>
+                  <th style={{ padding: "12px 8px" }}>Hòa</th>
+                  <th style={{ padding: "12px 8px", color: "#dc2626" }}>Thua</th>
+                  <th style={{ padding: "12px 8px" }}>BT</th>
+                  <th style={{ padding: "12px 8px" }}>BB</th>
+                  <th style={{ padding: "12px 8px" }}>HS</th>
+                  <th style={{ padding: "12px 8px", background: "#f0fdf4", color: "#166534", fontWeight: "900" }}>Điểm</th>
+                </tr>
+              </thead>
+              <tbody>
+                {DEFAULT_TOURNAMENT_DATA.standings.map((s) => {
+                  const medal = s.rank === 1 ? "🥇" : s.rank === 2 ? "🥈" : s.rank === 3 ? "🥉" : s.rank;
+                  return (
+                    <tr key={s.team} style={{ borderBottom: "1px solid #f1f5f9", textAlign: "center" }}>
+                      <td style={{ padding: "12px 8px", fontWeight: "800", fontSize: "14px" }}>{medal}</td>
+                      <td style={{ padding: "12px 8px", textAlign: "left", fontWeight: "700", color: "#0f172a" }}>{s.team}</td>
+                      <td style={{ padding: "12px 8px" }}>{s.played}</td>
+                      <td style={{ padding: "12px 8px", color: "#16a34a", fontWeight: "700" }}>{s.won}</td>
+                      <td style={{ padding: "12px 8px", color: "#64748b" }}>{s.drawn}</td>
+                      <td style={{ padding: "12px 8px", color: "#dc2626" }}>{s.lost}</td>
+                      <td style={{ padding: "12px 8px" }}>{s.gf}</td>
+                      <td style={{ padding: "12px 8px" }}>{s.ga}</td>
+                      <td style={{ padding: "12px 8px", fontWeight: "600" }}>{s.gd}</td>
+                      <td style={{ padding: "12px 8px", background: "#f0fdf4", color: "#166534", fontWeight: "900", fontSize: "14px" }}>{s.pts}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
       <section className="section-wrap" id="danh-sach-san">
         <div className="section-head-modern" style={{ alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
           <div>
@@ -3582,6 +4250,144 @@ export default function Home() {
           </div>
         </div>
       )}
+    
+      {/* MODAL: ĐĂNG TIN CÁP KÈO / TÌM ĐỐI */}
+      {createMatchOpen && (
+        <div className="modal-backdrop" style={{ display: "flex" }}>
+          <div className="modal-card" style={{ maxWidth: "520px", maxHeight: "90vh", overflowY: "auto" }}>
+            <div className="modal-header">
+              <div>
+                <h3 style={{ fontSize: "18px", margin: 0, color: "#0f172a" }}>➕ Đăng tin tìm đối giao lưu</h3>
+                <p style={{ fontSize: "12px", color: "#64748b", margin: "2px 0 0 0" }}>Đăng kèo thi đấu lên sàn phủi Ban Mê để các đội bắt đối</p>
+              </div>
+              <button type="button" className="modal-close" onClick={() => setCreateMatchOpen(false)}>✕</button>
+            </div>
+
+            <form onSubmit={handleCreateMatchSubmit} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Tên đội của bạn: *</label>
+                  <input type="text" required value={cmTeam} onChange={(e) => setCmTeam(e.target.value)} placeholder="VD: FC Dưỡng Sinh BMT" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Đội trưởng / Đại diện: *</label>
+                  <input type="text" required value={cmCaptain} onChange={(e) => setCmCaptain(e.target.value)} placeholder="VD: Duy Tài" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }} />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Số điện thoại / Zalo: *</label>
+                  <input type="text" required value={cmPhone} onChange={(e) => setCmPhone(e.target.value)} placeholder="VD: 0896890399" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px", fontFamily: "monospace" }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Cụm sân dự kiến: *</label>
+                  <select value={cmFieldId} onChange={(e) => setCmFieldId(Number(e.target.value))} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }}>
+                    {fieldsList.map((f) => (
+                      <option key={f.id} value={f.id}>{f.name} ({f.ward})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Ngày thi đấu: *</label>
+                  <input type="date" required value={cmDate} onChange={(e) => setCmDate(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Khung giờ đá: *</label>
+                  <select value={cmSlot} onChange={(e) => setCmSlot(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }}>
+                    <option value="17:30 - 19:00">17:30 - 19:00 (Giờ vàng tối)</option>
+                    <option value="19:00 - 20:30">19:00 - 20:30 (Đêm đẹp)</option>
+                    <option value="16:00 - 17:30">16:00 - 17:30 (Tan tầm)</option>
+                    <option value="06:30 - 08:00">06:30 - 08:00 (Sáng sớm)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Trình độ đội: *</label>
+                  <select value={cmLevel} onChange={(e) => setCmLevel(e.target.value as any)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }}>
+                    <option value="VUI_VE">Dưỡng sinh (Vui vẻ, giao lưu)</option>
+                    <option value="TRUNG_BINH">Trung bình (Phong trào)</option>
+                    <option value="BAN_CHUYEN">Khá - Chiến (Cọ xát căng)</option>
+                  </select>
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Kèo thỏa thuận: *</label>
+                  <select value={cmBet} onChange={(e) => setCmBet(e.target.value as any)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }}>
+                    <option value="CHIA_DOI">Tiền sân 5-5 (Mỗi đội 50%)</option>
+                    <option value="THUA_BAO">Đội thua bao trọn tiền sân</option>
+                    <option value="KEO_NUOC">Tiền sân 5-5 + Kèo nước</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 700, fontSize: "13px" }}>Ghi chú / Lời nhắn:</label>
+                <input type="text" value={cmDesc} onChange={(e) => setCmDesc(e.target.value)} placeholder="VD: Đội đá văn minh, không chơi xấu, mặc áo đỏ" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }} />
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                <button type="submit" className="primary-button" style={{ flex: 1, padding: "11px", fontWeight: 700 }}>
+                  🚀 Đăng tin tìm đối ngay
+                </button>
+                <button type="button" className="outline-button" style={{ padding: "11px 18px" }} onClick={() => setCreateMatchOpen(false)}>
+                  Hủy
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: BẮT ĐỐI / NHẬN KÈO */}
+      {acceptMatchOpen && activeMatchToAccept && (
+        <div className="modal-backdrop" style={{ display: "flex" }}>
+          <div className="modal-card" style={{ maxWidth: "460px" }}>
+            <div className="modal-header">
+              <div>
+                <h3 style={{ fontSize: "18px", margin: 0, color: "#0f172a" }}>🤝 Xác nhận bắt đối giao lưu</h3>
+                <p style={{ fontSize: "12px", color: "#64748b", margin: "2px 0 0 0" }}>Cáp kèo thi đấu với đội bạn</p>
+              </div>
+              <button type="button" className="modal-close" onClick={() => setAcceptMatchOpen(false)}>✕</button>
+            </div>
+
+            <form onSubmit={handleAcceptMatchSubmit} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: "10px", padding: "14px", fontSize: "13px" }}>
+                <div style={{ color: "#166534", fontWeight: 700, marginBottom: "4px" }}>
+                  Đội thách đấu: <span style={{ fontSize: "15px" }}>{activeMatchToAccept.teamName}</span>
+                </div>
+                <div style={{ color: "#334155", fontSize: "12px" }}>
+                  {activeMatchToAccept.fieldName} · {activeMatchToAccept.timeSlot} ngày {activeMatchToAccept.matchDate} · Kèo: {activeMatchToAccept.betLabel}
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 700, fontSize: "13px" }}>Tên đội của bạn (Đội nhận kèo): *</label>
+                <input type="text" required value={amTeam} onChange={(e) => setAmTeam(e.target.value)} placeholder="VD: FC Ban Mê Star" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }} />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 700, fontSize: "13px" }}>SĐT đại diện liên hệ: *</label>
+                <input type="text" required value={amPhone} onChange={(e) => setAmPhone(e.target.value)} placeholder="VD: 0912345678" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px", fontFamily: "monospace" }} />
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", marginTop: "6px" }}>
+                <button type="submit" className="primary-button" style={{ flex: 1, padding: "11px", fontWeight: 700 }}>
+                  ✓ Xác nhận bắt đối
+                </button>
+                <button type="button" className="outline-button" style={{ padding: "11px 18px" }} onClick={() => setAcceptMatchOpen(false)}>
+                  Đóng
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

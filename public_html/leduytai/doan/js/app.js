@@ -12,6 +12,8 @@ const API_BASE_URL = (typeof window !== "undefined" && window.localStorage && lo
 const DEFAULT_FIELDS = [
   {
     "id": 5,
+    "lat": 12.6784,
+    "lng": 108.0428,
     "name": "SVĐ Buôn Ma Thuột",
     "ward": "Phường Tân Tiến",
     "address": "2 Nguyễn Công Trứ, Phường Tân Tiến, Buôn Ma Thuột",
@@ -27,6 +29,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 6,
+    "lat": 12.6935,
+    "lng": 108.0312,
     "name": "Sân bóng đá C1",
     "ward": "Phường Tân Tiến",
     "address": "1B Y Ngông, Phường Tân Tiến, Buôn Ma Thuột",
@@ -42,6 +46,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 7,
+    "lat": 12.6865,
+    "lng": 108.058,
     "name": "Sân bóng đá Manchester",
     "ward": "Phường Tân Tiến",
     "address": "130 Y Ngông, Phường Tân Tiến, Buôn Ma Thuột",
@@ -57,6 +63,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 8,
+    "lat": 12.6812,
+    "lng": 108.045,
     "name": "Sân cỏ nhân tạo T&H",
     "ward": "Phường Tân Tiến",
     "address": "110/10 Hoàng Hoa Thám, Phường Tân Tiến, Buôn Ma Thuột",
@@ -72,6 +80,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 9,
+    "lat": 12.679,
+    "lng": 108.0515,
     "name": "Trung tâm TDTT Hoài Ân",
     "ward": "Phường Tân Lập",
     "address": "Hẻm 119 Nguyễn Văn Cừ, Phường Tân Lập, Buôn Ma Thuột",
@@ -87,6 +97,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 10,
+    "lat": 12.684,
+    "lng": 108.039,
     "name": "Sân Bóng Đá Ngọc Anh",
     "ward": "Phường Thành Nhất",
     "address": "Hẻm 46 Nguyễn Thị Định, Phường Thành Nhất, Buôn Ma Thuột",
@@ -102,6 +114,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 11,
+    "lat": 12.708,
+    "lng": 108.062,
     "name": "Sân vận động ĐTL (Hà Huy Tập)",
     "ward": "Phường Tân An",
     "address": "300 Hà Huy Tập, Phường Tân An, Buôn Ma Thuột",
@@ -117,6 +131,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 12,
+    "lat": 12.691,
+    "lng": 108.067,
     "name": "Sân bóng đá Tân Thái Long",
     "ward": "Phường Tân Lập",
     "address": "Hẻm 303 Nguyễn Văn Cừ, Phường Tân Lập, Buôn Ma Thuột",
@@ -132,6 +148,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 13,
+    "lat": 12.702,
+    "lng": 108.055,
     "name": "Sân Lập Nguyễn",
     "ward": "Phường Tân An",
     "address": "Hẻm Nguyễn Chí Thanh, Phường Tân An, Buôn Ma Thuột",
@@ -147,6 +165,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 14,
+    "lat": 12.6955,
+    "lng": 108.028,
     "name": "Sân KenVin",
     "ward": "Phường Tân Lợi",
     "address": "Hẻm Y Moan Ênuôl, Phường Tân Lợi, Buôn Ma Thuột",
@@ -162,6 +182,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 15,
+    "lat": 12.698,
+    "lng": 108.025,
     "name": "Sân Đại Thành",
     "ward": "Phường Tân Lợi",
     "address": "Đường Y Moan Ênuôl, Phường Tân Lợi, Buôn Ma Thuột",
@@ -177,6 +199,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 16,
+    "lat": 12.688,
+    "lng": 108.035,
     "name": "Sân Hoàng Gia",
     "ward": "Phường Tân Lợi",
     "address": "Hẻm Phan Chu Trinh, Phường Tân Lợi, Buôn Ma Thuột",
@@ -192,6 +216,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 17,
+    "lat": 12.6515,
+    "lng": 108.031,
     "name": "SVĐ Trường ĐH Tây Nguyên",
     "ward": "Phường Ea Tam",
     "address": "567 Lê Duẩn, Phường Ea Tam, Buôn Ma Thuột",
@@ -207,6 +233,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 18,
+    "lat": 12.658,
+    "lng": 108.036,
     "name": "Sân CĐ Sư Phạm",
     "ward": "Phường Ea Tam",
     "address": "Hẻm 33 Lê Thị Riêng, Phường Ea Tam, Buôn Ma Thuột",
@@ -222,6 +250,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 19,
+    "lat": 12.694,
+    "lng": 108.071,
     "name": "Sân bóng đá Ban Mê Sport",
     "ward": "Phường Tân Lập",
     "address": "Hẻm 403 Nguyễn Văn Cừ, Phường Tân Lập, Buôn Ma Thuột",
@@ -237,6 +267,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 20,
+    "lat": 12.682,
+    "lng": 108.056,
     "name": "Sân mini Hiệp Long",
     "ward": "Phường Tân Lập",
     "address": "Hẻm 175 Hùng Vương, Phường Tân Lập, Buôn Ma Thuột",
@@ -252,6 +284,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 21,
+    "lat": 12.677,
+    "lng": 108.04,
     "name": "Sân Thành Nhất",
     "ward": "Phường Thắng Lợi",
     "address": "Đường Phan Bội Châu, Phường Thắng Lợi, Buôn Ma Thuột",
@@ -267,6 +301,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 23,
+    "lat": 12.641,
+    "lng": 108.019,
     "name": "Sân thể thao Đức Thịnh",
     "ward": "Phường Khánh Xuân",
     "address": "Đường Võ Văn Kiệt, Phường Khánh Xuân, Buôn Ma Thuột",
@@ -282,6 +318,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 24,
+    "lat": 12.628,
+    "lng": 108.012,
     "name": "Sân Tiến Thy",
     "ward": "Xã Hòa Khánh",
     "address": "Quốc lộ 14, Xã Hòa Khánh, Buôn Ma Thuột",
@@ -297,6 +335,8 @@ const DEFAULT_FIELDS = [
   },
   {
     "id": 25,
+    "lat": 12.721,
+    "lng": 108.069,
     "name": "Sân Quốc Định",
     "ward": "Xã Hòa Thuận",
     "address": "Đường Đinh Núp, Xã Hòa Thuận, Buôn Ma Thuột",
@@ -721,6 +761,602 @@ function getFieldSubPitches(field) {
 }
 
 // Khởi tạo Database giả lập trên localStorage nếu chưa có
+
+// ==========================================
+// 1. SÀN CÁP KÈO BÓNG ĐÁ PHONG TRÀO BMT (MATCHMAKING)
+// ==========================================
+const DEFAULT_MATCHMAKING_POSTS = [
+  {
+    id: 1,
+    teamName: "FC Ban Mê Trẻ",
+    captainName: "Lê Duy Tài",
+    phone: "0896890399",
+    fieldId: 6,
+    fieldName: "Sân bóng đá C1",
+    fieldType: "SAN_5",
+    matchDate: getTodayString(),
+    timeSlot: "18:00 - 19:30",
+    level: "TRUNG_BINH",
+    levelLabel: "Trung bình (Phong trào)",
+    betRule: "CHIA_DOI",
+    betLabel: "Tiền sân 5-5",
+    status: "OPEN",
+    matchedBy: null,
+    avatar: "⚡",
+    description: "Đội sinh viên đá lành tính, phối hợp ban bật, không chơi xấu, giao lưu vui vẻ nâng cao sức khỏe.",
+    createdAt: "Vừa xong"
+  },
+  {
+    id: 2,
+    teamName: "FC Ea Tam 47",
+    captainName: "Quang Thịnh",
+    phone: "0905123456",
+    fieldId: 11,
+    fieldName: "Sân vận động ĐTL (Hà Huy Tập)",
+    fieldType: "SAN_7",
+    matchDate: getTodayString(1),
+    timeSlot: "19:30 - 21:00",
+    level: "BAN_CHUYEN",
+    levelLabel: "Khá - Chiến (Cọ xát)",
+    betRule: "THUA_BAO",
+    betLabel: "Đội thua trả sân",
+    status: "OPEN",
+    matchedBy: null,
+    avatar: "🔥",
+    description: "Đội cọ xát chuẩn bị tham gia giải sân 7 Đắk Lắk, tìm đối đá nhiệt tình, fair-play.",
+    createdAt: "15 phút trước"
+  },
+  {
+    id: 3,
+    teamName: "FC Lão Tướng BMT",
+    captainName: "Anh Hoàng",
+    phone: "0913456789",
+    fieldId: 12,
+    fieldName: "Sân bóng đá Tân Thái Long",
+    fieldType: "SAN_5",
+    matchDate: getTodayString(1),
+    timeSlot: "16:30 - 18:00",
+    level: "VUI_VE",
+    levelLabel: "Dưỡng sinh (Vui vẻ)",
+    betRule: "KEO_NUOC",
+    betLabel: "Kèo nước ngọt",
+    status: "MATCHED",
+    matchedBy: "FC Tân Lợi United",
+    avatar: "☕",
+    description: "Anh em văn phòng U35+ đá dưỡng sinh rèn luyện thể lực, không va chạm mạnh.",
+    createdAt: "1 giờ trước"
+  },
+  {
+    id: 4,
+    teamName: "FC CNTT Đắk Lắk",
+    captainName: "Hoàng Nam",
+    phone: "0912345678",
+    fieldId: 17,
+    fieldName: "SVĐ Trường ĐH Tây Nguyên",
+    fieldType: "SAN_11",
+    matchDate: getTodayString(2),
+    timeSlot: "15:00 - 17:00",
+    level: "TRUNG_BINH",
+    levelLabel: "Trung bình (SV ĐH Tây Nguyên)",
+    betRule: "CHIA_DOI",
+    betLabel: "Tiền sân 5-5",
+    status: "OPEN",
+    matchedBy: null,
+    avatar: "💻",
+    description: "Kèo sân lớn 11 người giao hữu bóng đá sinh viên và cựu sinh viên, thiếu 1 đối cùng chia sẻ đam mê.",
+    createdAt: "2 giờ trước"
+  }
+];
+
+// ==========================================
+// 2. GIẢI ĐẤU MINI & BẢNG XẾP HẠNG (TOURNAMENT HUB)
+// ==========================================
+const DEFAULT_TOURNAMENT_DATA = {
+  name: "CÚP TỨ HÙNG BAN MÊ 2026",
+  subTitle: "Giải đấu giao lưu các đội bóng phong trào xuất sắc Buôn Ma Thuột",
+  venue: "Sân Vận Động ĐTL (300 Hà Huy Tập) & Sân C1",
+  standings: [
+    { rank: 1, team: "FC Sân Nhà (Chủ giải)", played: 3, won: 2, drawn: 1, lost: 0, gf: 8, ga: 3, gd: "+5", points: 7, form: ["W", "W", "D"] },
+    { rank: 2, team: "FC Ban Mê Sport", played: 3, won: 2, drawn: 0, lost: 1, gf: 6, ga: 4, gd: "+2", points: 6, form: ["W", "L", "W"] },
+    { rank: 3, team: "FC ĐH Tây Nguyên", played: 3, won: 1, drawn: 1, lost: 1, gf: 5, ga: 5, gd: "0", points: 4, form: ["L", "W", "D"] },
+    { rank: 4, team: "FC ĐTL Hà Huy Tập", played: 3, won: 0, drawn: 0, lost: 3, gf: 2, ga: 9, gd: "-7", points: 0, form: ["L", "L", "L"] }
+  ],
+  bracketMatches: [
+    {
+      id: "BK1",
+      round: "BÁN KẾT 1",
+      time: "17:30 · Sân 7-1 ĐTL",
+      team1: { name: "FC Sân Nhà", score: 3 },
+      team2: { name: "FC ĐH Tây Nguyên", score: 2 },
+      status: "FINISHED",
+      winner: "FC Sân Nhà"
+    },
+    {
+      id: "BK2",
+      round: "BÁN KẾT 2",
+      time: "19:00 · Sân 7-2 ĐTL",
+      team1: { name: "FC Ban Mê Sport", score: 2 },
+      team2: { name: "FC ĐTL Hà Huy Tập", score: 1 },
+      status: "FINISHED",
+      winner: "FC Ban Mê Sport"
+    },
+    {
+      id: "H3",
+      round: "TRANH HẠNG BA",
+      time: "16:30 · Sân C1",
+      team1: { name: "FC ĐH Tây Nguyên", score: 2 },
+      team2: { name: "FC ĐTL Hà Huy Tập", score: 1 },
+      status: "FINISHED",
+      winner: "FC ĐH Tây Nguyên"
+    },
+    {
+      id: "CK",
+      round: "CHUNG KẾT CÚP TỨ HÙNG",
+      time: "18:00 · SVĐ Buôn Ma Thuột",
+      team1: { name: "FC Sân Nhà", score: 1 },
+      team2: { name: "FC Ban Mê Sport", score: 0 },
+      status: "FINISHED",
+      winner: "FC Sân Nhà (VÔ ĐỊCH 🏆)"
+    }
+  ]
+};
+
+// ==========================================
+// 3. LEAFLET MAP LOGIC
+// ==========================================
+let pitchLeafletMap = null;
+let pitchMarkers = [];
+
+function initPitchMap() {
+  const mapContainer = document.getElementById("pitchMapContainer");
+  if (!mapContainer) return;
+  if (typeof L === "undefined") {
+    mapContainer.innerHTML = '<div style="padding: 40px; text-align: center; color: #64748b; font-size: 14px;">Đang tải bản đồ OpenStreetMap Buôn Ma Thuột...</div>';
+    return;
+  }
+  if (pitchLeafletMap) {
+    setTimeout(() => { pitchLeafletMap.invalidateSize(); }, 200);
+    return;
+  }
+
+  pitchLeafletMap = L.map('pitchMapContainer').setView([12.6865, 108.0450], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(pitchLeafletMap);
+
+  renderPitchMarkers();
+}
+
+function renderPitchMarkers(filterType = "ALL") {
+  if (!pitchLeafletMap) return;
+  pitchMarkers.forEach(m => pitchLeafletMap.removeLayer(m));
+  pitchMarkers = [];
+
+  const fields = DEFAULT_FIELDS.filter(f => {
+    if (f.status === 'MAINTENANCE' || f.id === 22) return false;
+    if (filterType === "ALL") return true;
+    const subs = (typeof getFieldSubPitches === "function") ? getFieldSubPitches(f) : [];
+    return subs.some(s => s.category === filterType);
+  });
+
+  fields.forEach(field => {
+    if (!field.lat || !field.lng) return;
+
+    const customIcon = L.divIcon({
+      className: 'pitch-map-marker',
+      html: `<div style="background: #16a34a; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2.5px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.35); font-weight: bold; cursor: pointer;">⚽</div>`,
+      iconSize: [34, 34],
+      iconAnchor: [17, 34],
+      popupAnchor: [0, -32]
+    });
+
+    const marker = L.marker([field.lat, field.lng], { icon: customIcon }).addTo(pitchLeafletMap);
+
+    const popupHtml = `
+      <div style="font-family: inherit; width: 240px; padding: 2px;">
+        <img src="${field.imageUrl}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" alt="${field.name}" />
+        <strong style="font-size: 14px; color: #0f172a; display: block; margin-bottom: 4px;">${field.name}</strong>
+        <div style="font-size: 11px; color: #166534; font-weight: 700; margin-bottom: 4px;">📍 ${field.ward} · ${field.address || ''}</div>
+        <div style="font-size: 11px; color: #475569; margin-bottom: 8px;">${field.description}</div>
+        <div style="display: flex; gap: 6px;">
+          <button type="button" onclick="selectPitchAndScroll(${field.id})" style="flex: 1; background: #16a34a; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+            ⚡ Đặt sân này
+          </button>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=${field.lat},${field.lng}" target="_blank" style="background: #0284c7; color: white; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center;">
+            🧭 Chỉ đường
+          </a>
+        </div>
+      </div>
+    `;
+
+    marker.bindPopup(popupHtml);
+    pitchMarkers.push(marker);
+  });
+}
+
+function selectPitchAndScroll(fieldId) {
+  if (typeof selectPitch === "function") {
+    selectPitch(fieldId);
+  }
+}
+
+// Tính khoảng cách Haversine giữa 2 tọa độ (km)
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Bán kính Trái Đất (km)
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return Math.round(R * c * 10) / 10;
+}
+
+function findNearestPitch() {
+  const resultNotice = document.getElementById("nearestPitchNotice");
+  if (!navigator.geolocation) {
+    if (resultNotice) resultNotice.innerHTML = '<span style="color: #dc2626;">Trình duyệt không hỗ trợ định vị GPS.</span>';
+    return;
+  }
+  if (resultNotice) resultNotice.innerHTML = '<span style="color: #64748b;">Đang định vị vị trí hiện tại của bạn...</span>';
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const uLat = pos.coords.latitude;
+      const uLng = pos.coords.longitude;
+
+      let nearestField = null;
+      let minDistance = 999999;
+
+      DEFAULT_FIELDS.forEach(f => {
+        if (!f.lat || !f.lng || f.status === 'MAINTENANCE' || f.id === 22) return;
+        const d = calculateDistance(uLat, uLng, f.lat, f.lng);
+        if (d < minDistance) {
+          minDistance = d;
+          nearestField = f;
+        }
+      });
+
+      if (nearestField && pitchLeafletMap) {
+        pitchLeafletMap.setView([nearestField.lat, nearestField.lng], 15);
+        const marker = pitchMarkers.find(m => m.getLatLng().lat === nearestField.lat);
+        if (marker) marker.openPopup();
+
+        if (resultNotice) {
+          resultNotice.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: 8px; font-weight: 700;">📍 Sân gần bạn nhất: <strong>${nearestField.name}</strong> (Cách khoảng <strong>${minDistance} km</strong>) · ${nearestField.address}</div>`;
+        }
+      }
+    },
+    (err) => {
+      // Nếu từ chối GPS, lấy vị trí trung tâm Buôn Ma Thuột mặc định
+      const uLat = 12.6865;
+      const uLng = 108.0450;
+      let nearestField = DEFAULT_FIELDS[0];
+      if (nearestField && pitchLeafletMap) {
+        pitchLeafletMap.setView([nearestField.lat, nearestField.lng], 15);
+      }
+      if (resultNotice) {
+        resultNotice.innerHTML = `<span style="color: #ea580c;">Không truy cập được GPS: Đã chuyển đến sân trung tâm Buôn Ma Thuột (${nearestField.name}).</span>`;
+      }
+    },
+    { timeout: 8000 }
+  );
+}
+
+// ==========================================
+// 4. MATCHMAKING ACTIONS
+// ==========================================
+let currentMatchmakingFilter = "ALL";
+
+function getMatchmakingPosts() {
+  try {
+    const saved = localStorage.getItem("football_matchmaking");
+    return saved ? JSON.parse(saved) : DEFAULT_MATCHMAKING_POSTS;
+  } catch {
+    return DEFAULT_MATCHMAKING_POSTS;
+  }
+}
+
+function renderMatchmaking(filter = "ALL") {
+  currentMatchmakingFilter = filter;
+  const container = document.getElementById("matchmakingListContainer");
+  if (!container) return;
+
+  const posts = getMatchmakingPosts().filter(p => {
+    if (filter === "ALL") return true;
+    if (filter === "OPEN") return p.status === "OPEN";
+    return p.level === filter;
+  });
+
+  const tabs = ["ALL", "VUI_VE", "TRUNG_BINH", "BAN_CHUYEN", "OPEN"];
+  tabs.forEach(t => {
+    const el = document.getElementById("tabMatch_" + t);
+    if (el) el.className = `quick-day-btn ${t === filter ? 'active' : ''}`;
+  });
+
+  if (posts.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b; background: #f8fafc; border-radius: 14px;">Chưa có kèo đấu nào trong mục này. Hãy bấm nút "➕ Đăng tin tìm đối" để mở kèo đầu tiên!</div>';
+    return;
+  }
+
+  container.innerHTML = posts.map(post => {
+    const isOpen = post.status === "OPEN";
+    const levelBg = post.level === "BAN_CHUYEN" ? "#fef2f2" : post.level === "TRUNG_BINH" ? "#f0fdf4" : "#eff6ff";
+    const levelColor = post.level === "BAN_CHUYEN" ? "#b91c1c" : post.level === "TRUNG_BINH" ? "#166534" : "#1d4ed8";
+
+    return `
+      <div style="background: #ffffff; border: 1.5px solid ${isOpen ? '#cbd5e1' : '#e2e8f0'}; border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: all 0.25s ease;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='${isOpen ? '#cbd5e1' : '#e2e8f0'}'">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 26px; background: #f1f5f9; width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">${post.avatar || '⚽'}</span>
+              <div>
+                <strong style="font-size: 16px; color: #0f172a; display: block;">${post.teamName}</strong>
+                <small style="color: #64748b;">Đội trưởng: ${post.captainName} · ${post.createdAt}</small>
+              </div>
+            </div>
+            <span style="font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 800; background: ${isOpen ? '#dcfce7' : '#fee2e2'}; color: ${isOpen ? '#15803d' : '#991b1b'};">
+              ${isOpen ? '● ĐANG TÌM ĐỐI' : '✓ ĐÃ CÁP KÈO'}
+            </span>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">
+            <span style="font-size: 11px; font-weight: 700; background: ${levelBg}; color: ${levelColor}; padding: 3px 8px; border-radius: 6px;">
+              🎯 ${post.levelLabel}
+            </span>
+            <span style="font-size: 11px; font-weight: 700; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px;">
+              💰 ${post.betLabel}
+            </span>
+            <span style="font-size: 11px; font-weight: 700; background: #f1f5f9; color: #334155; padding: 3px 8px; border-radius: 6px;">
+              ⚽ ${post.fieldType === 'SAN_11' ? 'Sân 11' : post.fieldType === 'SAN_7' ? 'Sân 7' : 'Sân 5'}
+            </span>
+          </div>
+
+          <div style="font-size: 13px; color: #334155; background: #f8fafc; border-radius: 10px; padding: 12px; margin-bottom: 12px; line-height: 1.5;">
+            <div>🏟️ <strong>Sân:</strong> ${post.fieldName}</div>
+            <div>📅 <strong>Thời gian:</strong> ${post.timeSlot} (Ngày ${post.matchDate})</div>
+            <div style="margin-top: 6px; color: #475569; font-style: italic;">"${post.description}"</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 6px;">
+          ${isOpen ? `
+            <button type="button" onclick="openAcceptMatchModal(${post.id})" class="primary-button" style="flex: 1; padding: 9px; font-size: 12px; font-weight: 700; justify-content: center;">
+              🤝 Bắt đối ngay
+            </button>
+          ` : `
+            <div style="flex: 1; text-align: center; font-size: 12px; font-weight: 700; color: #166534; background: #dcfce7; padding: 8px; border-radius: 8px;">
+              Đã cáp với: ${post.matchedBy || 'Đội bạn'}
+            </div>
+          `}
+          <a href="tel:${post.phone}" class="outline-button" style="padding: 9px 12px; font-size: 12px; display: inline-flex; align-items: center;" title="Gọi điện">
+            📞
+          </a>
+          <a href="https://zalo.me/${post.phone}" target="_blank" class="outline-button" style="padding: 9px 12px; font-size: 12px; color: #0284c7; border-color: #bae6fd; display: inline-flex; align-items: center;" title="Nhắn tin Zalo">
+            💬
+          </a>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+let activeMatchIdToAccept = null;
+
+function openCreateMatchModal() {
+  document.getElementById("createMatchModal").style.display = "flex";
+  // Fill pitch select options
+  const select = document.getElementById("cmFieldSelect");
+  if (select) {
+    select.innerHTML = DEFAULT_FIELDS.map(f => `<option value="${f.id}">${f.name} (${f.ward})</option>`).join("");
+  }
+  const dateInput = document.getElementById("cmDateInput");
+  if (dateInput) dateInput.value = getTodayString();
+}
+
+function closeCreateMatchModal() {
+  document.getElementById("createMatchModal").style.display = "none";
+}
+
+function submitMatchPost(e) {
+  e.preventDefault();
+  const teamName = document.getElementById("cmTeamName").value.trim();
+  const captainName = document.getElementById("cmCaptainName").value.trim();
+  const phone = document.getElementById("cmPhone").value.trim();
+  const fieldId = Number(document.getElementById("cmFieldSelect").value);
+  const matchDate = document.getElementById("cmDateInput").value;
+  const timeSlot = document.getElementById("cmTimeSlot").value;
+  const level = document.getElementById("cmLevel").value;
+  const betRule = document.getElementById("cmBetRule").value;
+  const description = document.getElementById("cmDesc").value.trim() || "Kèo giao lưu hữu nghị, đá đẹp, nhiệt tình.";
+
+  const field = DEFAULT_FIELDS.find(f => f.id === fieldId) || DEFAULT_FIELDS[0];
+
+  const levelLabels = {
+    "VUI_VE": "Dưỡng sinh (Vui vẻ)",
+    "TRUNG_BINH": "Trung bình (Phong trào)",
+    "BAN_CHUYEN": "Khá - Chiến (Cọ xát)"
+  };
+
+  const betLabels = {
+    "CHIA_DOI": "Tiền sân 5-5",
+    "THUA_BAO": "Đội thua trả sân",
+    "KEO_NUOC": "Kèo nước ngọt"
+  };
+
+  const newPost = {
+    id: Date.now(),
+    teamName,
+    captainName,
+    phone,
+    fieldId,
+    fieldName: field.name,
+    fieldType: field.fieldType,
+    matchDate,
+    timeSlot,
+    level,
+    levelLabel: levelLabels[level] || "Phong trào",
+    betRule,
+    betLabel: betLabels[betRule] || "Tiền sân 5-5",
+    status: "OPEN",
+    matchedBy: null,
+    avatar: "⚡",
+    description,
+    createdAt: "Vừa xong"
+  };
+
+  const posts = getMatchmakingPosts();
+  posts.unshift(newPost);
+  localStorage.setItem("football_matchmaking", JSON.stringify(posts));
+
+  closeCreateMatchModal();
+  renderMatchmaking("ALL");
+  alert("🎉 Đã đăng tin tìm đối thành công! Các đội bóng tại Buôn Ma Thuột có thể liên hệ với bạn ngay.");
+}
+
+function openAcceptMatchModal(postId) {
+  activeMatchIdToAccept = postId;
+  const posts = getMatchmakingPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  document.getElementById("acceptMatchTeamTarget").textContent = post.teamName;
+  document.getElementById("acceptMatchDetails").textContent = `${post.fieldName} · ${post.timeSlot} ngày ${post.matchDate} · Kèo: ${post.betLabel}`;
+  document.getElementById("acceptMatchModal").style.display = "flex";
+}
+
+function closeAcceptMatchModal() {
+  document.getElementById("acceptMatchModal").style.display = "none";
+  activeMatchIdToAccept = null;
+}
+
+function confirmAcceptMatch(e) {
+  e.preventDefault();
+  const myTeam = document.getElementById("amMyTeamName").value.trim();
+  const myPhone = document.getElementById("amMyPhone").value.trim();
+
+  if (!myTeam || !myPhone) return;
+
+  const posts = getMatchmakingPosts();
+  const idx = posts.findIndex(p => p.id === activeMatchIdToAccept);
+  if (idx !== -1) {
+    posts[idx].status = "MATCHED";
+    posts[idx].matchedBy = myTeam;
+    localStorage.setItem("football_matchmaking", JSON.stringify(posts));
+  }
+
+  closeAcceptMatchModal();
+  renderMatchmaking(currentMatchmakingFilter);
+  alert(`🤝 Chúc mừng bạn đã bắt đối thành công với ${posts[idx]?.teamName}! Hãy liên hệ SĐT ${posts[idx]?.phone} để chốt màu áo thi đấu nhé.`);
+}
+
+// ==========================================
+// 5. TOURNAMENT HUB (GIẢI ĐẤU MINI & BẢNG XẾP HẠNG)
+// ==========================================
+let currentTournamentTab = "BRACKET";
+
+function getTournamentData() {
+  try {
+    const saved = localStorage.getItem("football_tournaments");
+    return saved ? JSON.parse(saved) : DEFAULT_TOURNAMENT_DATA;
+  } catch {
+    return DEFAULT_TOURNAMENT_DATA;
+  }
+}
+
+function switchTournamentTab(tab) {
+  currentTournamentTab = tab;
+  document.getElementById("tabTourBracket").className = `quick-day-btn ${tab === 'BRACKET' ? 'active' : ''}`;
+  document.getElementById("tabTourStandings").className = `quick-day-btn ${tab === 'STANDINGS' ? 'active' : ''}`;
+  renderTournament();
+}
+
+function renderTournament() {
+  const data = getTournamentData();
+  const bracketView = document.getElementById("tourBracketView");
+  const standingsView = document.getElementById("tourStandingsView");
+
+  if (!bracketView || !standingsView) return;
+
+  if (currentTournamentTab === "BRACKET") {
+    bracketView.style.display = "block";
+    standingsView.style.display = "none";
+    renderTournamentBracket(data);
+  } else {
+    bracketView.style.display = "none";
+    standingsView.style.display = "block";
+    renderTournamentStandings(data);
+  }
+}
+
+function renderTournamentBracket(data) {
+  const container = document.getElementById("tourBracketContainer");
+  if (!container) return;
+
+  container.innerHTML = data.bracketMatches.map(m => {
+    const isFinished = m.status === "FINISHED";
+    const t1Win = isFinished && m.team1.score > m.team2.score;
+    const t2Win = isFinished && m.team2.score > m.team1.score;
+
+    return `
+      <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm); position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+          <span style="font-size: 12px; font-weight: 800; color: #16a34a; letter-spacing: 0.5px;">${m.round}</span>
+          <span style="font-size: 11px; color: #64748b;">${m.time}</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; background: ${t1Win ? '#f0fdf4' : '#f8fafc'}; font-weight: ${t1Win ? '800' : '600'}; color: ${t1Win ? '#166534' : '#334155'};">
+            <span style="display: flex; align-items: center; gap: 8px;">
+              <span>${t1Win ? '👑' : '⚪'}</span> ${m.team1.name}
+            </span>
+            <span style="font-size: 16px; font-weight: 800;">${m.team1.score !== null ? m.team1.score : '-'}</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; background: ${t2Win ? '#f0fdf4' : '#f8fafc'}; font-weight: ${t2Win ? '800' : '600'}; color: ${t2Win ? '#166534' : '#334155'};">
+            <span style="display: flex; align-items: center; gap: 8px;">
+              <span>${t2Win ? '👑' : '⚪'}</span> ${m.team2.name}
+            </span>
+            <span style="font-size: 16px; font-weight: 800;">${m.team2.score !== null ? m.team2.score : '-'}</span>
+          </div>
+        </div>
+
+        ${m.winner ? `
+          <div style="margin-top: 10px; font-size: 11px; text-align: center; color: #15803d; font-weight: 700; background: #dcfce7; padding: 4px; border-radius: 6px;">
+            Đội chiến thắng: ${m.winner}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join("");
+}
+
+function renderTournamentStandings(data) {
+  const tbody = document.getElementById("tourStandingsTableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = data.standings.map(s => {
+    const medal = s.rank === 1 ? '🥇' : s.rank === 2 ? '🥈' : s.rank === 3 ? '🥉' : s.rank;
+    return `
+      <tr style="border-bottom: 1px solid #f1f5f9; text-align: center;">
+        <td style="padding: 12px 8px; font-weight: 800; font-size: 14px;">${medal}</td>
+        <td style="padding: 12px 8px; text-align: left; font-weight: 700; color: #0f172a;">${s.team}</td>
+        <td style="padding: 12px 8px;">${s.played}</td>
+        <td style="padding: 12px 8px; color: #16a34a; font-weight: 700;">${s.won}</td>
+        <td style="padding: 12px 8px; color: #64748b;">${s.drawn}</td>
+        <td style="padding: 12px 8px; color: #dc2626;">${s.lost}</td>
+        <td style="padding: 12px 8px;">${s.gf}</td>
+        <td style="padding: 12px 8px;">${s.ga}</td>
+        <td style="padding: 12px 8px; font-weight: 700;">${s.gd}</td>
+        <td style="padding: 12px 8px; font-weight: 800; color: #15803d; font-size: 16px; background: #f0fdf4;">${s.points}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
 function initStorage() {
   if (!localStorage.getItem("football_fields")) {
     localStorage.setItem("football_fields", JSON.stringify(DEFAULT_FIELDS));

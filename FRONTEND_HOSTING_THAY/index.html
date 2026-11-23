@@ -6,6 +6,8 @@
   <title>Sân Nhà FC - Hệ Thống Đặt Sân Bóng Đá Mini (Lê Duy Tài - leduytai/doan)</title>
   <link rel="stylesheet" href="./css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
   <!-- Top announcement bar -->
@@ -22,6 +24,9 @@
       </a>
 
       <nav class="nav-links">
+        <a href="#ban-do-san">🗺️ Bản đồ BMT</a>
+        <a href="#cap-keo">🤝 Cáp kèo</a>
+        <a href="#giai-dau">🏆 Giải đấu</a>
         <a href="#danh-sach-san">🏟️ Danh sách sân</a>
         <a href="#dat-san">📅 Lịch sân trống</a>
         <a href="#bang-gia">💰 Bảng giá</a>
@@ -214,6 +219,124 @@
   </section>
 
   <!-- UI-04: Lịch sân trống theo ngày (Interactive Matrix) -->
+  
+  <!-- SECTION: BẢN ĐỒ TƯƠNG TÁC 20 CỤM SÂN BUÔN MA THUỘT (LEAFLET MAP) -->
+  <section class="section-wrap" id="ban-do-san" style="background: #ffffff; border-radius: 24px; padding: 36px 32px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 32px;">
+    <div class="section-head-modern" style="margin-bottom: 20px;">
+      <div>
+        <span class="section-tag" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">🗺️ BẢN ĐỒ SỐ ĐỊA LÝ BUÔN MA THUỘT</span>
+        <h2 style="margin-top: 6px; font-size: 26px;">Bản đồ tương tác 20 cụm sân &amp; Định vị GPS</h2>
+        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Khám phá vị trí các cụm sân bóng thật tại Đắk Lắk, tự động tìm sân gần bạn nhất qua GPS và chỉ đường một chạm.</p>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <button type="button" class="primary-button" onclick="findNearestPitch()" style="padding: 10px 18px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+          <span>📍</span> Tìm sân gần tôi nhất (GPS)
+        </button>
+      </div>
+    </div>
+
+    <div id="nearestPitchNotice" style="margin-bottom: 14px;"></div>
+
+    <!-- Bộ lọc loại sân trên bản đồ -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center;">
+      <span style="font-size: 12px; font-weight: 700; color: #475569;">Lọc hiển thị sân:</span>
+      <button type="button" class="quick-day-btn active" onclick="renderPitchMarkers('ALL')" style="font-size: 12px; padding: 6px 14px;">Tất cả sân</button>
+      <button type="button" class="quick-day-btn" onclick="renderPitchMarkers('SAN_5')" style="font-size: 12px; padding: 6px 14px;">⚽ Sân 5 người</button>
+      <button type="button" class="quick-day-btn" onclick="renderPitchMarkers('SAN_7')" style="font-size: 12px; padding: 6px 14px;">🏆 Sân 7 người</button>
+      <button type="button" class="quick-day-btn" onclick="renderPitchMarkers('SAN_11')" style="font-size: 12px; padding: 6px 14px;">⭐ Sân 11 chuẩn VFF</button>
+    </div>
+
+    <!-- Leaflet Map Canvas -->
+    <div id="pitchMapContainer" style="width: 100%; height: 480px; border-radius: 18px; border: 2px solid #86efac; box-shadow: 0 6px 20px rgba(0,0,0,0.06); z-index: 1;"></div>
+    <div style="margin-top: 10px; font-size: 12px; color: #64748b; display: flex; justify-content: space-between; flex-wrap: wrap;">
+      <span>💡 <em>Bấm vào từng quả bóng ⚽ trên bản đồ để xem chi tiết sân, bấm 'Đặt sân này' hoặc 'Chỉ đường Google Maps'.</em></span>
+      <span>Nguồn bản đồ: OpenStreetMap (Đắk Lắk)</span>
+    </div>
+  </section>
+
+  <!-- SECTION: SÀN CÁP KÈO & TÌM ĐỐI GIAO LƯU BUÔN MA THUỘT -->
+  <section class="section-wrap" id="cap-keo" style="background: #ffffff; border-radius: 24px; padding: 36px 32px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 32px;">
+    <div class="section-head-modern" style="margin-bottom: 20px;">
+      <div>
+        <span class="section-tag" style="background: #fef2f2; color: #dc2626; border-color: #fecaca;">🤝 SÀN GIAO LƯU PHONG TRÀO BAN MÊ</span>
+        <h2 style="margin-top: 6px; font-size: 26px;">Cáp kèo thi đấu &amp; Tuyển cầu thủ</h2>
+        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Nơi các đội bóng đá phủi BMT giao lưu cọ xát, bắt đối nhanh chóng theo trình độ và thỏa thuận tiền sân.</p>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button type="button" class="primary-button" onclick="openCreateMatchModal()" style="padding: 10px 18px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+          <span>➕</span> Đăng tin tìm đối / Cáp kèo
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter tabs for matchmaking -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; align-items: center;">
+      <span style="font-size: 12px; font-weight: 700; color: #475569;">Trình độ:</span>
+      <button type="button" id="tabMatch_ALL" class="quick-day-btn active" onclick="renderMatchmaking('ALL')" style="font-size: 12px; padding: 6px 14px;">Tất cả kèo</button>
+      <button type="button" id="tabMatch_VUI_VE" class="quick-day-btn" onclick="renderMatchmaking('VUI_VE')" style="font-size: 12px; padding: 6px 14px;">🍻 Dưỡng sinh (Vui vẻ)</button>
+      <button type="button" id="tabMatch_TRUNG_BINH" class="quick-day-btn" onclick="renderMatchmaking('TRUNG_BINH')" style="font-size: 12px; padding: 6px 14px;">⚡ Trung bình (Phong trào)</button>
+      <button type="button" id="tabMatch_BAN_CHUYEN" class="quick-day-btn" onclick="renderMatchmaking('BAN_CHUYEN')" style="font-size: 12px; padding: 6px 14px;">🔥 Khá - Chiến (Cọ xát)</button>
+      <button type="button" id="tabMatch_OPEN" class="quick-day-btn" onclick="renderMatchmaking('OPEN')" style="font-size: 12px; padding: 6px 14px;">🟢 Đang chờ bắt đối</button>
+    </div>
+
+    <!-- Grid danh sách kèo -->
+    <div id="matchmakingListContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px;">
+      <!-- Sẽ được render tự động qua app.js -->
+    </div>
+  </section>
+
+  <!-- SECTION: QUẢN LÝ GIẢI ĐẤU MINI & BẢNG XẾP HẠNG (TOURNAMENT HUB) -->
+  <section class="section-wrap" id="giai-dau" style="background: #ffffff; border-radius: 24px; padding: 36px 32px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 32px;">
+    <div class="section-head-modern" style="margin-bottom: 20px;">
+      <div>
+        <span class="section-tag" style="background: #fefce8; color: #ca8a04; border-color: #fef08a;">🏆 GIẢI ĐẤU PHONG TRÀO BAN MÊ</span>
+        <h2 style="margin-top: 6px; font-size: 26px;">Cúp Tứ Hùng Ban Mê 2026</h2>
+        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Cập nhật kết quả trực tiếp, nhánh đấu loại trực tiếp Knock-out và bảng xếp hạng điểm số tự động.</p>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button type="button" id="tabTourBracket" class="quick-day-btn active" onclick="switchTournamentTab('BRACKET')" style="font-size: 13px; font-weight: 700; padding: 8px 16px;">
+          ⚔️ Nhánh đấu Knock-out
+        </button>
+        <button type="button" id="tabTourStandings" class="quick-day-btn" onclick="switchTournamentTab('STANDINGS')" style="font-size: 13px; font-weight: 700; padding: 8px 16px;">
+          📊 Bảng xếp hạng điểm số
+        </button>
+      </div>
+    </div>
+
+    <!-- View 1: Bracket Knockout -->
+    <div id="tourBracketView" style="display: block;">
+      <div id="tourBracketContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+        <!-- Render tự động qua app.js -->
+      </div>
+    </div>
+
+    <!-- View 2: Standings Table -->
+    <div id="tourStandingsView" style="display: none; overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
+        <thead>
+          <tr style="background: #f8fafc; color: #475569; font-weight: 800; border-bottom: 2px solid #e2e8f0; text-align: center;">
+            <th style="padding: 12px 8px; width: 50px;">Hạng</th>
+            <th style="padding: 12px 8px; text-align: left;">Đội bóng</th>
+            <th style="padding: 12px 8px;">Trận</th>
+            <th style="padding: 12px 8px; color: #16a34a;">Thắng</th>
+            <th style="padding: 12px 8px;">Hòa</th>
+            <th style="padding: 12px 8px; color: #dc2626;">Thua</th>
+            <th style="padding: 12px 8px;">BT</th>
+            <th style="padding: 12px 8px;">BB</th>
+            <th style="padding: 12px 8px;">HS</th>
+            <th style="padding: 12px 8px; background: #f0fdf4; color: #166534; font-weight: 900;">Điểm</th>
+          </tr>
+        </thead>
+        <tbody id="tourStandingsTableBody">
+          <!-- Render tự động qua app.js -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <section class="section-wrap" id="dat-san" style="background: #ffffff; border-radius: 24px; padding: 48px 36px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
     <div class="section-head-modern">
       <div>
@@ -943,6 +1066,9 @@
       renderFields();
       renderSchedule();
       syncBackendStatusAndFields();
+      if (typeof initPitchMap === 'function') initPitchMap();
+      if (typeof renderMatchmaking === 'function') renderMatchmaking();
+      if (typeof renderTournament === 'function') renderTournament();
     });
 
     // Toggle Mobile Menu
@@ -2379,6 +2505,134 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL: ĐĂNG TIN CÁP KÈO / TÌM ĐỐI -->
+  <div class="modal-backdrop" id="createMatchModal" style="display: none;">
+    <div class="modal-card" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 18px; margin: 0; color: #0f172a;">➕ Đăng tin tìm đối giao lưu</h3>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Đăng kèo thi đấu lên sàn phủi Ban Mê để các đội bắt đối</p>
+        </div>
+        <button type="button" class="modal-close" onclick="closeCreateMatchModal()">✕</button>
+      </div>
+
+      <form onsubmit="submitMatchPost(event)" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Tên đội của bạn: *</label>
+            <input type="text" id="cmTeamName" required placeholder="VD: FC Dưỡng Sinh BMT" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Đội trưởng / Đại diện: *</label>
+            <input type="text" id="cmCaptainName" required placeholder="VD: Duy Tài" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Số điện thoại / Zalo: *</label>
+            <input type="text" id="cmPhone" required placeholder="VD: 0896890399" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; font-family: monospace;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Cụm sân dự kiến: *</label>
+            <select id="cmFieldSelect" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <!-- Sẽ được fill tự động -->
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Ngày thi đấu: *</label>
+            <input type="date" id="cmDateInput" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Khung giờ đá: *</label>
+            <select id="cmTimeSlot" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <option value="17:30 - 19:00">17:30 - 19:00 (Giờ vàng tối)</option>
+              <option value="19:00 - 20:30">19:00 - 20:30 (Đêm đẹp)</option>
+              <option value="16:00 - 17:30">16:00 - 17:30 (Tan tầm)</option>
+              <option value="06:30 - 08:00">06:30 - 08:00 (Sáng sớm)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Trình độ đội: *</label>
+            <select id="cmLevel" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <option value="VUI_VE">Dưỡng sinh (Vui vẻ, giao lưu)</option>
+              <option value="TRUNG_BINH">Trung bình (Phong trào)</option>
+              <option value="BAN_CHUYEN">Khá - Chiến (Cọ xát căng)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700; font-size: 13px;">Kèo thỏa thuận: *</label>
+            <select id="cmBetRule" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <option value="CHIA_DOI">Tiền sân 5-5 (Mỗi đội 50%)</option>
+              <option value="THUA_BAO">Đội thua bao trọn tiền sân</option>
+              <option value="KEO_NUOC">Tiền sân 5-5 + Kèo nước</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-weight: 700; font-size: 13px;">Ghi chú / Lời nhắn:</label>
+          <input type="text" id="cmDesc" placeholder="VD: Đội đá văn minh, không chơi xấu, mặc áo đỏ" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 8px;">
+          <button type="submit" class="primary-button" style="flex: 1; padding: 11px; font-weight: 700;">
+            🚀 Đăng tin tìm đối ngay
+          </button>
+          <button type="button" class="outline-button" style="padding: 11px 18px;" onclick="closeCreateMatchModal()">
+            Hủy
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: BẮT ĐỐI / NHẬN KÈO -->
+  <div class="modal-backdrop" id="acceptMatchModal" style="display: none;">
+    <div class="modal-card" style="max-width: 460px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 18px; margin: 0; color: #0f172a;">🤝 Xác nhận bắt đối giao lưu</h3>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Cáp kèo thi đấu với đội bạn</p>
+        </div>
+        <button type="button" class="modal-close" onclick="closeAcceptMatchModal()">✕</button>
+      </div>
+
+      <form onsubmit="confirmAcceptMatch(event)" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 14px; font-size: 13px;">
+          <div style="color: #166534; font-weight: 700; margin-bottom: 4px;">Đội thách đấu: <span id="acceptMatchTeamTarget" style="font-size: 15px;">-</span></div>
+          <div id="acceptMatchDetails" style="color: #334155; font-size: 12px;">-</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-weight: 700; font-size: 13px;">Tên đội của bạn (Đội nhận kèo): *</label>
+          <input type="text" id="amMyTeamName" required placeholder="VD: FC Ban Mê Star" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-weight: 700; font-size: 13px;">SĐT đại diện liên hệ: *</label>
+          <input type="text" id="amMyPhone" required placeholder="VD: 0912345678" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; font-family: monospace;">
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 6px;">
+          <button type="submit" class="primary-button" style="flex: 1; padding: 11px; font-weight: 700;">
+            ✓ Xác nhận bắt đối
+          </button>
+          <button type="button" class="outline-button" style="padding: 11px 18px;" onclick="closeAcceptMatchModal()">
+            Đóng
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
 </html>
 
