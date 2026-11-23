@@ -2996,22 +2996,22 @@ export default function Home() {
           return (
             <div
               style={{
-                background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+                background: "linear-gradient(135deg, #0e1626 0%, #131e32 100%)",
                 color: "#ffffff",
                 borderRadius: "20px",
                 padding: "24px 28px",
                 marginBottom: "28px",
-                border: "2px solid #22c55e",
-                boxShadow: "0 12px 30px rgba(34, 197, 94, 0.2)",
+                border: "1px solid rgba(50, 157, 210, 0.35)",
+                boxShadow: "0 12px 30px rgba(0, 0, 0, 0.55)",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px", marginBottom: "16px" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "8px" }}>
-                    <span style={{ background: "#16a34a", color: "#ffffff", padding: "4px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: "800", letterSpacing: "0.5px" }}>
+                    <span style={{ background: "#329dd2", color: "#ffffff", padding: "4px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: "800", letterSpacing: "0.5px" }}>
                       🏢 CỤM SÂN MẸ ĐANG CHỌN
                     </span>
-                    <span style={{ fontSize: "12px", background: "rgba(255,255,255,0.1)", padding: "4px 10px", borderRadius: "8px", color: "#38bdf8", fontFamily: "monospace" }}>
+                    <span style={{ fontSize: "12px", background: "rgba(255,255,255,0.06)", padding: "4px 10px", borderRadius: "8px", color: "#38bdf8", fontFamily: "monospace", border: "1px solid rgba(50, 157, 210, 0.25)" }}>
                       🔗 API riêng: /api/v1/fields/{activePitch.id}/schedule?subPitch={selectedSubPitchId}
                     </span>
                   </div>
@@ -3021,7 +3021,7 @@ export default function Home() {
                       <span style={{ color: "#38bdf8", fontWeight: "700" }}>👨‍💼 Chủ sân: {activePitch.ownerName}</span>
                     )}
                     {activePitch.phone && (
-                      <span style={{ color: "#4ade80", fontWeight: "700" }}>📞 Hotline: {activePitch.phone}</span>
+                      <span style={{ color: "#f59e0b", fontWeight: "700" }}>📞 Hotline: {activePitch.phone}</span>
                     )}
                     {activePitch.ward && <span>📍 {activePitch.ward}</span>}
                     {activePitch.address && <span>🏠 {activePitch.address}</span>}
@@ -3034,9 +3034,9 @@ export default function Home() {
                     value={selectedPitchId}
                     onChange={(e) => setSelectedPitchId(Number(e.target.value))}
                     style={{
-                      background: "rgba(255,255,255,0.12)",
+                      background: "rgba(255,255,255,0.08)",
                       color: "#ffffff",
-                      border: "1px solid rgba(255,255,255,0.25)",
+                      border: "1px solid rgba(50, 157, 210, 0.3)",
                       padding: "8px 12px",
                       borderRadius: "8px",
                       fontSize: "13px",
@@ -3046,7 +3046,7 @@ export default function Home() {
                     }}
                   >
                     {fieldsList.map((f) => (
-                      <option key={f.id} value={f.id} style={{ background: "#0f172a", color: "#ffffff" }}>
+                      <option key={f.id} value={f.id} style={{ background: "#0e1626", color: "#ffffff" }}>
                         {f.name} ({f.ward})
                       </option>
                     ))}
@@ -3057,18 +3057,18 @@ export default function Home() {
               {/* Thông báo cơ chế quản lý & phân phối */}
               <div
                 style={{
-                  background: "rgba(34, 197, 94, 0.12)",
-                  border: "1px solid rgba(34, 197, 94, 0.35)",
+                  background: "rgba(50, 157, 210, 0.08)",
+                  border: "1px solid rgba(50, 157, 210, 0.25)",
                   borderRadius: "12px",
                   padding: "12px 16px",
                   marginBottom: "20px",
                   fontSize: "12px",
-                  color: "#dcfce7",
+                  color: "#cbd5e1",
                   lineHeight: "1.6",
                 }}
               >
-                📢 <strong>CƠ CHẾ VẬN HÀNH:</strong> Sân Nhà là nền tảng quản lý tập trung 21 cụm sân tại Buôn Ma Thuột.
-                Sân mẹ là cơ sở chung, quý khách <strong>chỉ được đặt các SÂN CON cụ thể bên dưới</strong>. Sau khi hoàn tất đặt sân con, hệ thống sẽ <strong>tự động gửi thông báo trực tiếp đến Chủ sân ({activePitch.ownerName || "Ban quản lý"} - {activePitch.phone})</strong> để giữ sân và chuẩn bị sẵn sàng trước giờ đá!
+                📢 <strong style={{ color: "#38bdf8" }}>CƠ CHẾ VẬN HÀNH:</strong> Sân Nhà là nền tảng quản lý tập trung 21 cụm sân tại Buôn Ma Thuột.
+                Sân mẹ là cơ sở chung, quý khách <strong>chọn SÂN CON (Sân 5 / Sân 7 / Sân 11) cụ thể bên dưới</strong>. Sau khi hoàn tất đặt sân con, hệ thống sẽ <strong>tự động chuyển thông báo trực tiếp đến Chủ sân ({activePitch.ownerName || "Ban quản lý"} - {activePitch.phone})</strong> để chuẩn bị sẵn sàng trước giờ đá!
               </div>
 
               {/* Ảnh thực tế mô tả cụm sân mẹ (Real Pitch Gallery) */}
@@ -3077,27 +3077,27 @@ export default function Home() {
                   <span>📸</span> HÌNH ẢNH MÔ TẢ THỰC TẾ CỤM SÂN ({activePitch.name}):
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "10px" }}>
-                  <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
+                  <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 4px 12px rgba(0,0,0,0.4)" }}>
                     <img src={activePitch.imageUrl || "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&auto=format&fit=crop&q=80"} alt={`${activePitch.name} - Toàn cảnh`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#4ade80", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Toàn cảnh cụm sân</span>
+                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.75)", color: "#38bdf8", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Toàn cảnh cụm sân</span>
                   </div>
-                  <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
+                  <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 4px 12px rgba(0,0,0,0.4)" }}>
                     <img src="https://images.unsplash.com/photo-1511886929837-354d827aae26?w=900&auto=format&fit=crop&q=80" alt="Mặt cỏ nhân tạo Pro chuẩn FIFA" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#38bdf8", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Mặt cỏ chuẩn FIFA</span>
+                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.75)", color: "#38bdf8", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Mặt cỏ chuẩn FIFA</span>
                   </div>
-                  <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
+                  <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 4px 12px rgba(0,0,0,0.4)" }}>
                     <img src="https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=900&auto=format&fit=crop&q=80" alt="Dàn đèn LED 400W chiếu sáng đêm" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#facc15", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Đèn LED 400W đêm</span>
+                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.75)", color: "#facc15", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Đèn LED 400W đêm</span>
                   </div>
-                  <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
+                  <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden", height: "115px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 4px 12px rgba(0,0,0,0.4)" }}>
                     <img src="https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=900&auto=format&fit=crop&q=80" alt="Khung thành & Lưới thi đấu" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#f472b6", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Khung thành &amp; Lưới</span>
+                    <span style={{ position: "absolute", bottom: "4px", left: "6px", background: "rgba(0,0,0,0.75)", color: "#f472b6", fontSize: "10px", fontWeight: "700", padding: "2px 6px", borderRadius: "4px" }}>Khung thành &amp; Lưới</span>
                   </div>
                 </div>
               </div>
 
               {/* Sub-pitch selector grid (SÂN CON THỰC TẾ) */}
-              <div style={{ background: "rgba(15, 23, 42, 0.65)", padding: "18px", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ background: "rgba(10, 16, 28, 0.75)", padding: "18px", borderRadius: "16px", border: "1px solid rgba(50, 157, 210, 0.2)" }}>
                 <div style={{ fontSize: "12px", fontWeight: "800", color: "#94a3b8", marginBottom: "14px", textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: "6px" }}>
                   <span>⚡</span> BƯỚC 1: CHỌN SÂN CON THỰC TẾ CỦA [ {activePitch.name} ] ({availableSubPitches.length} SÂN):
                 </div>
@@ -3116,24 +3116,24 @@ export default function Home() {
                           type="button"
                           onClick={() => handleSelectSubPitch(sp)}
                           style={{
-                            background: isSubSelected ? "#16a34a" : "rgba(255,255,255,0.05)",
-                            border: isSubSelected ? "2px solid #4ade80" : "1px solid rgba(255,255,255,0.15)",
+                            background: isSubSelected ? "linear-gradient(135deg, rgba(50, 157, 210, 0.3), rgba(31, 127, 174, 0.45))" : "rgba(255,255,255,0.04)",
+                            border: isSubSelected ? "2px solid #329dd2" : "1px solid rgba(255,255,255,0.12)",
                             color: "#ffffff",
                             padding: "14px 16px",
                             borderRadius: "14px",
                             cursor: "pointer",
                             textAlign: "left",
                             transition: "all 0.2s ease",
-                            boxShadow: isSubSelected ? "0 4px 16px rgba(22, 163, 74, 0.5)" : "none",
+                            boxShadow: isSubSelected ? "0 6px 20px rgba(50, 157, 210, 0.35)" : "none",
                           }}
                         >
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <span style={{ fontWeight: "800", fontSize: "15px", color: isSubSelected ? "#ffffff" : "#f1f5f9" }}>
+                            <span style={{ fontWeight: "800", fontSize: "15px", color: isSubSelected ? "#38bdf8" : "#f1f5f9" }}>
                               {sp.category === "SAN_11" ? "⭐ " : sp.category === "SAN_7" ? "🏆 " : "⚽ "}
                               {sp.name}
                             </span>
                             {isSubSelected && (
-                              <span style={{ background: "#4ade80", color: "#064e3b", fontSize: "10px", fontWeight: "900", padding: "2px 8px", borderRadius: "999px" }}>
+                              <span style={{ background: "#329dd2", color: "#ffffff", fontSize: "10px", fontWeight: "900", padding: "2px 8px", borderRadius: "999px" }}>
                                 ĐANG CHỌN ✓
                               </span>
                             )}
@@ -3144,7 +3144,7 @@ export default function Home() {
                           <div style={{ fontSize: "11px", color: "#cbd5e1", marginTop: "2px" }}>
                             {sp.highlight}
                           </div>
-                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#4ade80", marginTop: "8px" }}>
+                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#38bdf8", marginTop: "8px" }}>
                             {money(sp.basePrice)} / ca
                           </div>
                         </button>
@@ -3158,41 +3158,42 @@ export default function Home() {
         })()}
 
         {/* Date search bar + quick buttons */}
-        <div className="schedule-filter-bar" style={{ flexWrap: "wrap", marginBottom: "20px" }}>
-          <label>
-            Chọn ngày thi đấu:
+        <div className="schedule-filter-bar" style={{ flexWrap: "wrap", marginBottom: "20px", background: "var(--surface-alt)", border: "1px solid var(--border)", padding: "16px 20px", borderRadius: "14px" }}>
+          <label style={{ color: "#cbd5e1", fontWeight: "700" }}>
+            📅 Ngày thi đấu:
             <input
               type="date"
               value={date}
               required
               onChange={(e) => setDate(e.target.value)}
+              style={{ background: "var(--bg)", color: "#ffffff", border: "1px solid var(--border)", padding: "8px 12px", borderRadius: "8px", marginLeft: "10px" }}
             />
           </label>
 
           <div className="quick-days">
-            <button className="quick-day-btn" onClick={() => setQuickDate(0)}>Hôm nay</button>
-            <button className="quick-day-btn" onClick={() => setQuickDate(1)}>Ngày mai</button>
-            <button className="quick-day-btn" onClick={() => setQuickDate(2)}>Hôm sau</button>
+            <button className="quick-day-btn" onClick={() => setQuickDate(0)} style={{ background: "rgba(50, 157, 210, 0.15)", color: "#38bdf8", border: "1px solid rgba(50, 157, 210, 0.3)" }}>Hôm nay</button>
+            <button className="quick-day-btn" onClick={() => setQuickDate(1)} style={{ background: "rgba(255, 255, 255, 0.05)", color: "#cbd5e1", border: "1px solid var(--border)" }}>Ngày mai</button>
+            <button className="quick-day-btn" onClick={() => setQuickDate(2)} style={{ background: "rgba(255, 255, 255, 0.05)", color: "#cbd5e1", border: "1px solid var(--border)" }}>Hôm sau</button>
           </div>
 
-          <div style={{ marginLeft: "auto", fontSize: "13px", color: "#64748b", fontWeight: "600" }}>
-            Đang xem: <strong style={{ color: "#16a34a" }}>{activeSubPitch.name}</strong> ({activeSubPitch.categoryName})
+          <div style={{ marginLeft: "auto", fontSize: "13px", color: "#94a3b8", fontWeight: "600" }}>
+            Đang xem: <strong style={{ color: "#38bdf8" }}>{activeSubPitch.name}</strong> ({activeSubPitch.categoryName})
           </div>
         </div>
 
         {/* Legend */}
-        <div className="legend-bar">
+        <div className="legend-bar" style={{ background: "var(--surface-alt)", border: "1px solid var(--border)", padding: "12px 18px", borderRadius: "12px" }}>
           <div className="legend-item">
-            <span className="legend-box legend-available" />
-            <span>Còn trống (Click để đặt sân con)</span>
+            <span className="legend-box" style={{ background: "rgba(50, 157, 210, 0.2)", border: "1px solid #329dd2" }} />
+            <span style={{ color: "#cbd5e1" }}>Còn trống (Click để đặt ca)</span>
           </div>
           <div className="legend-item">
-            <span className="legend-box legend-booked" />
-            <span>Đã có đội đặt sân con này</span>
+            <span className="legend-box" style={{ background: "rgba(235, 47, 51, 0.15)", border: "1px solid #eb2f33" }} />
+            <span style={{ color: "#94a3b8" }}>Đã có đội đặt sân</span>
           </div>
           <div className="legend-item">
-            <span className="legend-box legend-peak" />
-            <span>🔥 Giờ vàng cao điểm</span>
+            <span className="legend-box" style={{ background: "rgba(245, 158, 11, 0.2)", border: "1px solid #f59e0b" }} />
+            <span style={{ color: "#fbbf24" }}>🔥 Giờ vàng cao điểm</span>
           </div>
         </div>
 
@@ -3202,24 +3203,24 @@ export default function Home() {
           const isWeekend = schedule?.dayType === "WEEKEND";
 
           return (
-            <div className="schedule-field-row" style={{ border: "2px solid var(--primary)", background: "var(--surface)" }}>
+            <div className="schedule-field-row" style={{ border: "1px solid var(--border)", background: "var(--surface)" }}>
               <div className="schedule-field-header" style={{ flexWrap: "wrap", gap: "8px", background: "var(--surface-alt)", padding: "16px 20px", borderRadius: "12px", border: "1px solid var(--border)" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                    <h3 style={{ margin: 0, color: "#15803d", fontSize: "20px" }}>
+                    <h3 style={{ margin: 0, color: "#ffffff", fontSize: "20px" }}>
                       ⚡ BƯỚC 2: CHỌN CA THI ĐẤU CỦA: {activeSubPitch.name}
                     </h3>
-                    <span style={{ fontSize: "12px", background: "#dcfce7", color: "#15803d", padding: "3px 10px", borderRadius: "6px", fontWeight: "700" }}>
+                    <span style={{ fontSize: "12px", background: "rgba(50, 157, 210, 0.15)", color: "#38bdf8", padding: "3px 10px", borderRadius: "6px", fontWeight: "700", border: "1px solid rgba(50, 157, 210, 0.3)" }}>
                       {activeSubPitch.categoryName}
                     </span>
                   </div>
-                  <div style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>
-                    Thuộc <strong>{activePitch.name}</strong> · 👨‍💼 Chủ sân tiếp nhận: <strong>{activePitch.ownerName}</strong> (Hotline: <strong>{activePitch.phone}</strong>) · Ngày: <strong>{date}</strong> ({isWeekend ? "Cuối tuần" : "Ngày thường"})
+                  <div style={{ fontSize: "13px", color: "#94a3b8", marginTop: "4px" }}>
+                    Thuộc <strong>{activePitch.name}</strong> · 👨‍💼 Chủ sân: <strong style={{ color: "#38bdf8" }}>{activePitch.ownerName}</strong> (Hotline: <strong style={{ color: "#f59e0b" }}>{activePitch.phone}</strong>) · Ngày: <strong>{date}</strong> ({isWeekend ? "Cuối tuần" : "Ngày thường"})
                   </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ fontSize: "13px", color: "#16a34a", fontWeight: "700", background: "#ecfdf5", padding: "6px 12px", borderRadius: "8px", border: "1px solid #a7f3d0" }}>
+                  <span style={{ fontSize: "13px", color: "#38bdf8", fontWeight: "700", background: "rgba(50, 157, 210, 0.12)", padding: "6px 12px", borderRadius: "8px", border: "1px solid rgba(50, 157, 210, 0.3)" }}>
                     ● 100% Sẵn sàng nhận đơn &amp; Báo Chủ sân
                   </span>
                 </div>
@@ -3296,14 +3297,14 @@ export default function Home() {
 
             <form onSubmit={handleConfirmBooking} className="modal-body">
               {errorNotice && (
-                <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#991b1b", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "16px" }}>
+                <div style={{ background: "rgba(235, 47, 51, 0.15)", border: "1px solid rgba(235, 47, 51, 0.35)", color: "#fca5a5", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "16px" }}>
                   <strong>Lỗi:</strong> {errorNotice}
                 </div>
               )}
 
               {/* Thông báo điều phối gửi chủ sân */}
-              <div style={{ background: "#ecfdf5", border: "1px solid #86efac", color: "#166534", padding: "12px 16px", borderRadius: "10px", fontSize: "13px", marginBottom: "16px", lineHeight: "1.6" }}>
-                🔔 <strong>HỆ THỐNG QUẢN LÝ SÂN NHÀ:</strong> Khi bấm xác nhận, hệ thống sẽ <strong>tự động chuyển thông báo đơn đặt đến Chủ sân ({bookingModal.field.ownerName || "Ban quản lý"} - Hotline: {bookingModal.field.phone})</strong> để chủ sân chuẩn bị bật đèn và đón tiếp đội của bạn!
+              <div style={{ background: "rgba(50, 157, 210, 0.1)", border: "1px solid rgba(50, 157, 210, 0.25)", color: "#cbd5e1", padding: "12px 16px", borderRadius: "10px", fontSize: "13px", marginBottom: "16px", lineHeight: "1.6" }}>
+                🔔 <strong style={{ color: "#38bdf8" }}>HỆ THỐNG QUẢN LÝ SÂN NHÀ:</strong> Khi bấm xác nhận, hệ thống sẽ <strong>tự động chuyển thông báo đơn đặt đến Chủ sân ({bookingModal.field.ownerName || "Ban quản lý"} - Hotline: {bookingModal.field.phone})</strong> để chủ sân chuẩn bị bật đèn và đón tiếp đội của bạn!
               </div>
 
               {/* Booking Summary Box */}
@@ -3314,13 +3315,13 @@ export default function Home() {
                 </div>
                 <div className="summary-row">
                   <span>⚽ Sân con được đặt:</span>
-                  <strong style={{ color: "#15803d", fontSize: "15px" }}>
+                  <strong style={{ color: "#38bdf8", fontSize: "15px" }}>
                     {bookingModal.subPitch.name} ({bookingModal.subPitch.categoryName})
                   </strong>
                 </div>
                 <div className="summary-row">
                   <span>👨‍💼 Chủ sân tiếp nhận đơn:</span>
-                  <strong style={{ color: "#0284c7" }}>
+                  <strong style={{ color: "#f59e0b" }}>
                     {bookingModal.field.ownerName || "Ban quản lý cụm sân"} ({bookingModal.field.phone})
                   </strong>
                 </div>
@@ -3334,7 +3335,7 @@ export default function Home() {
                 </div>
                 <div className="summary-row">
                   <span>Giá thuê sân con:</span>
-                  <strong>{money(bookingModal.slot.price ?? bookingModal.subPitch.basePrice)}</strong>
+                  <strong style={{ color: "#38bdf8" }}>{money(bookingModal.slot.price ?? bookingModal.subPitch.basePrice)}</strong>
                 </div>
 
                 {/* Additional services summary */}
@@ -3359,7 +3360,7 @@ export default function Home() {
 
               {/* Extra Services Checkboxes */}
               <div className="extra-services">
-                <div style={{ fontSize: "12px", fontWeight: "700", color: "#64748b", marginBottom: "8px" }}>
+                <div style={{ fontSize: "12px", fontWeight: "700", color: "#94a3b8", marginBottom: "8px" }}>
                   DỊCH VỤ THUÊ THÊM (TÙY CHỌN):
                 </div>
                 <div className="extra-service-item">
@@ -3406,7 +3407,7 @@ export default function Home() {
 
               {/* Customer Inputs */}
               {currentUser && (
-                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "8px 12px", borderRadius: "8px", fontSize: "12px", color: "#166534", marginBottom: "12px" }}>
+                <div style={{ background: "rgba(50, 157, 210, 0.12)", border: "1px solid rgba(50, 157, 210, 0.3)", padding: "8px 12px", borderRadius: "8px", fontSize: "12px", color: "#38bdf8", marginBottom: "12px" }}>
                   ✓ Đã tự động điền thông tin từ tài khoản Neon của bạn (<strong>{currentUser.fullName}</strong>).
                 </div>
               )}
@@ -3473,58 +3474,59 @@ export default function Home() {
                 style={{
                   width: "60px",
                   height: "60px",
-                  background: "#dcfce7",
-                  color: "#16a34a",
+                  background: "rgba(50, 157, 210, 0.15)",
+                  color: "#38bdf8",
+                  border: "2px solid #329dd2",
                   borderRadius: "50%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "32px",
+                  fontSize: "30px",
                   margin: "0 auto 16px",
                 }}
               >
                 ✓
               </div>
 
-              <h2 style={{ fontSize: "22px", margin: "0 0 4px" }}>🎉 Đặt Sân Con Thành Công!</h2>
-              <div style={{ display: "inline-block", background: "#dcfce7", color: "#15803d", fontWeight: "800", fontSize: "12px", padding: "4px 12px", borderRadius: "999px", marginBottom: "16px" }}>
+              <h2 style={{ fontSize: "22px", margin: "0 0 4px", color: "#ffffff" }}>🎉 Đặt Sân Con Thành Công!</h2>
+              <div style={{ display: "inline-block", background: "rgba(50, 157, 210, 0.15)", color: "#38bdf8", border: "1px solid rgba(50, 157, 210, 0.35)", fontWeight: "800", fontSize: "12px", padding: "4px 12px", borderRadius: "999px", marginBottom: "16px" }}>
                 🔔 HỆ THỐNG ĐÃ TỰ ĐỘNG BÁO CHO CHỦ SÂN
               </div>
 
-              <p style={{ fontSize: "14px", color: "#64748b", margin: "0 0 16px" }}>
+              <p style={{ fontSize: "14px", color: "#94a3b8", margin: "0 0 16px" }}>
                 Đơn đặt sân con của bạn đã được ghi nhận vào CSDL Neon và gửi thông tin xác nhận cho Chủ sân:
               </p>
 
               <div
                 style={{
-                  background: "#f0fdf4",
-                  border: "2px dashed #86efac",
+                  background: "var(--surface-alt)",
+                  border: "2px dashed rgba(50, 157, 210, 0.45)",
                   borderRadius: "12px",
                   padding: "16px 20px",
                   margin: "0 0 20px",
                   textAlign: "left",
                 }}
               >
-                <div style={{ fontSize: "11px", color: "#166534", fontWeight: "700" }}>MÃ VÉ ĐẶT SÂN:</div>
-                <div style={{ fontSize: "24px", fontWeight: "900", color: "#15803d", letterSpacing: "1px" }}>
+                <div style={{ fontSize: "11px", color: "#38bdf8", fontWeight: "700", letterSpacing: "0.5px" }}>MÃ VÉ ĐẶT SÂN:</div>
+                <div style={{ fontSize: "24px", fontWeight: "900", color: "#ffffff", letterSpacing: "1px" }}>
                   {successReceipt.bookingCode}
                 </div>
-                <div style={{ fontSize: "14px", color: "#0f172a", marginTop: "10px", fontWeight: "700" }}>
-                  ⚽ Sân con đã đặt: <span style={{ color: "#16a34a" }}>{successReceipt.subPitchName}</span> ({successReceipt.categoryName})
+                <div style={{ fontSize: "14px", color: "#f1f5f9", marginTop: "10px", fontWeight: "700" }}>
+                  ⚽ Sân con đã đặt: <span style={{ color: "#38bdf8" }}>{successReceipt.subPitchName}</span> ({successReceipt.categoryName})
                 </div>
-                <div style={{ fontSize: "13px", color: "#334155", marginTop: "4px" }}>
+                <div style={{ fontSize: "13px", color: "#cbd5e1", marginTop: "4px" }}>
                   🏢 Cụm sân mẹ: <strong>{successReceipt.parentVenueName}</strong>
                 </div>
-                <div style={{ fontSize: "13px", color: "#0284c7", fontWeight: "700", marginTop: "4px" }}>
+                <div style={{ fontSize: "13px", color: "#f59e0b", fontWeight: "700", marginTop: "4px" }}>
                   👨‍💼 Chủ sân tiếp nhận: {successReceipt.ownerName} (Hotline: {successReceipt.ownerPhone})
                 </div>
-                <div style={{ fontSize: "13px", color: "#475569", marginTop: "4px" }}>
+                <div style={{ fontSize: "13px", color: "#94a3b8", marginTop: "4px" }}>
                   ⏰ Ca thi đấu: <strong>{successReceipt.timeLabel}</strong> · Ngày <strong>{successReceipt.date}</strong>
                 </div>
-                <div style={{ fontSize: "15px", fontWeight: "800", color: "#b45309", marginTop: "6px" }}>
+                <div style={{ fontSize: "15px", fontWeight: "800", color: "#f59e0b", marginTop: "6px" }}>
                   💰 Tổng tiền: {money(successReceipt.totalPrice)}
                 </div>
-                <div style={{ fontSize: "12px", color: "#22c55e", fontWeight: "700", marginTop: "8px", background: "rgba(34, 197, 94, 0.12)", padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(34, 197, 94, 0.3)" }}>
+                <div style={{ fontSize: "12px", color: "#38bdf8", fontWeight: "700", marginTop: "8px", background: "rgba(50, 157, 210, 0.12)", padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(50, 157, 210, 0.3)" }}>
                   🟢 Trạng thái: Đã gửi thông báo xác nhận đến Chủ sân để giữ sân và bật đèn
                 </div>
               </div>

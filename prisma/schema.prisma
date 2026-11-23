@@ -16,6 +16,7 @@ enum Role {
 enum FieldType {
   SAN_5
   SAN_7
+  SAN_11
 }
 
 enum FieldStatus {
