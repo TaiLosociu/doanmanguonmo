@@ -2161,29 +2161,41 @@ export default function Home() {
       {/* Sleek Dark Night Topbar */}
       <div style={{ background: "#050a12", borderBottom: "1px solid rgba(50, 157, 210, 0.2)", padding: "7px 24px", fontSize: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ color: "#329dd2", fontWeight: 700, display: "flex", alignItems: "center", gap: "6px" }}>
-          <span>⚽</span> <span>HỆ THỐNG SÂN BÓNG BUÔN MA THUỘT · SÀN CÁP KÈO & BẢNG XẾP HẠNG ELO CLB</span>
+          <span>⚽</span> <span>HỆ THỐNG ĐẶT LỊCH THỂ THAO TRỰC TUYẾN ALO BOOKING · BUÔN MA THUỘT</span>
         </span>
         <span style={{ color: "#94a3b8" }}>📞 Hotline hỗ trợ: <strong style={{ color: "#f59e0b" }}>0896890399</strong> · Mở cửa 06:00 - 23:00</span>
       </div>
 
-      {/* Main Navigation Topbar */}
+      {/* Main Navigation Topbar Chuẩn ALO Booking */}
       <header className="topbar-wrapper">
         <div className="topbar">
-          <a className="brand" href="/">
-            <div className="brand-icon">⚽</div>
-            <div style={{ color: "#ffffff" }}>SÂN<span style={{ color: "#329dd2" }}>NHÀ</span> <span style={{ background: "#eb2f33", color: "#ffffff", padding: "2px 6px", borderRadius: "4px", fontSize: "9px", fontWeight: 900, marginLeft: "4px", letterSpacing: "0.5px" }}>BMT</span></div>
+          <a className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
+            <div className="brand-icon" style={{ width: "42px", height: "42px", borderRadius: "12px", background: "linear-gradient(135deg, #329dd2 0%, #1f7fae 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", boxShadow: "0 4px 14px rgba(50, 157, 210, 0.4)" }}>⚽</div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ color: "#ffffff", fontSize: "20px", fontWeight: 900, letterSpacing: "-0.5px" }}>ALO<span style={{ color: "#329dd2" }}>BOOKING</span></span>
+                <span className="alo-brand-badge">BMT</span>
+              </div>
+              <div style={{ fontSize: "10px", color: "#94a3b8", fontWeight: 700, letterSpacing: "0.5px" }}>ĐẶT LỊCH THỂ THAO TRỰC TUYẾN</div>
+            </div>
           </a>
+
+          {/* ALO Location Pill */}
+          <div className="alo-location-pill" title="Khu vực hoạt động mặc định">
+            <span>📍</span>
+            <span>TP. Buôn Ma Thuột, Đắk Lắk</span>
+          </div>
 
           <nav className="nav-links">
             <div className="nav-group-pill">
-              <a href="#danh-sach-san" title="Danh mục 20 cụm sân Buôn Ma Thuột">🏟️ Sân bóng</a>
-              <a href="#dat-san" title="Xem lịch các ca trống & đặt ca">📅 Lịch ca trống</a>
+              <a href="#dat-san" title="Xem sơ đồ ma trận ca trống và đặt lịch">📅 Đặt sân trực tuyến</a>
+              <a href="#danh-sach-san" title="Danh mục 21 cụm sân Buôn Ma Thuột">🏟️ 21 Cụm sân</a>
               <a href="#ban-do-san" title="Định vị GPS & bản đồ cụm sân">🗺️ Radar GPS</a>
             </div>
             <div className="nav-group-pill">
               <a href="#cap-keo" title="Sàn cáp kèo giao lưu phủi">🤝 Cáp kèo</a>
               <a href="#hoi-nhom" title="Câu lạc bộ 15 người & leo rank">🛡️ FC &amp; Leo rank</a>
-              <a href="#giai-dau" title="Cúp Tứ Hùng Ban Mê">🏆 Giải đấu</a>
+              <a href="#quy-trinh-alo" title="6 Bước đặt lịch chuẩn ALO Booking">📋 Quy trình</a>
             </div>
             <div className="nav-group-pill">
               <a href="#bang-gia" title="Bảng giá chuẩn các loại sân">💰 Bảng giá</a>
@@ -2205,9 +2217,9 @@ export default function Home() {
                 gap: "7px",
                 padding: "6px 14px",
                 borderRadius: "999px",
-                border: isApiConnected ? "1px solid #86efac" : "1px solid #fca5a5",
+                border: isApiConnected ? "1px solid rgba(34, 197, 94, 0.4)" : "1px solid rgba(239, 68, 68, 0.4)",
                 background: isApiConnected ? "rgba(34, 197, 94, 0.12)" : "rgba(239, 68, 68, 0.12)",
-                color: isApiConnected ? "#15803d" : "#b91c1c",
+                color: isApiConnected ? "#4ade80" : "#f87171",
                 fontSize: "12px",
                 fontWeight: "700",
                 cursor: "pointer",
@@ -2225,7 +2237,7 @@ export default function Home() {
                   display: "inline-block",
                 }}
               />
-              <span>{isApiConnected ? "Wispbyte / Neon" : "Chưa kết nối API"}</span>
+              <span>{isApiConnected ? "Neon Cloud 🟢" : "Chưa kết nối API"}</span>
             </button>
             {currentUser ? (
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -2280,11 +2292,6 @@ export default function Home() {
             {currentUser?.role === "STAFF" && (
               <a className="btn-nav-admin" href="/staff" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }} title="Quản lý ca trực & Check-in sân">📋 Trực Ca Sân</a>
             )}
-            {currentUser && currentUser.role !== "ADMIN" && currentUser.role !== "STAFF" && (
-              <span style={{ fontSize: "11px", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "5px 12px", borderRadius: "999px", fontWeight: "800" }}>
-                ⚽ Khách hàng / Cầu thủ
-              </span>
-            )}
           </div>
 
           <button
@@ -2320,27 +2327,24 @@ export default function Home() {
                 👤 Đăng nhập / Đăng ký tài khoản
               </button>
             )}
+            <a href="#dat-san" onClick={() => setMobileMenuOpen(false)} style={{ color: "#38bdf8" }}>📅 Đặt sân trực tuyến</a>
             <a href="#danh-sach-san" onClick={() => setMobileMenuOpen(false)}>🏟️ Danh sách sân</a>
-            <a href="#dat-san" onClick={() => setMobileMenuOpen(false)}>📅 Lịch sân trống</a>
+            <a href="#cap-keo" onClick={() => setMobileMenuOpen(false)}>🤝 Sàn cáp kèo</a>
+            <a href="#hoi-nhom" onClick={() => setMobileMenuOpen(false)}>🛡️ FC &amp; Leo rank ELO</a>
             <a href="#bang-gia" onClick={() => setMobileMenuOpen(false)}>💰 Bảng giá</a>
-            <a href="#danh-gia" onClick={() => setMobileMenuOpen(false)}>⭐ Đánh giá khách hàng</a>
-            <a href="#hoi-dap" onClick={() => setMobileMenuOpen(false)}>❓ Câu hỏi thường gặp</a>
             <a href="/lookup" onClick={() => setMobileMenuOpen(false)}>🔍 Tra cứu vé đặt sân</a>
-            {(currentUser?.role === "ADMIN" || currentUser?.role === "STAFF") && (
-              <a href="/admin" style={{ color: "var(--primary)", fontWeight: "700" }} onClick={() => setMobileMenuOpen(false)}>⚙️ Cổng Quản trị / Nhân viên</a>
-            )}
           </div>
         )}
       </header>
 
-      {/* Hero Section */}
-      <section className="hero-container">
+      {/* Hero Section Chuẩn Phong Cách ALO Booking */}
+      <section className="hero-container" style={{ paddingBottom: "24px" }}>
         <div className="hero">
-          <div>
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-              <div className="hero-pill" style={{ margin: 0 }}>
-                <span className="dot" />
-                <span>HỆ THỐNG ĐẶT SÂN BÓNG ĐÁ TRỰC TUYẾN CHUẨN FIFA</span>
+          <div style={{ maxWidth: "100%" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
+              <div className="hero-pill" style={{ margin: 0, background: "rgba(50, 157, 210, 0.15)", borderColor: "rgba(50, 157, 210, 0.4)", color: "#38bdf8" }}>
+                <span className="dot" style={{ background: "#38bdf8" }} />
+                <span>NỀN TẢNG ĐẶT LỊCH THỂ THAO TRỰC TUYẾN SỐ 1 BUÔN MA THUỘT</span>
               </div>
               <div className="weather-widget">
                 <span className="weather-icon">🌤️</span>
@@ -2348,100 +2352,171 @@ export default function Home() {
               </div>
             </div>
 
-            <h1>
-              Trận cầu đỉnh cao<br />bắt đầu từ <em>một cuộc hẹn.</em>
+            <h1 style={{ fontSize: "clamp(28px, 4.5vw, 46px)", lineHeight: 1.2, marginBottom: "12px" }}>
+              Đặt Lịch Sân Thể Thao Nhanh Chóng<br /><span style={{ color: "#329dd2" }}>Giữ Chỗ Tức Thì 24/7</span> · ALO Booking
             </h1>
-            <p className="hero-sub">
-              Trực quan hóa ca đá còn trống theo thời gian thực, bảng giá snapshot minh bạch, kiểm tra xung đột lịch tức thì và quản lý thanh toán chuyên nghiệp.
+            <p className="hero-sub" style={{ maxWidth: "820px", fontSize: "15px", marginBottom: "20px" }}>
+              Nền tảng đặt lịch thể thao thông minh chuẩn ALO Booking. Theo dõi tình trạng ca sân trống theo thời gian thực tại 21 cụm sân cỏ nhân tạo &amp; tự nhiên ở TP. Buôn Ma Thuột. Kết nối cáp kèo phủi, quản lý FC 15 người và leo rank ELO giải đấu hấp dẫn.
             </p>
 
-            <div className="hero-actions">
-              <a href="#dat-san" className="primary-button">
-                <span>⚡</span> Chọn sân &amp; Đặt lịch ngay
-              </a>
-              <a href="/lookup" className="outline-button">
-                <span>🔍</span> Tra cứu phiếu đặt sân
-              </a>
-            </div>
+            {/* ALO BOOKING MULTI-FIELD SEARCH BAR */}
+            <div className="alo-hero-widget">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "8px" }}>
+                <div style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ color: "#38bdf8" }}>⚡</span> TÌM KIẾM SÂN BÓNG &amp; KIỂM TRA CA TRỐNG THEO THỜI GIAN THỰC
+                </div>
+                <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                  Cập nhật trực tiếp từ CSDL Neon Cloud
+                </div>
+              </div>
 
-            {/* Hero Quick Search / Filter Bar */}
-            <div className="hero-quick-bar">
-              <div className="quick-bar-item">
-                <label>📅 Chọn ngày thi đấu</label>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
-              </div>
-              <div className="quick-bar-item">
-                <label>⚽ Quy mô sân thi đấu</label>
-                <select
-                  value={filterType}
-                  onChange={(e) => handleFilterTypeChange(e.target.value as any)}
-                >
-                  <option value="ALL">Tất cả quy mô (Sân 5, 7, 11)</option>
-                  <option value="SAN_5">⚽ Sân 5 người (Mini · Từ 250k)</option>
-                  <option value="SAN_7">🏆 Sân 7 người (Bán chuyên · Từ 400k)</option>
-                  <option value="SAN_11">⭐ Sân 11 người (Chuẩn VFF / SVĐ · Từ 800k)</option>
-                </select>
-              </div>
-              <div className="quick-bar-item" style={{ flex: "0 0 auto", minWidth: "auto", justifyContent: "flex-end" }}>
+              <div className="alo-search-grid">
+                <div className="alo-field-group">
+                  <label>⚽ Quy mô sân</label>
+                  <select
+                    value={filterType}
+                    onChange={(e) => handleFilterTypeChange(e.target.value as any)}
+                  >
+                    <option value="ALL">Tất cả quy mô (Sân 5, 7, 11)</option>
+                    <option value="SAN_5">⚽ Sân mini 5 người (Từ 250k)</option>
+                    <option value="SAN_7">🏆 Sân 7 người (Từ 400k)</option>
+                    <option value="SAN_11">⭐ Sân 11 người SVĐ FIFA (Từ 800k)</option>
+                  </select>
+                </div>
+
+                <div className="alo-field-group">
+                  <label>📍 Khu vực tại BMT</label>
+                  <select
+                    value={filterWard}
+                    onChange={(e) => setFilterWard(e.target.value)}
+                  >
+                    <option value="ALL">Toàn thành phố Buôn Ma Thuột</option>
+                    <option value="Phường Tân Tiến">Phường Tân Tiến (SVĐ BMT, Sân C1)</option>
+                    <option value="Phường Tân Lợi">Phường Tân Lợi (Sân KenVin)</option>
+                    <option value="Phường Tân An">Phường Tân An</option>
+                    <option value="Phường Ea Tam">Phường Ea Tam (Sân CĐ Sư Phạm)</option>
+                    <option value="Phường Thành Nhất">Phường Thành Nhất</option>
+                    <option value="Phường Tân Lập">Phường Tân Lập (Sân Ban Mê Sport)</option>
+                    <option value="Xã Hòa Khánh">Xã Hòa Khánh</option>
+                    <option value="Xã Hòa Thuận">Xã Hòa Thuận</option>
+                  </select>
+                </div>
+
+                <div className="alo-field-group">
+                  <label>📅 Ngày thi đấu</label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                </div>
+
+                <div className="alo-field-group">
+                  <label>⏰ Khung giờ đá</label>
+                  <select defaultValue="ALL">
+                    <option value="ALL">Tất cả các ca (06:00 - 22:30)</option>
+                    <option value="MORNING">Ca sáng (06:00 - 12:00)</option>
+                    <option value="AFTERNOON">Ca chiều tan sở (16:00 - 18:30)</option>
+                    <option value="NIGHT">Giờ vàng tối (18:30 - 22:30)</option>
+                  </select>
+                </div>
+
                 <button
                   type="button"
-                  onClick={handleCheckAvailableSlots}
                   className="primary-button"
-                  style={{ padding: "10px 20px", fontSize: "14px", height: "42px", display: "inline-flex", alignItems: "center", cursor: "pointer" }}
+                  style={{ height: "44px", padding: "0 16px", fontSize: "13px", fontWeight: 800, justifyContent: "center" }}
+                  onClick={handleCheckAvailableSlots}
                 >
-                  Kiểm tra giờ trống ⚡
+                  ⚡ TÌM SÂN NGAY
                 </button>
               </div>
             </div>
 
-            <div className="hero-stats" style={{ marginTop: "28px" }}>
+            {/* ALO Category Selector Pills */}
+            <div style={{ marginTop: "18px" }}>
+              <div style={{ fontSize: "12px", fontWeight: 700, color: "#94a3b8", marginBottom: "6px" }}>DANH MỤC THỂ THAO &amp; TIÊU CHÍ NHANH:</div>
+              <div className="alo-pills-bar">
+                <button
+                  type="button"
+                  className={`alo-pill-btn ${filterType === "ALL" ? "active" : ""}`}
+                  onClick={() => handleFilterTypeChange("ALL")}
+                >
+                  ⚽ Tất cả sân (21 cụm sân)
+                </button>
+                <button
+                  type="button"
+                  className={`alo-pill-btn ${filterType === "SAN_5" ? "active" : ""}`}
+                  onClick={() => handleFilterTypeChange("SAN_5")}
+                >
+                  🏃 Sân 5 mini cỏ nhân tạo
+                </button>
+                <button
+                  type="button"
+                  className={`alo-pill-btn ${filterType === "SAN_7" ? "active" : ""}`}
+                  onClick={() => handleFilterTypeChange("SAN_7")}
+                >
+                  🏆 Sân 7 người phong trào
+                </button>
+                <button
+                  type="button"
+                  className={`alo-pill-btn ${filterType === "SAN_11" ? "active" : ""}`}
+                  onClick={() => handleFilterTypeChange("SAN_11")}
+                >
+                  ⭐ Sân 11 người SVĐ FIFA
+                </button>
+                <button
+                  type="button"
+                  className="alo-pill-btn"
+                  onClick={() => {
+                    handleFilterTypeChange("ALL");
+                    setQuickDate(0);
+                  }}
+                >
+                  🟢 Ca trống hôm nay
+                </button>
+                <button
+                  type="button"
+                  className="alo-pill-btn"
+                  onClick={() => {
+                    handleFindNearestPitch();
+                    const mapEl = document.getElementById("ban-do-san");
+                    if (mapEl) mapEl.scrollIntoView({ behavior: "smooth" });
+                  }}
+                >
+                  📍 Sân gần bạn nhất (GPS)
+                </button>
+              </div>
+            </div>
+
+            <div className="hero-stats" style={{ marginTop: "24px" }}>
               <div className="hero-stat-item">
-                <b>4 Sân</b>
-                <span>Cỏ nhân tạo đạt chuẩn</span>
+                <b>21 Cụm Sân</b>
+                <span>Bao phủ toàn Buôn Ma Thuột</span>
               </div>
               <div className="hero-stat-item">
                 <b>11 Ca/Ngày</b>
-                <span>Khung giờ linh hoạt</span>
+                <span>Linh hoạt 06:00 - 22:30</span>
               </div>
               <div className="hero-stat-item">
-                <b>100%</b>
+                <b>100% Real-time</b>
                 <span>Chống trùng lịch tự động</span>
               </div>
               <div className="hero-stat-item">
                 <b>4.9/5 ⭐</b>
-                <span>Hơn 1.200 lượt đánh giá</span>
+                <span>Hơn 1.200 đánh giá 5 sao</span>
               </div>
-            </div>
-          </div>
-
-          {/* Football pitch diagram art */}
-          <div className="pitch-card-art">
-            <div className="pitch-graphic">
-              <div className="pitch-center-line" />
-              <div className="pitch-center-circle" />
-            </div>
-            <div className="pitch-art-info">
-              <div>
-                <strong style={{ fontSize: "16px", display: "block" }}>SÂN BÓNG ĐÁ MINI TIÊU CHUẨN</strong>
-                <small style={{ color: "#94a3b8" }}>Hệ thống đèn LED 400W chống chói ban đêm</small>
-              </div>
-              <span className="pitch-art-tag">CHUẨN QUỐC TẾ</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Amenities Bar */}
+      {/* Amenities Bar Chuẩn ALO Booking */}
       <div className="amenities-bar">
         <div className="amenities-content">
           <div className="amenity-item">
             <i>💡</i>
             <div>
-              <strong>Đèn LED hiện đại</strong>
+              <strong>Đèn LED chống chói</strong>
               <div style={{ fontSize: "11px", color: "#64748b" }}>Chiếu sáng chuẩn giải đấu</div>
             </div>
           </div>
@@ -2455,28 +2530,74 @@ export default function Home() {
           <div className="amenity-item">
             <i>🚗</i>
             <div>
-              <strong>Bãi đỗ xe miễn phí</strong>
-              <div style={{ fontSize: "11px", color: "#64748b" }}>Trông giữ xe máy &amp; ô tô</div>
+              <strong>Bãi đỗ xe ô tô &amp; máy</strong>
+              <div style={{ fontSize: "11px", color: "#64748b" }}>Trông giữ camera 24/7</div>
             </div>
           </div>
           <div className="amenity-item">
             <i>🥤</i>
             <div>
-              <strong>Căng tin phục vụ</strong>
-              <div style={{ fontSize: "11px", color: "#64748b" }}>Nước tăng lực &amp; áo bib</div>
+              <strong>Căng tin &amp; Cho thuê áo</strong>
+              <div style={{ fontSize: "11px", color: "#64748b" }}>Nước khoáng, áo bib, bóng</div>
             </div>
           </div>
           <div className="amenity-item">
-            <i>👨‍⚖️</i>
+            <i>📱</i>
             <div>
-              <strong>Dịch vụ trọng tài</strong>
-              <div style={{ fontSize: "11px", color: "#64748b" }}>Bắt trận công tâm, chuẩn luật</div>
+              <strong>VietQR MB Bank tự động</strong>
+              <div style={{ fontSize: "11px", color: "#64748b" }}>Quét mã cọc giữ sân tức thì</div>
             </div>
           </div>
         </div>
       </div>
 
-      
+      {/* SECTION: 6 BƯỚC ĐẶT LỊCH THỂ THAO CHUẨN ALO BOOKING */}
+      <section className="section-wrap" id="quy-trinh-alo" style={{ paddingTop: "40px", paddingBottom: "20px" }}>
+        <div style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto 30px" }}>
+          <span className="module-tag tag-dark">📋 QUY TRÌNH ALO BOOKING</span>
+          <h2 style={{ fontSize: "26px", color: "#ffffff", marginTop: "8px" }}>6 Bước Đặt Lịch Sân Cực Kỳ Đơn Giản</h2>
+          <p style={{ color: "#94a3b8", fontSize: "14px", marginTop: "4px" }}>Trải nghiệm đặt sân thể thao chuyên nghiệp, nhanh chóng và giữ chỗ tức thì không cần chờ đợi.</p>
+        </div>
+
+        <div className="alo-steps-container">
+          <div className="alo-step-item">
+            <div className="alo-step-num">1</div>
+            <strong style={{ color: "#ffffff", fontSize: "14px", display: "block", marginBottom: "6px" }}>Tìm cụm sân</strong>
+            <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0 }}>Chọn sân theo môn thể thao, quy mô 5-7-11 hoặc khoảng cách GPS gần bạn nhất.</p>
+          </div>
+
+          <div className="alo-step-item">
+            <div className="alo-step-num">2</div>
+            <strong style={{ color: "#ffffff", fontSize: "14px", display: "block", marginBottom: "6px" }}>Chọn ca trống</strong>
+            <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0 }}>Xem sơ đồ ma trận thời gian thực và bấm chọn khung giờ vàng bạn muốn thi đấu.</p>
+          </div>
+
+          <div className="alo-step-item">
+            <div className="alo-step-num">3</div>
+            <strong style={{ color: "#ffffff", fontSize: "14px", display: "block", marginBottom: "6px" }}>Điền thông tin</strong>
+            <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0 }}>Nhập họ tên và số điện thoại liên hệ (hệ thống tự động điền nếu đã đăng nhập).</p>
+          </div>
+
+          <div className="alo-step-item">
+            <div className="alo-step-num">4</div>
+            <strong style={{ color: "#ffffff", fontSize: "14px", display: "block", marginBottom: "6px" }}>Chọn dịch vụ</strong>
+            <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0 }}>Tùy chọn bổ sung thêm áo bib, bóng thi đấu, nước suối hoặc trọng tài phong trào.</p>
+          </div>
+
+          <div className="alo-step-item">
+            <div className="alo-step-num">5</div>
+            <strong style={{ color: "#ffffff", fontSize: "14px", display: "block", marginBottom: "6px" }}>Quét VietQR cọc</strong>
+            <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0 }}>Quét mã VietQR chuyển khoản cọc 50% qua MB Bank để khóa ca và giữ sân.</p>
+          </div>
+
+          <div className="alo-step-item">
+            <div className="alo-step-num">6</div>
+            <strong style={{ color: "#ffffff", fontSize: "14px", display: "block", marginBottom: "6px" }}>Ra sân thi đấu</strong>
+            <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0 }}>Nhận vé điện tử lưu trên hệ thống, bật Google Maps chỉ đường và ra sân đúng giờ.</p>
+          </div>
+        </div>
+      </section>
+
       {/* SECTION 1: BẢN ĐỒ TƯƠNG TÁC & ĐỊNH VỊ GPS BUÔN MA THUỘT */}
       <section className="section-wrap" id="ban-do-san" style={{ background: "var(--surface)", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
         <div className="section-head-modern" style={{ marginBottom: "20px" }}>
