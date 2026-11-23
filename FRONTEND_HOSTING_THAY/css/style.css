@@ -1,40 +1,49 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cabinet+Grotesk:wght@700;800;900&display=swap");
 
 :root {
-  /* Brand Master Palette: #080f1b (Obsidian Dark), #329dd2 (Electric Cyan/Blue), #eb2f33 (Crimson Flame Red) */
+  /* Brand Master Palette: Tối trầm và ấm kết hợp #080f1b, #329dd2, #eb2f33 */
   --primary: #329dd2;
-  --primary-hover: #2284b7;
-  --primary-dark: #15628a;
-  --primary-light: #e6f4fb;
-  --primary-glow: rgba(50, 157, 210, 0.35);
+  --primary-hover: #4bb5eb;
+  --primary-dark: #1f7fae;
+  --primary-light: rgba(50, 157, 210, 0.15);
+  --primary-glow: rgba(50, 157, 210, 0.45);
 
   --accent-red: #eb2f33;
-  --accent-red-hover: #cf1b1f;
-  --accent-red-light: #fee2e2;
-  --accent-red-glow: rgba(235, 47, 51, 0.35);
+  --accent-red-hover: #ff474b;
+  --accent-red-light: rgba(235, 47, 51, 0.15);
+  --accent-red-glow: rgba(235, 47, 51, 0.45);
 
+  --gold: #f59e0b;
+  --gold-hover: #fbbf24;
+  --gold-glow: rgba(245, 158, 11, 0.35);
+
+  /* Tone màu tối trầm và ấm (Deep Warm Obsidian & Slate) */
   --dark-main: #080f1b;
-  --dark-surface: #0e1a2f;
-  --dark-card: #13223c;
-  --dark-border: #1e3355;
-  --dark-muted: #8ea8c7;
+  --dark-surface: #0e1626;
+  --dark-card: #131e32;
+  --dark-card-hover: #17243c;
+  --dark-border: #1e2e4a;
+  --dark-muted: #8ea5c8;
 
   --accent: #329dd2;
-  --gold: #f59e0b;
   --danger: #eb2f33;
-  --danger-light: #fee2e2;
-  --bg: #f4f8fb;
-  --surface: #ffffff;
-  --surface-alt: #edf4f9;
-  --text-main: #080f1b;
-  --text-muted: #566a7f;
-  --border: #d4e3ee;
+  --danger-light: rgba(235, 47, 51, 0.18);
+
+  /* Giao diện mặc định: Tối trầm & ấm */
+  --bg: #080f1b;
+  --surface: #0e1626;
+  --surface-alt: #131e32;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: #1e2e4a;
+  --border-light: rgba(255, 255, 255, 0.08);
+
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
-  --shadow-sm: 0 2px 6px rgba(8, 15, 27, 0.04);
-  --shadow-md: 0 12px 28px -6px rgba(8, 15, 27, 0.08), 0 6px 14px -4px rgba(50, 157, 210, 0.08);
-  --shadow-lg: 0 24px 48px -12px rgba(8, 15, 27, 0.16);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 12px 30px -4px rgba(0, 0, 0, 0.55), 0 0 20px -6px rgba(50, 157, 210, 0.25);
+  --shadow-lg: 0 24px 50px -8px rgba(0, 0, 0, 0.75), 0 0 30px -6px rgba(235, 47, 51, 0.2);
 }
 
 * {
@@ -43,14 +52,18 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: #080f1b;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: radial-gradient(circle at 50% 0%, #111e33 0%, #080f1b 75%, #050a12 100%);
+  background-attachment: fixed;
   color: var(--text-main);
   font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   line-height: 1.6;
+  min-height: 100vh;
 }
 
 h1, h2, h3, h4, .brand-title {
@@ -279,9 +292,9 @@ button {
 }
 
 .outline-button {
-  background: #ffffff;
-  color: #080f1b;
-  border: 1.5px solid #d4e3ee;
+  background: var(--surface);
+  color: var(--text-main);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 12px 22px;
   font-size: 14px;
@@ -295,7 +308,7 @@ button {
 .outline-button:hover {
   border-color: #329dd2;
   color: #329dd2;
-  background: #e6f4fb;
+  background: rgba(50, 157, 210, 0.15);
 }
 
 .hero-stats {
@@ -303,20 +316,20 @@ button {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
   padding-top: 24px;
 }
 
 .hero-stat-item b {
   font-size: 24px;
   font-weight: 800;
-  color: #0f172a;
+  color: #f1f5f9;
   display: block;
 }
 
 .hero-stat-item span {
   font-size: 12px;
-  color: #64748b;
+  color: #94a3b8;
   font-weight: 500;
 }
 
@@ -385,7 +398,7 @@ button {
 
 /* Feature bar */
 .amenities-bar {
-  background: #ffffff;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: 20px 0;
 }
@@ -403,7 +416,7 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #334155;
+  color: var(--text-main);
   font-size: 13px;
   font-weight: 600;
 }
@@ -437,6 +450,7 @@ button {
 .section-head-modern h2 {
   font-size: 28px;
   margin: 6px 0 0;
+  color: var(--text-main);
 }
 
 .section-tag {
@@ -455,20 +469,20 @@ button {
 }
 
 .filter-tab {
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-muted);
   transition: all 0.2s;
 }
 
 .filter-tab.active, .filter-tab:hover {
-  background: #0f172a;
+  background: var(--primary);
   color: #ffffff;
-  border-color: #0f172a;
+  border-color: var(--primary);
 }
 
 /* Pitch cards grid */
@@ -479,7 +493,7 @@ button {
 }
 
 .pitch-card {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -492,7 +506,7 @@ button {
 .pitch-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
-  border-color: #cbd5e1;
+  border-color: var(--primary);
 }
 
 .pitch-thumb {
@@ -595,7 +609,7 @@ button {
 
 /* Schedule section UI-04 */
 .schedule-filter-bar {
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 20px;
@@ -610,7 +624,7 @@ button {
 .schedule-filter-bar label {
   font-size: 12px;
   font-weight: 700;
-  color: #475569;
+  color: var(--text-muted);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -622,7 +636,7 @@ button {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 0 14px;
-  background: #ffffff;
+  background: var(--surface-alt);
   color: var(--text-main);
   outline: none;
   font-weight: 600;
@@ -631,7 +645,7 @@ button {
 .schedule-filter-bar input[type="date"]:focus,
 .schedule-filter-bar select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+  box-shadow: 0 0 0 3px rgba(50, 157, 210, 0.25);
 }
 
 .quick-days {
@@ -647,11 +661,13 @@ button {
   padding: 8px 14px;
   font-size: 12px;
   font-weight: 700;
-  color: #334155;
+  color: var(--text-main);
 }
 
 .quick-day-btn:hover {
-  background: #e2e8f0;
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
 }
 
 .legend-bar {
@@ -659,7 +675,7 @@ button {
   gap: 20px;
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 20px;
 }
 
@@ -675,10 +691,10 @@ button {
   border-radius: 4px;
 }
 
-.legend-available { background: #dcfce7; border: 1px solid #86efac; }
-.legend-booked { background: #fee2e2; border: 1px solid #fca5a5; }
-.legend-peak { background: #fef3c7; border: 1px solid #fcd34d; }
-.legend-past { background: #f1f5f9; border: 1px solid #cbd5e1; }
+.legend-available { background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; }
+.legend-booked { background: rgba(235, 47, 51, 0.2); border: 1px solid #eb2f33; }
+.legend-peak { background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; }
+.legend-past { background: rgba(148, 163, 184, 0.15); border: 1px solid #475569; }
 
 /* Grid of fields & slots */
 .schedule-fields-list {
@@ -688,7 +704,7 @@ button {
 }
 
 .schedule-field-row {
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 24px;
@@ -707,6 +723,7 @@ button {
 .schedule-field-header h3 {
   margin: 0;
   font-size: 20px;
+  color: var(--text-main);
 }
 
 .slots-grid-container {
@@ -722,7 +739,7 @@ button {
   padding: 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: #ffffff;
+  background: var(--surface-alt);
   transition: all 0.2s;
   text-align: left;
 }
@@ -730,7 +747,7 @@ button {
 .slot-btn b {
   font-size: 13px;
   margin-bottom: 4px;
-  color: #0f172a;
+  color: var(--text-main);
 }
 
 .slot-btn span {
@@ -741,7 +758,7 @@ button {
 .slot-btn small {
   font-size: 9px;
   font-weight: 700;
-  color: #b45309;
+  color: #fbbf24;
   margin-top: 4px;
   display: block;
 }

@@ -1129,8 +1129,9 @@ function renderPitchMarkers(filterType = "ALL") {
     const marker = L.marker([field.lat, field.lng], { icon: customIcon }).addTo(pitchLeafletMap);
 
     const gmapOrigin = (userLat && userLng) ? '&origin=' + userLat + ',' + userLng : '';
-    const gmapNavUrl = 'https://www.google.com/maps/dir/?api=1' + gmapOrigin + '&destination=' + field.lat + ',' + field.lng + '&travelmode=driving';
-    const gmapSearchUrl = 'https://www.google.com/maps/search/?api=1&query=' + field.lat + ',' + field.lng;
+    const gmapDest = encodeURIComponent(field.name + ', ' + (field.address || '') + ', Buôn Ma Thuột, Đắk Lắk');
+    const gmapNavUrl = 'https://www.google.com/maps/dir/?api=1' + gmapOrigin + '&destination=' + gmapDest + '&travelmode=driving';
+    const gmapSearchUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(field.name + ' ' + (field.address || '') + ' Buôn Ma Thuột');
 
     const popupHtml =
       '<div style="font-family: inherit; width: 270px; padding: 2px;">' +
@@ -1156,8 +1157,8 @@ function drawRouteToPitch(fieldId) {
   const field = DEFAULT_FIELDS.find(f => f.id === fieldId);
   if (!field || !pitchLeafletMap) return;
 
-  const myLat = userLat || 12.6865;
-  const myLng = userLng || 108.0450;
+  const myLat = userLat || 12.6806;
+  const myLng = userLng || 108.0378;
 
   if (routeLine) {
     pitchLeafletMap.removeLayer(routeLine);
@@ -1177,7 +1178,8 @@ function drawRouteToPitch(fieldId) {
   const d = calculateDistance(myLat, myLng, field.lat, field.lng);
   const resultNotice = document.getElementById("nearestPitchNotice");
   if (resultNotice) {
-    const navUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + myLat + ',' + myLng + '&destination=' + field.lat + ',' + field.lng + '&travelmode=driving';
+    const dest = encodeURIComponent(field.name + ', ' + (field.address || '') + ', Buôn Ma Thuột, Đắk Lắk');
+    const navUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + myLat + ',' + myLng + '&destination=' + dest + '&travelmode=driving';
     resultNotice.innerHTML =
       '<div style="background: #080f1b; border: 1.5px solid #329dd2; color: #ffffff; padding: 14px 18px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 12px; box-shadow: 0 4px 16px rgba(50,157,210,0.2);">' +
       '<div>' +
@@ -1196,7 +1198,7 @@ function findNearestPitch() {
   if (resultNotice) resultNotice.innerHTML = '<span style="color: #329dd2; font-weight: 700;">📡 Đang quét radar GPS vệ tinh...</span>';
 
   if (!navigator.geolocation) {
-    doFindNearest(12.6865, 108.0450, true);
+    doFindNearest(12.6806, 108.0378, true);
     return;
   }
 
@@ -1208,8 +1210,8 @@ function findNearestPitch() {
       doFindNearest(userLat, userLng, false);
     },
     () => {
-      userLat = 12.6865;
-      userLng = 108.0450;
+      userLat = 12.6806;
+      userLng = 108.0378;
       showUserLocationOnMap(userLat, userLng, true);
       doFindNearest(userLat, userLng, true);
     },

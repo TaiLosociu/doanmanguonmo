@@ -1255,6 +1255,256 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    // 12. API Matchmaking (Cáp Kèo Giao Lưu)
+    if (pathname === "/api/v1/matchmaking" && req.method === "GET") {
+      const posts = await queryNeon(
+        "SELECT * FROM matchmaking_posts ORDER BY id DESC"
+      );
+      return sendJson(res, 200, posts.map(p => ({
+        id: p.id,
+        userId: p.user_id,
+        userName: p.user_name,
+        teamName: p.team_name,
+        phone: p.phone,
+        playDate: p.play_date,
+        playTime: p.play_time,
+        pitchName: p.pitch_name,
+        pitchId: p.pitch_id,
+        format: p.format,
+        betType: p.bet_type,
+        level: p.level,
+        note: p.note,
+        status: p.status,
+        challengerId: p.challenger_id,
+        challengerName: p.challenger_name,
+        challengerPhone: p.challenger_phone,
+        createdAt: formatIsoUtc(p.created_at)
+      })));
+    }
+
+    if (pathname === "/api/v1/matchmaking" && req.method === "POST") {
+      const b = await parseJsonBody(req);
+      if (!b.teamName || !b.phone || !b.playDate || !b.playTime || !b.pitchName) {
+        return sendJson(res, 400, { message: "Vui lòng nhập đầy đủ Tên đội, SĐT, Ngày đá, Khung giờ và Tên sân!" });
+      }
+      const inserted = await queryNeon(
+        `INSERT INTO matchmaking_posts (user_id, user_name, team_name, phone, play_date, play_time, pitch_name, pitch_id, format, bet_type, level, note, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'OPEN')
+         RETURNING *`,
+        [
+          b.userId || null,
+          b.userName || b.teamName,
+          b.teamName,
+          b.phone,
+          b.playDate,
+          b.playTime,
+          b.pitchName,
+          b.pitchId || null,
+          b.format || "SAN_5",
+          b.betType || "Giao lưu vui vẻ (Chia 5-5)",
+          b.level || "Trung bình - Khá",
+          b.note || ""
+        ]
+      );
+      return sendJson(res, 201, { success: true, post: inserted[0] });
+    }
+
+    // Nhận kèo (PUT /api/v1/matchmaking/:id/accept)
+    if (pathname.match(/^\/api\/v1\/matchmaking\/\d+\/accept$/) && req.method === "PUT") {
+      const matchId = pathname.split("/")[4];
+      const b = await parseJsonBody(req);
+      const updated = await queryNeon(
+        `UPDATE matchmaking_posts 
+         SET status = 'ACCEPTED', challenger_id = $1, challenger_name = $2, challenger_phone = $3
+         WHERE id = $4 RETURNING *`,
+        [b.challengerId || null, b.challengerName || "Đội bạn", b.challengerPhone || "", matchId]
+      );
+      if (!updated || updated.length === 0) return sendJson(res, 404, { message: "Không tìm thấy kèo thi đấu!" });
+      return sendJson(res, 200, { success: true, post: updated[0] });
+    }
+
+    // Xóa kèo (DELETE /api/v1/matchmaking/:id)
+    if (pathname.match(/^\/api\/v1\/matchmaking\/\d+$/) && req.method === "DELETE") {
+      const matchId = pathname.split("/")[4];
+      await queryNeon("DELETE FROM matchmaking_posts WHERE id = $1", [matchId]);
+      return sendJson(res, 200, { success: true, message: "Đã xóa bài cáp kèo!" });
+    }
+
+    // 13. API Danh Sách FC & Bảng Xếp Hạng ELO Leo Rank
+    if (pathname === "/api/v1/clubs" && req.method === "GET") {
+      const clubs = await queryNeon(
+        "SELECT * FROM football_clubs ORDER BY elo DESC, wins DESC, id ASC"
+      );
+      return sendJson(res, 200, clubs.map(c => ({
+        id: c.id,
+        name: c.name,
+        captainName: c.captain_name,
+        captainPhone: c.captain_phone,
+        userId: c.user_id,
+        elo: c.elo,
+        tier: c.tier,
+        matchesPlayed: c.matches_played,
+        wins: c.wins,
+        draws: c.draws,
+        losses: c.losses,
+        membersCount: c.members_count,
+        maxMembers: c.max_members,
+        homePitch: c.home_pitch,
+        bio: c.bio,
+        createdAt: formatIsoUtc(c.created_at)
+      })));
+    }
+
+    if (pathname === "/api/v1/clubs" && req.method === "POST") {
+      const b = await parseJsonBody(req);
+      if (!b.name || !b.captainName || !b.captainPhone) {
+        return sendJson(res, 400, { message: "Vui lòng nhập Tên câu lạc bộ (FC), Tên đội trưởng và Số điện thoại!" });
+      }
+      const existing = await queryNeon("SELECT id FROM football_clubs WHERE LOWER(name) = LOWER($1)", [b.name]);
+      if (existing && existing.length > 0) {
+        return sendJson(res, 400, { message: "Tên câu lạc bộ này đã tồn tại! Vui lòng chọn tên khác." });
+      }
+      const inserted = await queryNeon(
+        `INSERT INTO football_clubs (name, captain_name, captain_phone, user_id, elo, tier, home_pitch, bio, members_count, max_members)
+         VALUES ($1, $2, $3, $4, 1200, 'Đồng', $5, $6, 1, 15)
+         RETURNING *`,
+        [b.name, b.captainName, b.captainPhone, b.userId || null, b.homePitch || "SVĐ Buôn Ma Thuột", b.bio || "CLB mới thành lập, quyết tâm leo rank!"]
+      );
+      const newClub = inserted[0];
+      await queryNeon(
+        `INSERT INTO club_members (club_id, user_id, member_name, phone, position, role)
+         VALUES ($1, $2, $3, $4, 'Đội trưởng / Tiền vệ', 'CAPTAIN')`,
+        [newClub.id, b.userId || null, b.captainName, b.captainPhone]
+      );
+      return sendJson(res, 201, { success: true, club: newClub });
+    }
+
+    // Danh sách thành viên FC (GET /api/v1/clubs/:id/members)
+    if (pathname.match(/^\/api\/v1\/clubs\/\d+\/members$/) && req.method === "GET") {
+      const clubId = pathname.split("/")[4];
+      const members = await queryNeon(
+        "SELECT * FROM club_members WHERE club_id = $1 ORDER BY id ASC",
+        [clubId]
+      );
+      return sendJson(res, 200, members.map(m => ({
+        id: m.id,
+        clubId: m.club_id,
+        memberName: m.member_name,
+        phone: m.phone,
+        position: m.position,
+        number: m.number,
+        role: m.role,
+        joinedAt: formatIsoUtc(m.joined_at)
+      })));
+    }
+
+    // Tham gia FC (POST /api/v1/clubs/:id/join) - Giới hạn 15 người
+    if (pathname.match(/^\/api\/v1\/clubs\/\d+\/join$/) && req.method === "POST") {
+      const clubId = pathname.split("/")[4];
+      const b = await parseJsonBody(req);
+      const clubRows = await queryNeon("SELECT * FROM football_clubs WHERE id = $1", [clubId]);
+      if (!clubRows || clubRows.length === 0) return sendJson(res, 404, { message: "Không tìm thấy FC!" });
+      const club = clubRows[0];
+      if (club.members_count >= 15) {
+        return sendJson(res, 400, { message: "FC này đã đủ giới hạn tối đa 15 thành viên thi đấu!" });
+      }
+      const memberName = b.memberName || "Cầu thủ mới";
+      const phone = b.phone || "";
+      const position = b.position || "Tiền vệ (MF)";
+      const number = b.number || Math.floor(Math.random() * 90) + 10;
+      await queryNeon(
+        `INSERT INTO club_members (club_id, user_id, member_name, phone, position, number, role)
+         VALUES ($1, $2, $3, $4, $5, $6, 'MEMBER')`,
+        [clubId, b.userId || null, memberName, phone, position, number]
+      );
+      const updated = await queryNeon(
+        "UPDATE football_clubs SET members_count = members_count + 1 WHERE id = $1 RETURNING *",
+        [clubId]
+      );
+      return sendJson(res, 200, { success: true, message: `Chúc mừng bạn đã gia nhập ${club.name}!`, club: updated[0] });
+    }
+
+    // 14. API Ghi Nhận Kết Quả Trận Đấu & Leo Rank ELO (POST /api/v1/clubs/match-result)
+    if (pathname === "/api/v1/clubs/match-result" && req.method === "POST") {
+      const b = await parseJsonBody(req);
+      const { teamAId, teamBId, scoreA, scoreB } = b;
+      if (!teamAId || !teamBId || scoreA === undefined || scoreB === undefined) {
+        return sendJson(res, 400, { message: "Thiếu thông tin kết quả trận đấu!" });
+      }
+      const rowsA = await queryNeon("SELECT * FROM football_clubs WHERE id = $1", [teamAId]);
+      const rowsB = await queryNeon("SELECT * FROM football_clubs WHERE id = $2", [teamBId]);
+      if (rowsA.length === 0 || rowsB.length === 0) {
+        return sendJson(res, 404, { message: "Một trong hai đội không tồn tại!" });
+      }
+      const clubA = rowsA[0];
+      const clubB = rowsB[0];
+      const sA = Number(scoreA);
+      const sB = Number(scoreB);
+
+      let eloAChange = 0;
+      let eloBChange = 0;
+      let winA = 0, drawA = 0, lossA = 0;
+      let winB = 0, drawB = 0, lossB = 0;
+
+      if (sA > sB) {
+        eloAChange = +25;
+        eloBChange = -15;
+        winA = 1;
+        lossB = 1;
+      } else if (sA < sB) {
+        eloAChange = -15;
+        eloBChange = +25;
+        lossA = 1;
+        winB = 1;
+      } else {
+        eloAChange = +5;
+        eloBChange = +5;
+        drawA = 1;
+        drawB = 1;
+      }
+
+      function calcTier(elo) {
+        if (elo >= 1600) return 'Thách Đấu';
+        if (elo >= 1500) return 'Kim Cương';
+        if (elo >= 1400) return 'Bạch Kim';
+        if (elo >= 1300) return 'Vàng';
+        if (elo >= 1200) return 'Bạc';
+        return 'Đồng';
+      }
+
+      const newEloA = Math.max(800, clubA.elo + eloAChange);
+      const newEloB = Math.max(800, clubB.elo + eloBChange);
+
+      await queryNeon(
+        `UPDATE football_clubs SET 
+           elo = $1, tier = $2, matches_played = matches_played + 1,
+           wins = wins + $3, draws = draws + $4, losses = losses + $5
+         WHERE id = $6`,
+        [newEloA, calcTier(newEloA), winA, drawA, lossA, teamAId]
+      );
+
+      await queryNeon(
+        `UPDATE football_clubs SET 
+           elo = $1, tier = $2, matches_played = matches_played + 1,
+           wins = wins + $3, draws = draws + $4, losses = losses + $5
+         WHERE id = $6`,
+        [newEloB, calcTier(newEloB), winB, drawB, lossB, teamBId]
+      );
+
+      await queryNeon(
+        `INSERT INTO match_results (team_a_id, team_a_name, score_a, team_b_id, team_b_name, score_b, elo_change_a, elo_change_b, match_date)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [teamAId, clubA.name, sA, teamBId, clubB.name, sB, eloAChange, eloBChange, new Date().toISOString().slice(0, 10)]
+      );
+
+      return sendJson(res, 200, {
+        success: true,
+        message: `Đã cập nhật kết quả: ${clubA.name} (${scoreA}) - (${scoreB}) ${clubB.name}. Điểm ELO đã được phân phối!`,
+        teamA: { id: teamAId, name: clubA.name, oldElo: clubA.elo, newElo: newEloA, change: eloAChange },
+        teamB: { id: teamBId, name: clubB.name, oldElo: clubB.elo, newElo: newEloB, change: eloBChange }
+      });
+    }
+
     // 404 for unknown endpoints
     return sendJson(res, 404, { message: `Endpoint ${pathname} không tồn tại` });
   } catch (err) {

@@ -394,6 +394,46 @@ function getFieldSubPitches(field: FieldInfo | { id: number; name?: string } | n
 // Fallback tương thích
 const SUB_PITCHES: SubPitchItem[] = getFieldSubPitches({ id: 6 });
 
+// Toạ độ thực tế chuẩn xác từng cụm sân Buôn Ma Thuột (Chống lệch Spa Mon 85 Nguyễn Đức Cảnh)
+const FIELD_COORDINATES_MAP: Record<number, { lat: number; lng: number }> = {
+  5: { lat: 12.6784, lng: 108.0428 }, // SVĐ Buôn Ma Thuột (2 Nguyễn Công Trứ)
+  6: { lat: 12.6935, lng: 108.0312 }, // Sân C1 (1B Y Ngông)
+  7: { lat: 12.6865, lng: 108.0580 }, // Sân Manchester (130 Y Ngông)
+  8: { lat: 12.6812, lng: 108.0450 }, // Sân T&H (110/10 Hoàng Hoa Thám)
+  9: { lat: 12.6790, lng: 108.0515 }, // Sân Hoài Ân (119 Nguyễn Văn Cừ)
+  10: { lat: 12.6840, lng: 108.0390 }, // Sân Ngọc Anh (46 Nguyễn Thị Định)
+  11: { lat: 12.7080, lng: 108.0620 }, // SVĐ ĐTL (300 Hà Huy Tập)
+  12: { lat: 12.6685, lng: 108.0298 }, // Sân Tân Thái Long (213/6 Mai Hắc Đế)
+  13: { lat: 12.6987, lng: 108.0411 }, // Sân Lập Nguyễn (75/12 Trần Khánh Dư)
+  14: { lat: 12.6871, lng: 108.0285 }, // Sân KEVIN (209 Quang Trung)
+  15: { lat: 12.6654, lng: 108.0342 }, // Sân Đại Thành (147 Mai Hắc Đế)
+  16: { lat: 12.6512, lng: 108.0518 }, // Sân Hoàng Gia (Đường 30/4)
+  17: { lat: 12.6478, lng: 108.0583 }, // SVĐ Trường ĐH Tây Nguyên (567 Lê Duẩn)
+  18: { lat: 12.6565, lng: 108.0541 }, // Sân CĐ Sư Phạm (349 Lê Duẩn)
+  19: { lat: 12.7185, lng: 108.0624 }, // Sân Ban Mê Sport (185 Hà Huy Tập)
+  23: { lat: 12.6912, lng: 108.0418 }, // Sân Đức Thịnh Sports
+  24: { lat: 12.6742, lng: 108.0125 }, // Sân Tiến Thy (140 Nguyễn Thị Định)
+  25: { lat: 12.6531, lng: 108.0612 }, // Sân Quốc Định (112 Y Wang)
+  26: { lat: 12.6765, lng: 108.0288 }, // Sân Hưng Thịnh
+  27: { lat: 12.6948, lng: 108.0560 }  // Sân Thắng Lợi
+};
+
+function getPitchCoords(f: { id: number; lat?: number; lng?: number }): { lat: number; lng: number } {
+  if (f.lat && f.lng && !(f.lat === 12.6865 && f.lng === 108.0450)) return { lat: f.lat, lng: f.lng };
+  return FIELD_COORDINATES_MAP[f.id] || { lat: 12.6806, lng: 108.0378 };
+}
+
+function getGoogleMapsDirUrl(name: string, address: string | null | undefined, uLat?: number, uLng?: number): string {
+  const originPart = (uLat && uLng) ? `origin=${uLat},${uLng}&` : "";
+  const dest = encodeURIComponent(`${name}, ${address || ''}, Buôn Ma Thuột, Đắk Lắk`);
+  return `https://www.google.com/maps/dir/?api=1&${originPart}destination=${dest}&travelmode=driving`;
+}
+
+function getGoogleMapsSearchUrl(name: string, address: string | null | undefined): string {
+  const query = encodeURIComponent(`${name} ${address || ''} Buôn Ma Thuột`);
+  return `https://www.google.com/maps/search/?api=1&query=${query}`;
+}
+
 type FieldInfo = {
   lat?: number;
   lng?: number;
@@ -1222,6 +1262,7 @@ export default function Home() {
 
   const [mapFilter, setMapFilter] = useState<"ALL" | "SAN_5" | "SAN_7" | "SAN_11">("ALL");
   const [gpsNotice, setGpsNotice] = useState<string>("");
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     const R = 6371;
@@ -1241,12 +1282,12 @@ export default function Home() {
         (pos) => {
           const uLat = pos.coords.latitude;
           const uLng = pos.coords.longitude;
+          setUserCoords({ lat: uLat, lng: uLng });
           let nearest = fieldsList[0];
           let minD = 999999;
           fieldsList.forEach((f) => {
-            const fLat = f.lat || 12.6865;
-            const fLng = f.lng || 108.0450;
-            const d = calculateDistance(uLat, uLng, fLat, fLng);
+            const coords = getPitchCoords(f);
+            const d = calculateDistance(uLat, uLng, coords.lat, coords.lng);
             if (d < minD) {
               minD = d;
               nearest = f;
@@ -1885,10 +1926,13 @@ export default function Home() {
   const currentFieldsSchedule = schedule?.fields ?? schedule?.pitches ?? [];
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* Top announcement bar */}
-      <div className="top-announcement" style={{ justifyContent: "flex-end" }}>
-        <span>📞 Hotline hỗ trợ: <strong>0896890399</strong> · Mở cửa 06:00 - 23:00</span>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)", color: "var(--text-main)" }}>
+      {/* Sleek Dark Night Topbar */}
+      <div style={{ background: "#050a12", borderBottom: "1px solid rgba(50, 157, 210, 0.2)", padding: "7px 24px", fontSize: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ color: "#329dd2", fontWeight: 700, display: "flex", alignItems: "center", gap: "6px" }}>
+          <span>⚽</span> <span>HỆ THỐNG SÂN BÓNG BUÔN MA THUỘT · SÀN CÁP KÈO & BẢNG XẾP HẠNG ELO CLB</span>
+        </span>
+        <span style={{ color: "#94a3b8" }}>📞 Hotline hỗ trợ: <strong style={{ color: "#f59e0b" }}>0896890399</strong> · Mở cửa 06:00 - 23:00</span>
       </div>
 
       {/* Main Navigation Topbar */}
@@ -1959,8 +2003,8 @@ export default function Home() {
                   className="user-badge-topbar"
                   style={{
                     cursor: "pointer",
-                    background: "#f0fdf4",
-                    border: "1px solid #86efac",
+                    background: "rgba(50, 157, 210, 0.12)",
+                    border: "1px solid rgba(50, 157, 210, 0.3)",
                     borderRadius: "999px",
                     padding: "6px 14px",
                     display: "inline-flex",
@@ -1971,9 +2015,9 @@ export default function Home() {
                   title="Nhấn để xem Hồ sơ & Cài đặt cá nhân"
                 >
                   <span>👤</span>
-                  <span style={{ fontWeight: 700, color: "#166534" }}>{currentUser.fullName}</span>
-                  <span style={{ fontSize: "11px", background: "#22c55e", color: "#fff", padding: "2px 8px", borderRadius: "999px" }}>
-                    Hồ sơ &amp; Cài đặt ⚙️
+                  <span style={{ fontWeight: 700, color: "#f1f5f9" }}>{currentUser.fullName}</span>
+                  <span style={{ fontSize: "10px", background: "#329dd2", color: "#fff", padding: "2px 8px", borderRadius: "999px", fontWeight: 800 }}>
+                    {currentUser.role === "ADMIN" ? "👑 ADMIN" : currentUser.role === "STAFF" ? "📋 STAFF" : "⚽ CẦU THỦ"}
                   </span>
                 </button>
                 <button
@@ -1999,8 +2043,16 @@ export default function Home() {
                 <span>👤</span> Đăng nhập / Đăng ký
               </button>
             )}
-            {(currentUser?.role === "ADMIN" || currentUser?.role === "STAFF") && (
-              <a className="btn-nav-admin" href="/admin">⚙️ Cổng Quản trị</a>
+            {currentUser?.role === "ADMIN" && (
+              <a className="btn-nav-admin" href="/admin" title="Toàn quyền Quản trị Sân bóng, Giá & Thành viên">👑 Cổng Quản trị</a>
+            )}
+            {currentUser?.role === "STAFF" && (
+              <a className="btn-nav-admin" href="/staff" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }} title="Quản lý ca trực & Check-in sân">📋 Trực Ca Sân</a>
+            )}
+            {currentUser && currentUser.role !== "ADMIN" && currentUser.role !== "STAFF" && (
+              <span style={{ fontSize: "11px", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "5px 12px", borderRadius: "999px", fontWeight: "800" }}>
+                ⚽ Khách hàng / Cầu thủ
+              </span>
             )}
           </div>
 
@@ -2016,7 +2068,7 @@ export default function Home() {
 
         {/* Mobile dropdown */}
         {mobileMenuOpen && (
-          <div style={{ background: "#ffffff", padding: "16px 24px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ background: "var(--surface)", padding: "16px 24px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "12px" }}>
             {currentUser ? (
               <div style={{ padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
                 <div>Đang đăng nhập: <strong>{currentUser.fullName}</strong> ({currentUser.phone})</div>
@@ -2195,12 +2247,12 @@ export default function Home() {
 
       
       {/* SECTION 1: BẢN ĐỒ TƯƠNG TÁC & ĐỊNH VỊ GPS BUÔN MA THUỘT */}
-      <section className="section-wrap" id="ban-do-san" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
+      <section className="section-wrap" id="ban-do-san" style={{ background: "var(--surface)", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
         <div className="section-head-modern" style={{ marginBottom: "20px" }}>
           <div>
             <span className="module-tag tag-cyan">🗺️ BẢN ĐỒ SỐ &amp; RADAR GPS BUÔN MA THUỘT</span>
-            <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Bản đồ vị trí 20 cụm sân &amp; Định vị GPS</h2>
-            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
+            <h2 style={{ marginTop: "6px", fontSize: "26px", color: "var(--text-main)" }}>Bản đồ vị trí 20 cụm sân &amp; Định vị GPS</h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
               Khám phá tọa độ các sân bóng thật tại Đắk Lắk, tự động tính khoảng cách tìm sân gần bạn nhất và chỉ đường Google Maps một chạm.
             </p>
           </div>
@@ -2218,7 +2270,7 @@ export default function Home() {
         </div>
 
         {gpsNotice && (
-          <div style={{ background: "#f0fdf4", border: "1px solid #86efac", color: "#166534", padding: "12px 16px", borderRadius: "10px", fontWeight: "700", marginBottom: "16px", fontSize: "13px" }}>
+          <div style={{ background: "rgba(50, 157, 210, 0.12)", border: "1px solid var(--primary)", color: "#f1f5f9", padding: "12px 16px", borderRadius: "10px", fontWeight: "700", marginBottom: "16px", fontSize: "13px" }}>
             {gpsNotice}
           </div>
         )}
@@ -2251,14 +2303,13 @@ export default function Home() {
             .slice(0, 8)
             .map((f) => {
               const isSelected = f.id === selectedPitchId;
-              const fLat = f.lat || 12.6865;
-              const fLng = f.lng || 108.0450;
+              const coords = getPitchCoords(f);
               return (
                 <div
                   key={f.id}
                   style={{
-                    border: isSelected ? "2px solid #16a34a" : "1.5px solid #e2e8f0",
-                    background: isSelected ? "#f0fdf4" : "#ffffff",
+                    border: isSelected ? "2px solid var(--primary)" : "1.5px solid var(--border)",
+                    background: isSelected ? "rgba(50, 157, 210, 0.12)" : "var(--surface-alt)",
                     borderRadius: "16px",
                     overflow: "hidden",
                     boxShadow: "var(--shadow-sm)",
@@ -2270,17 +2321,17 @@ export default function Home() {
                 >
                   <div style={{ position: "relative", height: "120px" }}>
                     <img src={f.imageUrl || ""} alt={f.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <span style={{ position: "absolute", top: "8px", right: "8px", background: "rgba(15, 23, 42, 0.75)", color: "#ffffff", padding: "3px 8px", borderRadius: "999px", fontSize: "10px", fontWeight: "700" }}>
+                    <span style={{ position: "absolute", top: "8px", right: "8px", background: "rgba(8, 15, 27, 0.85)", color: "#329dd2", border: "1px solid rgba(50, 157, 210, 0.3)", padding: "3px 8px", borderRadius: "999px", fontSize: "10px", fontWeight: "700" }}>
                       📍 {f.ward}
                     </span>
                   </div>
 
                   <div style={{ padding: "14px" }}>
-                    <strong style={{ fontSize: "15px", color: "#0f172a", display: "block", marginBottom: "4px" }}>{f.name}</strong>
-                    <div style={{ fontSize: "11px", color: "#64748b", marginBottom: "8px", lineHeight: "1.4" }}>
+                    <strong style={{ fontSize: "15px", color: "var(--text-main)", display: "block", marginBottom: "4px" }}>{f.name}</strong>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px", lineHeight: "1.4" }}>
                       🏠 {f.address}
                     </div>
-                    <div style={{ fontSize: "11px", color: "#166534", fontWeight: "600", marginBottom: "12px" }}>
+                    <div style={{ fontSize: "11px", color: "#f59e0b", fontWeight: "600", marginBottom: "12px" }}>
                       📞 {f.phone || "0896890399"}
                     </div>
 
@@ -2298,12 +2349,12 @@ export default function Home() {
                         ⚡ Đặt ca sân
                       </button>
                       <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${fLat},${fLng}`}
+                        href={getGoogleMapsDirUrl(f.name, f.address, userCoords?.lat, userCoords?.lng)}
                         target="_blank"
                         rel="noreferrer"
                         className="outline-button"
-                        style={{ padding: "8px 12px", fontSize: "11px", display: "inline-flex", alignItems: "center", textDecoration: "none", color: "#0284c7" }}
-                        title="Chỉ đường Google Maps"
+                        style={{ padding: "8px 12px", fontSize: "11px", display: "inline-flex", alignItems: "center", textDecoration: "none", color: "#329dd2" }}
+                        title={`Chỉ đường Google Maps đến ${f.name} (${f.address})`}
                       >
                         🧭 Chỉ đường
                       </a>
@@ -2316,12 +2367,12 @@ export default function Home() {
       </section>
 
       {/* SECTION 2: SÀN CÁP KÈO & TÌM ĐỐI GIAO LƯU BUÔN MA THUỘT */}
-      <section className="section-wrap" id="cap-keo" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
+      <section className="section-wrap" id="cap-keo" style={{ background: "var(--surface)", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
         <div className="section-head-modern" style={{ marginBottom: "20px" }}>
           <div>
             <span className="module-tag tag-red">🤝 SÀN CÁP KÈO BÓNG ĐÁ PHỦI BAN MÊ</span>
-            <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Cáp kèo thi đấu &amp; Tuyển cầu thủ</h2>
-            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
+            <h2 style={{ marginTop: "6px", fontSize: "26px", color: "var(--text-main)" }}>Cáp kèo thi đấu &amp; Tuyển cầu thủ</h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
               Nơi các đội bóng đá phủi BMT giao lưu cọ xát, bắt đối nhanh chóng theo trình độ và thỏa thuận tiền sân.
             </p>
           </div>
@@ -2340,7 +2391,7 @@ export default function Home() {
 
         {/* Filter tabs */}
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "18px", alignItems: "center" }}>
-          <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Trình độ:</span>
+          <span style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-muted)" }}>Trình độ:</span>
           {[
             { key: "ALL", label: "Tất cả kèo" },
             { key: "MY_POSTS", label: "👤 Kèo của tôi" },
@@ -2372,15 +2423,15 @@ export default function Home() {
             })
             .map((post) => {
               const isOpen = post.status === "OPEN";
-              const levelBg = post.level === "BAN_CHUYEN" ? "#fef2f2" : post.level === "TRUNG_BINH" ? "#f0fdf4" : "#eff6ff";
-              const levelColor = post.level === "BAN_CHUYEN" ? "#b91c1c" : post.level === "TRUNG_BINH" ? "#166534" : "#1d4ed8";
+              const levelBg = post.level === "BAN_CHUYEN" ? "rgba(235, 47, 51, 0.2)" : post.level === "TRUNG_BINH" ? "rgba(50, 157, 210, 0.2)" : "rgba(148, 163, 184, 0.15)";
+              const levelColor = post.level === "BAN_CHUYEN" ? "#ff474b" : post.level === "TRUNG_BINH" ? "#329dd2" : "#cbd5e1";
 
               return (
                 <div
                   key={post.id}
                   style={{
-                    background: "#ffffff",
-                    border: `1.5px solid ${isOpen ? "#cbd5e1" : "#e2e8f0"}`,
+                    background: "var(--surface-alt)",
+                    border: `1.5px solid ${isOpen ? "rgba(50, 157, 210, 0.35)" : "var(--border)"}`,
                     borderRadius: "16px",
                     padding: "20px",
                     boxShadow: "var(--shadow-sm)",
@@ -2392,15 +2443,15 @@ export default function Home() {
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontSize: "26px", background: "#f1f5f9", width: "44px", height: "44px", borderRadius: "12px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ fontSize: "26px", background: "#050a12", border: "1px solid var(--border)", width: "44px", height: "44px", borderRadius: "12px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                           {post.avatar || "⚽"}
                         </span>
                         <div>
-                          <strong style={{ fontSize: "16px", color: "#0f172a", display: "block" }}>{post.teamName}</strong>
-                          <small style={{ color: "#64748b" }}>Đội trưởng: {post.captainName} · {post.createdAt}</small>
+                          <strong style={{ fontSize: "16px", color: "var(--text-main)", display: "block" }}>{post.teamName}</strong>
+                          <small style={{ color: "var(--text-muted)" }}>Đội trưởng: {post.captainName} · {post.createdAt}</small>
                         </div>
                       </div>
-                      <span style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "999px", fontWeight: "800", background: isOpen ? "#dcfce7" : "#fee2e2", color: isOpen ? "#15803d" : "#991b1b" }}>
+                      <span style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "999px", fontWeight: "800", background: isOpen ? "rgba(50, 157, 210, 0.15)" : "rgba(235, 47, 51, 0.15)", color: isOpen ? "#329dd2" : "#eb2f33", border: `1px solid ${isOpen ? "rgba(50, 157, 210, 0.3)" : "rgba(235, 47, 51, 0.3)"}` }}>
                         {isOpen ? "● ĐANG TÌM ĐỐI" : "✓ ĐÃ CÁP KÈO"}
                       </span>
                     </div>
@@ -2409,18 +2460,18 @@ export default function Home() {
                       <span style={{ fontSize: "11px", fontWeight: "700", background: levelBg, color: levelColor, padding: "3px 8px", borderRadius: "6px" }}>
                         🎯 {post.levelLabel}
                       </span>
-                      <span style={{ fontSize: "11px", fontWeight: "700", background: "#fef3c7", color: "#92400e", padding: "3px 8px", borderRadius: "6px" }}>
+                      <span style={{ fontSize: "11px", fontWeight: "700", background: "rgba(245, 158, 11, 0.2)", color: "#f59e0b", padding: "3px 8px", borderRadius: "6px" }}>
                         💰 {post.betLabel}
                       </span>
-                      <span style={{ fontSize: "11px", fontWeight: "700", background: "#f1f5f9", color: "#334155", padding: "3px 8px", borderRadius: "6px" }}>
+                      <span style={{ fontSize: "11px", fontWeight: "700", background: "rgba(255, 255, 255, 0.08)", color: "var(--text-main)", padding: "3px 8px", borderRadius: "6px" }}>
                         ⚽ {post.fieldType === "SAN_11" ? "Sân 11" : post.fieldType === "SAN_7" ? "Sân 7" : "Sân 5"}
                       </span>
                     </div>
 
-                    <div style={{ fontSize: "13px", color: "#334155", background: "#f8fafc", borderRadius: "10px", padding: "12px", marginBottom: "12px", lineHeight: "1.5" }}>
+                    <div style={{ fontSize: "13px", color: "var(--text-main)", background: "rgba(0, 0, 0, 0.25)", border: "1px solid var(--border)", borderRadius: "10px", padding: "12px", marginBottom: "12px", lineHeight: "1.5" }}>
                       <div>🏟️ <strong>Sân:</strong> {post.fieldName}</div>
                       <div>📅 <strong>Thời gian:</strong> {post.timeSlot} (Ngày {post.matchDate})</div>
-                      <div style={{ marginTop: "6px", color: "#475569", fontStyle: "italic" }}>"{post.description}"</div>
+                      <div style={{ marginTop: "6px", color: "var(--text-muted)", fontStyle: "italic" }}>"{post.description}"</div>
                     </div>
                   </div>
 
@@ -2438,14 +2489,14 @@ export default function Home() {
                         🤝 Bắt đối ngay
                       </button>
                     ) : (
-                      <div style={{ flex: 1, textAlign: "center", fontSize: "12px", fontWeight: "700", color: "#166534", background: "#dcfce7", padding: "8px", borderRadius: "8px" }}>
+                      <div style={{ flex: 1, textAlign: "center", fontSize: "12px", fontWeight: "700", color: "#329dd2", background: "rgba(50, 157, 210, 0.15)", border: "1px solid rgba(50, 157, 210, 0.3)", padding: "8px", borderRadius: "8px" }}>
                         Đã cáp với: {post.matchedBy || "Đội bạn"}
                       </div>
                     )}
                     <a href={`tel:${post.phone}`} className="outline-button" style={{ padding: "9px 12px", fontSize: "12px", display: "inline-flex", alignItems: "center" }} title="Gọi điện">
                       📞
                     </a>
-                    <a href={`https://zalo.me/${post.phone}`} target="_blank" rel="noreferrer" className="outline-button" style={{ padding: "9px 12px", fontSize: "12px", color: "#0284c7", borderColor: "#bae6fd", display: "inline-flex", alignItems: "center" }} title="Nhắn Zalo">
+                    <a href={`https://zalo.me/${post.phone}`} target="_blank" rel="noreferrer" className="outline-button" style={{ padding: "9px 12px", fontSize: "12px", color: "#329dd2", display: "inline-flex", alignItems: "center" }} title="Nhắn Zalo">
                       💬
                     </a>
                   </div>
@@ -2457,12 +2508,12 @@ export default function Home() {
 
       
       {/* SECTION: HỆ THỐNG CÂU LẠC BỘ (FC) & HỘI NHÓM - LEO RANK */}
-      <section className="section-wrap" id="hoi-nhom" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
+      <section className="section-wrap" id="hoi-nhom" style={{ background: "var(--surface)", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
         <div className="section-head-modern" style={{ marginBottom: "20px" }}>
           <div>
             <span className="module-tag tag-dark">🛡️ HỆ THỐNG FC &amp; HỘI NHÓM - LEO RANK ELO</span>
-            <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Tạo FC &amp; Leo Rank ELO</h2>
-            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
+            <h2 style={{ marginTop: "6px", fontSize: "26px", color: "var(--text-main)" }}>Tạo FC &amp; Leo Rank ELO</h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
               Tạo câu lạc bộ bóng đá (FC) tối đa 15 thành viên, tham gia giải đấu, tích lũy ELO để leo hạng.
             </p>
           </div>
@@ -2487,13 +2538,13 @@ export default function Home() {
         </div>
 
         {/* ELO Ranking Guide */}
-        <div style={{ background: "linear-gradient(135deg, #f5f3ff, #ede9fe, #f0fdf4)", border: "1px solid #c4b5fd", borderRadius: "14px", padding: "14px", marginBottom: "16px" }}>
-          <div style={{ fontSize: "12px", fontWeight: "800", color: "#5b21b6", marginBottom: "8px" }}>📊 Hệ thống Rank ELO:</div>
+        <div style={{ background: "linear-gradient(135deg, rgba(8, 15, 27, 0.95), rgba(19, 30, 50, 0.95))", border: "1px solid var(--border)", borderRadius: "14px", padding: "14px", marginBottom: "16px" }}>
+          <div style={{ fontSize: "12px", fontWeight: "800", color: "#329dd2", marginBottom: "8px" }}>📊 Hệ thống Rank ELO Thi Đấu Buôn Ma Thuột:</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", fontSize: "11px" }}>
-            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "#fef3c7", color: "#b45309", fontWeight: 700 }}>🥉 Đồng (800-1099)</span>
-            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "#f1f5f9", color: "#64748b", fontWeight: 700 }}>🥈 Bạc (1100-1399)</span>
-            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "#fefce8", color: "#ca8a04", fontWeight: 700 }}>🥇 Vàng (1400-1599)</span>
-            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "#f5f3ff", color: "#7c3aed", fontWeight: 700 }}>💎 Kim Cương (1600+)</span>
+            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "rgba(245, 158, 11, 0.18)", color: "#f59e0b", fontWeight: 700, border: "1px solid rgba(245, 158, 11, 0.3)" }}>🥉 Đồng (800-1099)</span>
+            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "rgba(148, 163, 184, 0.18)", color: "#cbd5e1", fontWeight: 700, border: "1px solid rgba(148, 163, 184, 0.3)" }}>🥈 Bạc (1100-1399)</span>
+            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "rgba(234, 179, 8, 0.18)", color: "#fbbf24", fontWeight: 700, border: "1px solid rgba(234, 179, 8, 0.3)" }}>🥇 Vàng (1400-1599)</span>
+            <span style={{ padding: "3px 10px", borderRadius: "999px", background: "rgba(50, 157, 210, 0.18)", color: "#329dd2", fontWeight: 700, border: "1px solid rgba(50, 157, 210, 0.3)" }}>💎 Kim Cương (1600+)</span>
           </div>
         </div>
 
@@ -2518,34 +2569,34 @@ export default function Home() {
               const isFull = club.members.length >= MAX_CLUB_MEMBERS;
 
               return (
-                <div key={club.id} style={{ background: "#ffffff", border: "1.5px solid #e2e8f0", borderRadius: "16px", overflow: "hidden", boxShadow: "var(--shadow-sm)" }}>
+                <div key={club.id} style={{ background: "var(--surface-alt)", border: "1.5px solid var(--border)", borderRadius: "16px", overflow: "hidden", boxShadow: "var(--shadow-sm)" }}>
                   <div style={{ position: "relative", height: "100px" }}>
                     <img src={club.banner} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={club.name} />
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(transparent 30%, rgba(0,0,0,0.6))" }} />
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(transparent 30%, rgba(0,0,0,0.75))" }} />
                     <div style={{ position: "absolute", bottom: "8px", left: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ fontSize: "28px", background: "rgba(255,255,255,0.9)", width: "44px", height: "44px", borderRadius: "12px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{club.avatar}</span>
+                      <span style={{ fontSize: "28px", background: "rgba(8, 15, 27, 0.9)", border: "1px solid var(--border)", width: "44px", height: "44px", borderRadius: "12px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{club.avatar}</span>
                       <div>
                         <strong style={{ fontSize: "15px", color: "#ffffff", display: "block", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>{club.name}</strong>
                         <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.9)" }}>{club.ward}</span>
                       </div>
                     </div>
-                    <div style={{ position: "absolute", top: "8px", right: "8px", background: "rgba(0,0,0,0.6)", color: getEloColor(club.elo), padding: "3px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "800" }}>{club.rank} · {club.elo} ELO</div>
+                    <div style={{ position: "absolute", top: "8px", right: "8px", background: "rgba(0,0,0,0.75)", color: getEloColor(club.elo), border: "1px solid rgba(255,255,255,0.15)", padding: "3px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "800" }}>{club.rank} · {club.elo} ELO</div>
                   </div>
 
                   <div style={{ padding: "14px" }}>
-                    <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "8px" }}>{club.description}</div>
+                    <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "8px" }}>{club.description}</div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
-                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "#f0fdf4", color: "#166534" }}>👤 {club.members.length}/{MAX_CLUB_MEMBERS}</span>
-                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "#eff6ff", color: "#1d4ed8" }}>🏆 {club.wins}W · {club.draws}D · {club.losses}L</span>
-                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "#fef3c7", color: "#92400e" }}>⚽ {club.goalsFor} BT - {club.goalsAgainst} BB</span>
-                      {club.isRecruiting && <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "#dcfce7", color: "#15803d" }}>🟢 Đang tuyển</span>}
+                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "rgba(50, 157, 210, 0.15)", color: "#329dd2" }}>👤 {club.members.length}/{MAX_CLUB_MEMBERS}</span>
+                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b" }}>🏆 {club.wins}W · {club.draws}D · {club.losses}L</span>
+                      <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "rgba(255, 255, 255, 0.08)", color: "var(--text-main)" }}>⚽ {club.goalsFor} BT - {club.goalsAgainst} BB</span>
+                      {club.isRecruiting && <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: "rgba(34, 197, 94, 0.15)", color: "#22c55e" }}>🟢 Đang tuyển</span>}
                     </div>
-                    <div style={{ fontSize: "11px", color: "#334155", marginBottom: "10px" }}>🎖️ Đội trưởng: <strong>{club.captainName}</strong></div>
+                    <div style={{ fontSize: "11px", color: "var(--text-main)", marginBottom: "10px" }}>🎖️ Đội trưởng: <strong>{club.captainName}</strong></div>
                     <div style={{ display: "flex", gap: "6px" }}>
                       {isMember ? (
-                        <div style={{ flex: 1, textAlign: "center", fontSize: "11px", fontWeight: 700, color: "#166534", background: "#dcfce7", padding: "8px", borderRadius: "8px" }}>✓ Bạn là thành viên</div>
+                        <div style={{ flex: 1, textAlign: "center", fontSize: "11px", fontWeight: 700, color: "#329dd2", background: "rgba(50, 157, 210, 0.15)", border: "1px solid rgba(50, 157, 210, 0.3)", padding: "8px", borderRadius: "8px" }}>✓ Bạn là thành viên</div>
                       ) : isFull ? (
-                        <div style={{ flex: 1, textAlign: "center", fontSize: "11px", fontWeight: 700, color: "#991b1b", background: "#fee2e2", padding: "8px", borderRadius: "8px" }}>Đã đủ 15 người</div>
+                        <div style={{ flex: 1, textAlign: "center", fontSize: "11px", fontWeight: 700, color: "#eb2f33", background: "rgba(235, 47, 51, 0.15)", border: "1px solid rgba(235, 47, 51, 0.3)", padding: "8px", borderRadius: "8px" }}>Đã đủ 15 người</div>
                       ) : (
                         <button type="button" onClick={() => handleJoinClub(club.id)} className="primary-button" style={{ flex: 1, padding: "8px", fontSize: "11px", fontWeight: 700, justifyContent: "center" }}>🤝 Gia nhập</button>
                       )}
@@ -2559,12 +2610,12 @@ export default function Home() {
       </section>
 
       {/* SECTION 3: QUẢN LÝ GIẢI ĐẤU MINI & BẢNG XẾP HẠNG (TOURNAMENT HUB) */}
-      <section className="section-wrap" id="giai-dau" style={{ background: "#ffffff", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
+      <section className="section-wrap" id="giai-dau" style={{ background: "var(--surface)", borderRadius: "24px", padding: "36px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", marginBottom: "32px" }}>
         <div className="section-head-modern" style={{ marginBottom: "20px" }}>
           <div>
             <span className="module-tag tag-cyan">🏆 GIẢI ĐẤU PHONG TRÀO BAN MÊ 2026</span>
-            <h2 style={{ marginTop: "6px", fontSize: "26px" }}>Cúp Tứ Hùng Ban Mê 2026</h2>
-            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "4px" }}>
+            <h2 style={{ marginTop: "6px", fontSize: "26px", color: "var(--text-main)" }}>Cúp Tứ Hùng Ban Mê 2026</h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
               Cập nhật kết quả trực tiếp, nhánh đấu loại trực tiếp Knock-out và bảng xếp hạng điểm số tự động.
             </p>
           </div>
@@ -2597,21 +2648,21 @@ export default function Home() {
               const t2Win = isFinished && (m.team2.score ?? 0) > (m.team1.score ?? 0);
 
               return (
-                <div key={m.id} style={{ background: "#ffffff", border: "1.5px solid #e2e8f0", borderRadius: "14px", padding: "18px", boxShadow: "var(--shadow-sm)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "1px solid #f1f5f9", paddingBottom: "8px" }}>
-                    <span style={{ fontSize: "12px", fontWeight: "800", color: "#16a34a", letterSpacing: "0.5px" }}>{m.round}</span>
-                    <span style={{ fontSize: "11px", color: "#64748b" }}>{m.time}</span>
+                <div key={m.id} style={{ background: "var(--surface-alt)", border: "1.5px solid var(--border)", borderRadius: "14px", padding: "18px", boxShadow: "var(--shadow-sm)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "1px solid var(--border)", paddingBottom: "8px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: "800", color: "#329dd2", letterSpacing: "0.5px" }}>{m.round}</span>
+                    <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{m.time}</span>
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "8px", background: t1Win ? "#f0fdf4" : "#f8fafc", fontWeight: t1Win ? "800" : "600", color: t1Win ? "#166534" : "#334155" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "8px", background: t1Win ? "rgba(50, 157, 210, 0.2)" : "rgba(0,0,0,0.25)", border: `1px solid ${t1Win ? "rgba(50, 157, 210, 0.4)" : "var(--border)"}`, fontWeight: t1Win ? "800" : "600", color: t1Win ? "#329dd2" : "var(--text-main)" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <span>{t1Win ? "👑" : "⚪"}</span> {m.team1.name}
                       </span>
                       <span style={{ fontSize: "16px", fontWeight: "800" }}>{m.team1.score !== null ? m.team1.score : "-"}</span>
                     </div>
 
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "8px", background: t2Win ? "#f0fdf4" : "#f8fafc", fontWeight: t2Win ? "800" : "600", color: t2Win ? "#166534" : "#334155" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "8px", background: t2Win ? "rgba(50, 157, 210, 0.2)" : "rgba(0,0,0,0.25)", border: `1px solid ${t2Win ? "rgba(50, 157, 210, 0.4)" : "var(--border)"}`, fontWeight: t2Win ? "800" : "600", color: t2Win ? "#329dd2" : "var(--text-main)" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <span>{t2Win ? "👑" : "⚪"}</span> {m.team2.name}
                       </span>
@@ -2620,7 +2671,7 @@ export default function Home() {
                   </div>
 
                   {m.winner && (
-                    <div style={{ marginTop: "10px", fontSize: "11px", textAlign: "center", color: "#15803d", fontWeight: "700", background: "#dcfce7", padding: "4px", borderRadius: "6px" }}>
+                    <div style={{ marginTop: "10px", fontSize: "11px", textAlign: "center", color: "#329dd2", fontWeight: "700", background: "rgba(50, 157, 210, 0.15)", border: "1px solid rgba(50, 157, 210, 0.3)", padding: "4px", borderRadius: "6px" }}>
                       Đội chiến thắng: {m.winner}
                     </div>
                   )}
@@ -2630,36 +2681,36 @@ export default function Home() {
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left", background: "#ffffff", borderRadius: "12px", overflow: "hidden", border: "1px solid #e2e8f0" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left", background: "var(--surface-alt)", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--border)" }}>
               <thead>
-                <tr style={{ background: "#f8fafc", color: "#475569", fontWeight: "800", borderBottom: "2px solid #e2e8f0", textAlign: "center" }}>
+                <tr style={{ background: "rgba(0, 0, 0, 0.4)", color: "var(--text-muted)", fontWeight: "800", borderBottom: "2px solid var(--border)", textAlign: "center" }}>
                   <th style={{ padding: "12px 8px", width: "50px" }}>Hạng</th>
                   <th style={{ padding: "12px 8px", textAlign: "left" }}>Đội bóng</th>
                   <th style={{ padding: "12px 8px" }}>Trận</th>
-                  <th style={{ padding: "12px 8px", color: "#16a34a" }}>Thắng</th>
+                  <th style={{ padding: "12px 8px", color: "#329dd2" }}>Thắng</th>
                   <th style={{ padding: "12px 8px" }}>Hòa</th>
-                  <th style={{ padding: "12px 8px", color: "#dc2626" }}>Thua</th>
+                  <th style={{ padding: "12px 8px", color: "#eb2f33" }}>Thua</th>
                   <th style={{ padding: "12px 8px" }}>BT</th>
                   <th style={{ padding: "12px 8px" }}>BB</th>
                   <th style={{ padding: "12px 8px" }}>HS</th>
-                  <th style={{ padding: "12px 8px", background: "#f0fdf4", color: "#166534", fontWeight: "900" }}>Điểm</th>
+                  <th style={{ padding: "12px 8px", background: "rgba(50, 157, 210, 0.15)", color: "#329dd2", fontWeight: "900" }}>Điểm</th>
                 </tr>
               </thead>
               <tbody>
                 {DEFAULT_TOURNAMENT_DATA.standings.map((s) => {
                   const medal = s.rank === 1 ? "🥇" : s.rank === 2 ? "🥈" : s.rank === 3 ? "🥉" : s.rank;
                   return (
-                    <tr key={s.team} style={{ borderBottom: "1px solid #f1f5f9", textAlign: "center" }}>
+                    <tr key={s.team} style={{ borderBottom: "1px solid var(--border)", textAlign: "center" }}>
                       <td style={{ padding: "12px 8px", fontWeight: "800", fontSize: "14px" }}>{medal}</td>
-                      <td style={{ padding: "12px 8px", textAlign: "left", fontWeight: "700", color: "#0f172a" }}>{s.team}</td>
+                      <td style={{ padding: "12px 8px", textAlign: "left", fontWeight: "700", color: "var(--text-main)" }}>{s.team}</td>
                       <td style={{ padding: "12px 8px" }}>{s.played}</td>
-                      <td style={{ padding: "12px 8px", color: "#16a34a", fontWeight: "700" }}>{s.won}</td>
-                      <td style={{ padding: "12px 8px", color: "#64748b" }}>{s.drawn}</td>
-                      <td style={{ padding: "12px 8px", color: "#dc2626" }}>{s.lost}</td>
+                      <td style={{ padding: "12px 8px", color: "#329dd2", fontWeight: "700" }}>{s.won}</td>
+                      <td style={{ padding: "12px 8px", color: "var(--text-muted)" }}>{s.drawn}</td>
+                      <td style={{ padding: "12px 8px", color: "#eb2f33" }}>{s.lost}</td>
                       <td style={{ padding: "12px 8px" }}>{s.gf}</td>
                       <td style={{ padding: "12px 8px" }}>{s.ga}</td>
                       <td style={{ padding: "12px 8px", fontWeight: "600" }}>{s.gd}</td>
-                      <td style={{ padding: "12px 8px", background: "#f0fdf4", color: "#166534", fontWeight: "900", fontSize: "14px" }}>{s.pts}</td>
+                      <td style={{ padding: "12px 8px", background: "rgba(50, 157, 210, 0.15)", color: "#329dd2", fontWeight: "900", fontSize: "14px" }}>{s.pts}</td>
                     </tr>
                   );
                 })}
@@ -2923,7 +2974,7 @@ export default function Home() {
       </section>
 
       {/* UI-04: Lịch sân trống theo ngày (Interactive Matrix) */}
-      <section className="section-wrap" id="dat-san" style={{ background: "#ffffff", borderRadius: "24px", padding: "48px 36px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
+      <section className="section-wrap" id="dat-san" style={{ background: "var(--surface)", borderRadius: "24px", padding: "48px 36px", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         <div className="section-head-modern">
           <div>
             <span className="section-tag">ĐẶT LỊCH SÂN CON (UI-04)</span>
@@ -3151,8 +3202,8 @@ export default function Home() {
           const isWeekend = schedule?.dayType === "WEEKEND";
 
           return (
-            <div className="schedule-field-row" style={{ border: "2px solid #22c55e", background: "#f8fafc" }}>
-              <div className="schedule-field-header" style={{ flexWrap: "wrap", gap: "8px", background: "#ffffff", padding: "16px 20px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+            <div className="schedule-field-row" style={{ border: "2px solid var(--primary)", background: "var(--surface)" }}>
+              <div className="schedule-field-header" style={{ flexWrap: "wrap", gap: "8px", background: "var(--surface-alt)", padding: "16px 20px", borderRadius: "12px", border: "1px solid var(--border)" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                     <h3 style={{ margin: 0, color: "#15803d", fontSize: "20px" }}>
@@ -3473,7 +3524,7 @@ export default function Home() {
                 <div style={{ fontSize: "15px", fontWeight: "800", color: "#b45309", marginTop: "6px" }}>
                   💰 Tổng tiền: {money(successReceipt.totalPrice)}
                 </div>
-                <div style={{ fontSize: "12px", color: "#16a34a", fontWeight: "700", marginTop: "8px", background: "#ffffff", padding: "6px 10px", borderRadius: "6px", border: "1px solid #bbf7d0" }}>
+                <div style={{ fontSize: "12px", color: "#22c55e", fontWeight: "700", marginTop: "8px", background: "rgba(34, 197, 94, 0.12)", padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(34, 197, 94, 0.3)" }}>
                   🟢 Trạng thái: Đã gửi thông báo xác nhận đến Chủ sân để giữ sân và bật đèn
                 </div>
               </div>
@@ -3669,31 +3720,31 @@ export default function Home() {
       </section>
 
       {/* Guide Steps */}
-      <section className="section-wrap" style={{ background: "#f1f5f9", borderRadius: "20px", margin: "40px auto 60px" }}>
+      <section className="section-wrap" style={{ background: "var(--surface)", borderRadius: "20px", margin: "40px auto 60px", border: "1px solid var(--border)" }}>
         <div style={{ textAlign: "center", maxWidth: "600px", margin: "0 auto 36px" }}>
           <span className="section-tag">QUY TRÌNH RA SÂN</span>
-          <h2>Đặt sân đơn giản chỉ trong 3 bước</h2>
+          <h2 style={{ color: "var(--text-main)" }}>Đặt sân đơn giản chỉ trong 3 bước</h2>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
-          <div style={{ background: "#ffffff", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
-            <span style={{ fontSize: "28px" }}>01</span>
-            <h4 style={{ margin: "12px 0 8px", fontSize: "18px" }}>Chọn sân &amp; ca đá</h4>
-            <p style={{ fontSize: "13px", color: "#64748b", margin: 0 }}>
+          <div style={{ background: "var(--surface-alt)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
+            <span style={{ fontSize: "28px", color: "#329dd2", fontWeight: 800 }}>01</span>
+            <h4 style={{ margin: "12px 0 8px", fontSize: "18px", color: "var(--text-main)" }}>Chọn sân &amp; ca đá</h4>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
               Kiểm tra lịch sân trống trực tiếp theo ngày, loại sân 5 hoặc 7 và xem trước giá tạm tính.
             </p>
           </div>
-          <div style={{ background: "#ffffff", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
-            <span style={{ fontSize: "28px" }}>02</span>
-            <h4 style={{ margin: "12px 0 8px", fontSize: "18px" }}>Xác nhận &amp; Giữ chỗ</h4>
-            <p style={{ fontSize: "13px", color: "#64748b", margin: 0 }}>
+          <div style={{ background: "var(--surface-alt)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
+            <span style={{ fontSize: "28px", color: "#329dd2", fontWeight: 800 }}>02</span>
+            <h4 style={{ margin: "12px 0 8px", fontSize: "18px", color: "var(--text-main)" }}>Xác nhận &amp; Giữ chỗ</h4>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
               Backend khóa chỗ trong Transaction chống trùng lặp, tự động snapshot biểu giá cố định.
             </p>
           </div>
-          <div style={{ background: "#ffffff", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
-            <span style={{ fontSize: "28px" }}>03</span>
-            <h4 style={{ margin: "12px 0 8px", fontSize: "18px" }}>Nhận vé &amp; Ra sân</h4>
-            <p style={{ fontSize: "13px", color: "#64748b", margin: 0 }}>
+          <div style={{ background: "var(--surface-alt)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
+            <span style={{ fontSize: "28px", color: "#329dd2", fontWeight: 800 }}>03</span>
+            <h4 style={{ margin: "12px 0 8px", fontSize: "18px", color: "var(--text-main)" }}>Nhận vé &amp; Ra sân</h4>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
               Lưu mã đặt sân SAN-XXXX để check-in tại quầy hoặc tra cứu/hủy trực tuyến bất kỳ lúc nào.
             </p>
           </div>
@@ -3816,7 +3867,7 @@ export default function Home() {
       </section>
 
       {/* Location and Contact Map Section */}
-      <section className="section-wrap" style={{ background: "#ffffff", borderRadius: "24px", padding: "40px 36px", border: "1px solid var(--border)", margin: "40px auto 60px" }}>
+      <section className="section-wrap" style={{ background: "var(--surface)", borderRadius: "24px", padding: "40px 36px", border: "1px solid var(--border)", margin: "40px auto 60px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "36px", alignItems: "center" }}>
           <div>
             <span className="section-tag">ĐỊA ĐIỂM &amp; CHỈ ĐƯỜNG</span>
@@ -3862,13 +3913,13 @@ export default function Home() {
                 Cách trung tâm thành phố 10 phút di chuyển. Thuận tiện cho xe hơi và xe máy.
               </p>
               <a
-                href="https://maps.google.com"
+                href="https://www.google.com/maps/search/?api=1&query=San+bong+da+Buon+Ma+Thuot+Dak+Lak"
                 target="_blank"
                 rel="noreferrer"
                 className="primary-button"
-                style={{ background: "#ffffff", color: "#15803d", border: "none" }}
+                style={{ background: "#329dd2", color: "#ffffff", border: "none", fontWeight: 700 }}
               >
-                Mở chỉ đường trên Google Maps ↗
+                Mở radar sân trên Google Maps ↗
               </a>
             </div>
           </div>
