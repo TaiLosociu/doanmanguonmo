@@ -858,6 +858,8 @@ const DEFAULT_CLUBS: FootballClub[] = [
 
 type MatchmakingPost = {
   id: number;
+  userId?: number;
+  userFullName?: string;
   teamName: string;
   captainName: string;
   phone: string;
@@ -1055,6 +1057,12 @@ export default function Home() {
   });
   const [clubFilter, setClubFilter] = useState<string>("ALL");
   const [createClubOpen, setCreateClubOpen] = useState<boolean>(false);
+  const [challengeModalOpen, setChallengeModalOpen] = useState<boolean>(false);
+  const [chalClub1Id, setChalClub1Id] = useState<number>(1);
+  const [chalClub2Id, setChalClub2Id] = useState<number>(2);
+  const [chalScore1, setChalScore1] = useState<number>(3);
+  const [chalScore2, setChalScore2] = useState<number>(2);
+  const [selectedRouteField, setSelectedRouteField] = useState<FieldInfo | null>(null);
   const [clubDetailOpen, setClubDetailOpen] = useState<FootballClub | null>(null);
   const [ccName, setCcName] = useState<string>("");
   const [ccShort, setCcShort] = useState<string>("");
@@ -1100,7 +1108,94 @@ export default function Home() {
     alert("🎉 Gia nhập thành công!");
   }
 
-  function handleCreateClubSubmit(e: FormEvent) {
+  function handleMatchChallengeSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (chalClub1Id === chalClub2Id) {
+      alert("⚠️ Vui lòng chọn 2 câu lạc bộ khác nhau để thi đấu!");
+      return;
+    }
+    const updated = clubs.map((c) => ({ ...c }));
+    const c1 = updated.find((c) => c.id === chalClub1Id);
+    const c2 = updated.find((c) => c.id === chalClub2Id);
+    if (!c1 || !c2) return;
+
+    c1.goalsFor += chalScore1;
+    c1.goalsAgainst += chalScore2;
+    c2.goalsFor += chalScore2;
+    c2.goalsAgainst += chalScore1;
+
+    let msg = "";
+    if (chalScore1 > chalScore2) {
+      c1.wins += 1;
+      c1.elo += 25;
+      c2.losses += 1;
+      c2.elo = Math.max(0, c2.elo - 15);
+      msg = "🏆 " + c1.name + " giành chiến thắng (" + chalScore1 + " - " + chalScore2 + ")!\n" + c1.name + ": +25 ELO (" + c1.elo + " ELO)\n" + c2.name + ": -15 ELO (" + c2.elo + " ELO)";
+    } else if (chalScore2 > chalScore1) {
+      c2.wins += 1;
+      c2.elo += 25;
+      c1.losses += 1;
+      c1.elo = Math.max(0, c1.elo - 15);
+      msg = "🏆 " + c2.name + " giành chiến thắng (" + chalScore2 + " - " + chalScore1 + ")!\n" + c2.name + ": +25 ELO (" + c2.elo + " ELO)\n" + c1.name + ": -15 ELO (" + c1.elo + " ELO)";
+    } else {
+      c1.draws += 1;
+      c1.elo += 5;
+      c2.draws += 1;
+      c2.elo += 5;
+      msg = "🤝 Hai đội hòa nhau (" + chalScore1 + " - " + chalScore2 + ")!\nMỗi đội được cộng +5 ELO.";
+    }
+
+    c1.rank = getEloRank(c1.elo);
+    c2.rank = getEloRank(c2.elo);
+
+    setClubs(updated);
+    if (typeof window !== "undefined") window.localStorage.setItem("football_clubs", JSON.stringify(updated));
+    setChallengeModalOpen(false);
+    alert("🎉 ĐÃ CẬP NHẬT KẾT QUẢ THÀNH CÔNG!\n" + msg);
+  }
+
+  function handleAddMemberToClub(clubId: number) {
+    const name = prompt("Nhập họ và tên thành viên mới:");
+    if (!name || !name.trim()) return;
+    const phone = prompt("Nhập số điện thoại của thành viên (bắt buộc):");
+    if (!phone || phone.trim().length < 9) {
+      alert("⚠️ Số điện thoại không hợp lệ!");
+      return;
+    }
+    const updated = clubs.map((c) => {
+      if (c.id === clubId) {
+        if (c.members.length >= MAX_CLUB_MEMBERS) {
+          alert("⚠️ FC đã đủ 15 người!");
+          return c;
+        }
+        return {
+          ...c,
+          members: [...c.members, {
+            userId: Date.now(),
+            name: name.trim(),
+            phone: phone.trim(),
+            role: "MEMBER" as const,
+            joinedAt: new Date().toISOString().split("T")[0]
+          }]
+        };
+      }
+      return c;
+    });
+    setClubs(updated);
+    if (typeof window !== "undefined") window.localStorage.setItem("football_clubs", JSON.stringify(updated));
+    const updatedTarget = updated.find((c) => c.id === clubId);
+    if (updatedTarget) setClubDetailOpen(updatedTarget);
+    alert("🎉 Đã thêm " + name + " vào danh sách 15 người của FC!");
+  }
+
+  function handleDeleteMatchPost(postId: number) {
+    if (!confirm("Bạn có chắc chắn muốn xóa bài đăng cáp kèo này?")) return;
+    const updated = matchPosts.filter((p) => p.id !== postId);
+    setMatchPosts(updated);
+    if (typeof window !== "undefined") window.localStorage.setItem("football_matchmaking", JSON.stringify(updated));
+  }
+
+    function handleCreateClubSubmit(e: FormEvent) {
     e.preventDefault();
     if (!currentUser) { alert("⚠️ Cần đăng nhập!"); return; }
     if (!ccName || !ccPhone2 || ccPhone2.length < 9) { alert("⚠️ Tên CLB & SĐT bắt buộc!"); return; }
@@ -2248,10 +2343,11 @@ export default function Home() {
           <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Trình độ:</span>
           {[
             { key: "ALL", label: "Tất cả kèo" },
-            { key: "VUI_VE", label: "🍻 Dưỡng sinh (Vui vẻ)" },
-            { key: "TRUNG_BINH", label: "⚡ Trung bình (Phong trào)" },
-            { key: "BAN_CHUYEN", label: "🔥 Khá - Chiến (Cọ xát)" },
-            { key: "OPEN", label: "🟢 Đang chờ bắt đối" }
+            { key: "MY_POSTS", label: "👤 Kèo của tôi" },
+            { key: "OPEN", label: "🟢 Đang chờ bắt đối" },
+            { key: "VUI_VE", label: "🍻 Dưỡng sinh" },
+            { key: "TRUNG_BINH", label: "⚡ Phong trào" },
+            { key: "BAN_CHUYEN", label: "🔥 Bán chuyên" }
           ].map((tab) => (
             <button
               key={tab.key}
@@ -2271,6 +2367,7 @@ export default function Home() {
             .filter((p) => {
               if (matchFilter === "ALL") return true;
               if (matchFilter === "OPEN") return p.status === "OPEN";
+              if (matchFilter === "MY_POSTS") return currentUser && p.userId === currentUser.id;
               return p.level === matchFilter;
             })
             .map((post) => {
@@ -2369,9 +2466,24 @@ export default function Home() {
               Tạo câu lạc bộ bóng đá (FC) tối đa 15 thành viên, tham gia giải đấu, tích lũy ELO để leo hạng.
             </p>
           </div>
-          <button type="button" className="primary-button" onClick={() => { if (!currentUser) { alert("⚠️ Đăng nhập để tạo FC!"); return; } setCreateClubOpen(true); }} style={{ padding: "10px 18px", fontSize: "13px", fontWeight: "700" }}>
-            ➕ Tạo FC mới
-          </button>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="btn-accent-red"
+              onClick={() => setChallengeModalOpen(true)}
+              style={{ padding: "10px 18px", fontSize: "13px", fontWeight: "800", display: "inline-flex", alignItems: "center", gap: "8px" }}
+            >
+              <span>⚔️</span> Thách đấu &amp; Ghi nhận Leo Rank
+            </button>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => { if (!currentUser) { alert("⚠️ Đăng nhập để tạo FC!"); return; } setCreateClubOpen(true); }}
+              style={{ padding: "10px 18px", fontSize: "13px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "8px" }}
+            >
+              <span>➕</span> Tạo FC mới (15 người)
+            </button>
+          </div>
         </div>
 
         {/* ELO Ranking Guide */}
@@ -4628,6 +4740,63 @@ export default function Home() {
       )}
 
       
+      
+      {/* MODAL: THÁCH ĐẤU & GHI NHẬN KẾT QUẢ LEO RANK ELO */}
+      {challengeModalOpen && (
+        <div className="modal-backdrop" style={{ display: "flex" }}>
+          <div className="modal-card" style={{ maxWidth: "480px" }}>
+            <div className="modal-header">
+              <div>
+                <h3 style={{ margin: 0, fontSize: "18px", color: "#080f1b" }}>⚔️ Thách Đấu &amp; Ghi Nhận Leo Rank ELO</h3>
+                <p style={{ fontSize: "12px", color: "#64748b", margin: "2px 0 0 0" }}>Cộng trừ điểm ELO cập nhật Bảng Xếp Hạng Ban Mê</p>
+              </div>
+              <button type="button" className="modal-close" onClick={() => setChallengeModalOpen(false)}>✕</button>
+            </div>
+
+            <form onSubmit={handleMatchChallengeSubmit} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 700, fontSize: "13px" }}>Đội 1 (Đội của bạn):</label>
+                <select value={chalClub1Id} onChange={(e) => setChalClub1Id(Number(e.target.value))} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }}>
+                  {clubs.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name} ({c.rank} · {c.elo} ELO)</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 700, fontSize: "13px" }}>Đội 2 (Đội đối thủ):</label>
+                <select value={chalClub2Id} onChange={(e) => setChalClub2Id(Number(e.target.value))} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }}>
+                  {clubs.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name} ({c.rank} · {c.elo} ELO)</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Số bàn thắng Đội 1: *</label>
+                  <input type="number" min="0" max="99" required value={chalScore1} onChange={(e) => setChalScore1(Number(e.target.value))} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "14px", fontWeight: 800, textAlign: "center" }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "13px" }}>Số bàn thắng Đội 2: *</label>
+                  <input type="number" min="0" max="99" required value={chalScore2} onChange={(e) => setChalScore2(Number(e.target.value))} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "14px", fontWeight: 800, textAlign: "center" }} />
+                </div>
+              </div>
+
+              <div style={{ background: "#080f1b", border: "1px solid #1e3355", borderRadius: "10px", padding: "12px", fontSize: "12px", color: "#cbd5e1" }}>
+                <strong style={{ color: "#329dd2" }}>📊 Quy tắc tính điểm ELO Leo Rank:</strong>
+                <div style={{ marginTop: "4px" }}>• Thắng: <strong style={{ color: "#329dd2" }}>+25 ELO</strong> · Thua: <strong style={{ color: "#eb2f33" }}>-15 ELO</strong> · Hòa: <strong>+5 ELO</strong></div>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", marginTop: "6px" }}>
+                <button type="submit" className="btn-accent-red" style={{ flex: 1, padding: "11px", fontWeight: 800 }}>⚡ Xác nhận kết quả &amp; Cập nhật ELO</button>
+                <button type="button" className="outline-button" style={{ padding: "11px 18px" }} onClick={() => setChallengeModalOpen(false)}>Hủy</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* MODAL: TẠO CÂU LẠC BỘ */}
       {createClubOpen && (
         <div className="modal-backdrop" style={{ display: "flex" }}>
