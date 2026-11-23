@@ -1069,6 +1069,56 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    // 7b. API Danh sách toàn bộ đơn đặt sân của khách hàng (GET /api/v1/bookings/my?phone=...)
+    if (pathname === "/api/v1/bookings/my" && req.method === "GET") {
+      const phone = String(query.phone || query.customerPhone || "").trim();
+      if (!phone) {
+        return sendJson(res, 400, { message: "Vui lòng truyền số điện thoại để lấy danh sách vé đặt sân." });
+      }
+      const rows = await queryNeon(
+        `SELECT b.*, f.name as field_name, f.ward as field_ward, f.address as field_address, f.phone as field_phone, s.label as time_label 
+         FROM bookings b 
+         JOIN fields f ON b.field_id = f.id 
+         LEFT JOIN time_slots s ON b.time_slot_id = s.id 
+         WHERE b.customer_phone = $1
+         ORDER BY b.id DESC LIMIT 50`,
+        [phone]
+      );
+      return sendJson(res, 200, rows.map((b) => {
+        const depositAmount = Math.max(100000, Math.round(Number(b.total_price) * 0.3));
+        return {
+          id: b.id,
+          bookingCode: b.booking_code,
+          customerName: b.customer_name,
+          customerPhone: b.customer_phone,
+          fieldName: b.field_name,
+          fieldWard: b.field_ward,
+          fieldAddress: b.field_address,
+          fieldPhone: b.field_phone,
+          timeLabel: b.time_label,
+          startAt: formatIsoUtc(b.start_at),
+          endAt: formatIsoUtc(b.end_at),
+          unitPrice: Number(b.unit_price),
+          totalPrice: Number(b.total_price),
+          depositAmount,
+          status: b.status,
+          cancelReason: b.cancel_reason,
+          createdAt: formatIsoUtc(b.created_at),
+          qrUrl: `https://img.vietqr.io/image/970422-02304200699999-compact2.png?amount=${depositAmount}&addInfo=${encodeURIComponent(b.booking_code)}&accountName=LE%20DUY%20TAI`
+        };
+      }));
+    }
+
+    // 7c. API Khách hàng hủy vé đặt (POST/PUT /api/v1/bookings/:id/cancel)
+    const userCancelMatch = pathname.match(/^\/api\/v1\/bookings\/(\d+)\/cancel$/);
+    if (userCancelMatch && (req.method === "PUT" || req.method === "PATCH" || req.method === "POST")) {
+      const bId = Number(userCancelMatch[1]);
+      const body = await parseJsonBody(req);
+      const reason = body.reason || "Khách hàng yêu cầu hủy lịch trên web";
+      await queryNeon("UPDATE bookings SET status = 'CANCELLED', cancel_reason = $1 WHERE id = $2", [reason, bId]);
+      return sendJson(res, 200, { success: true, message: "Đã hủy ca đặt sân thành công!" });
+    }
+
     // 8. API Admin: Danh sách đơn hàng chi tiết (GET /api/v1/admin/bookings)
     if (pathname === "/api/v1/admin/bookings" && req.method === "GET") {
       const rows = await queryNeon(

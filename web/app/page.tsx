@@ -808,6 +808,9 @@ type FootballClub = {
   banner: string;
   captainId: number;
   captainName: string;
+  captainPhone?: string;
+  homePitch?: string;
+  tier?: string;
   description: string;
   ward: string;
   level: "VUI_VE" | "TRUNG_BINH" | "BAN_CHUYEN";
@@ -1517,12 +1520,14 @@ export default function Home() {
   } | null>(null);
   const [authModal, setAuthModal] = useState<"LOGIN" | "REGISTER" | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [profileTab, setProfileTab] = useState<"PROFILE" | "PASSWORD" | "NOTIFICATIONS" | "PREFERENCES">("PROFILE");
+  const [profileTab, setProfileTab] = useState<"BOOKINGS" | "FC_TEAM" | "MATCHES" | "FAVORITES" | "PROFILE" | "PASSWORD" | "PREFERENCES">("BOOKINGS");
   const [profileNotice, setProfileNotice] = useState("");
   const [userAvatar, setUserAvatar] = useState("⚽");
   const [userArea, setUserArea] = useState("Phường Tân Tiến");
   const [userTeam, setUserTeam] = useState("CLB Ban Mê FC");
   const [userPosition, setUserPosition] = useState("Tiền đạo (ST)");
+  const [userPreferredFoot, setUserPreferredFoot] = useState("Chân phải");
+  const [userFavoriteNumber, setUserFavoriteNumber] = useState(10);
   const [notifyZalo, setNotifyZalo] = useState(true);
   const [notifyReminder, setNotifyReminder] = useState(true);
   const [notifyPromo, setNotifyPromo] = useState(true);
@@ -1532,6 +1537,232 @@ export default function Home() {
   const [authError, setAuthError] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
   const [authNotice, setAuthNotice] = useState("");
+
+  // Customer Hub State
+  const [myBookings, setMyBookings] = useState<any[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [favoritePitchIds, setFavoritePitchIds] = useState<number[]>([5, 6, 19]);
+  const [newMemberName, setNewMemberName] = useState("");
+  const [newMemberPhone, setNewMemberPhone] = useState("");
+  const [newMemberPos, setNewMemberPos] = useState("Tiền vệ");
+  const [newMemberNum, setNewMemberNum] = useState(10);
+  const [activeTicketQr, setActiveTicketQr] = useState<any | null>(null);
+  const [matchScoreModal, setMatchScoreModal] = useState<any | null>(null);
+  const [scoreTeamA, setScoreTeamA] = useState<number>(3);
+  const [scoreTeamB, setScoreTeamB] = useState<number>(2);
+
+  async function fetchMyBookings() {
+    setLoadingBookings(true);
+    try {
+      const local = JSON.parse(window.localStorage.getItem("my-bookings") || "[]");
+      if (currentUser?.phone) {
+        const res = await fetch(`${API}/bookings/my?phone=${encodeURIComponent(currentUser.phone)}`);
+        if (res.ok) {
+          const remote = await res.json();
+          if (Array.isArray(remote) && remote.length > 0) {
+            const combined = [...remote];
+            local.forEach((l: any) => {
+              if (!combined.some((c: any) => c.bookingCode === l.bookingCode)) {
+                combined.push(l);
+              }
+            });
+            setMyBookings(combined);
+            setLoadingBookings(false);
+            return;
+          }
+        }
+      }
+      setMyBookings(local);
+    } catch {
+      const local = JSON.parse(window.localStorage.getItem("my-bookings") || "[]");
+      setMyBookings(local);
+    } finally {
+      setLoadingBookings(false);
+    }
+  }
+
+  useEffect(() => {
+    if (profileModalOpen) {
+      fetchMyBookings();
+    }
+  }, [profileModalOpen, currentUser]);
+
+  async function handleCancelMyBooking(b: any) {
+    if (!confirm(`Bạn có chắc chắn muốn hủy đơn đặt sân ${b.bookingCode}?`)) return;
+    try {
+      if (b.id) {
+        await fetch(`${API}/bookings/${b.id}/cancel`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason: "Khách hàng hủy trên giao diện cá nhân" }),
+        }).catch(() => {});
+      }
+      const updated = myBookings.map((item) =>
+        item.bookingCode === b.bookingCode ? { ...item, status: "CANCELLED", cancelReason: "Khách hủy lịch" } : item
+      );
+      setMyBookings(updated);
+      window.localStorage.setItem("my-bookings", JSON.stringify(updated));
+      alert("✓ Đã hủy ca đặt sân thành công!");
+    } catch (e) {
+      alert("Lỗi khi hủy: " + e);
+    }
+  }
+
+  function handleToggleFavorite(id: number) {
+    setFavoritePitchIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id];
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("football_favorites", JSON.stringify(next));
+      }
+      return next;
+    });
+  }
+
+  const myClub = useMemo(() => {
+    if (!currentUser) return null;
+    return clubs.find(
+      (c) =>
+        c.captainId === currentUser.id ||
+        c.captainPhone === currentUser.phone ||
+        c.members?.some((m) => m.userId === currentUser.id || (currentUser.phone && m.phone === currentUser.phone))
+    ) || null;
+  }, [clubs, currentUser]);
+
+  function handleAddMemberToMyClub(e: FormEvent) {
+    e.preventDefault();
+    if (!myClub) return;
+    if (myClub.members.length >= 15) {
+      alert("⚠️ Đội bóng đã đủ 15 thành viên tối đa theo quy định giải đấu!");
+      return;
+    }
+    if (!newMemberName.trim() || !newMemberPhone.trim() || newMemberPhone.trim().length < 9) {
+      alert("⚠️ Vui lòng nhập tên thành viên và SĐT hợp lệ (tối thiểu 9 số)!");
+      return;
+    }
+    if (myClub.members.some((m) => m.phone === newMemberPhone.trim())) {
+      alert("⚠️ Số điện thoại này đã có trong danh sách thành viên!");
+      return;
+    }
+    const newMember = {
+      userId: Date.now(),
+      name: newMemberName.trim(),
+      phone: newMemberPhone.trim(),
+      role: "MEMBER" as const,
+      joinedAt: new Date().toISOString().split("T")[0],
+    };
+    const updatedClubs = clubs.map((c) => {
+      if (c.id === myClub.id) {
+        return {
+          ...c,
+          members: [...c.members, newMember],
+        };
+      }
+      return c;
+    });
+    setClubs(updatedClubs);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("football_clubs", JSON.stringify(updatedClubs));
+    }
+    fetch(`${API}/clubs/${myClub.id}/join`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        memberName: newMemberName.trim(),
+        phone: newMemberPhone.trim(),
+        position: newMemberPos,
+        number: newMemberNum,
+      }),
+    }).catch(() => {});
+    setNewMemberName("");
+    setNewMemberPhone("");
+    setProfileNotice(`🎉 Đã thêm cầu thủ ${newMember.name} (#${newMemberNum}) vào FC! (${myClub.members.length + 1}/15 thành viên)`);
+  }
+
+  function handleRemoveMemberFromClub(memberPhone: string) {
+    if (!myClub) return;
+    if (!confirm("Bạn có chắc chắn muốn xóa thành viên này khỏi đội hình?")) return;
+    const updatedClubs = clubs.map((c) => {
+      if (c.id === myClub.id) {
+        return {
+          ...c,
+          members: c.members.filter((m) => m.phone !== memberPhone),
+        };
+      }
+      return c;
+    });
+    setClubs(updatedClubs);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("football_clubs", JSON.stringify(updatedClubs));
+    }
+    setProfileNotice("✓ Đã cập nhật lại danh sách đội hình 15 người!");
+  }
+
+  async function handleSubmitMatchScore(e: FormEvent) {
+    e.preventDefault();
+    if (!matchScoreModal) return;
+    const myTeam = matchScoreModal.teamName;
+    const oppTeam = matchScoreModal.matchedBy || "FC Đối Thủ";
+    const clubA = clubs.find((c) => c.name.toLowerCase() === myTeam.toLowerCase()) || clubs[0];
+    const clubB = clubs.find((c) => c.name.toLowerCase() === oppTeam.toLowerCase()) || clubs[1];
+
+    const isWin = scoreTeamA > scoreTeamB;
+    const isDraw = scoreTeamA === scoreTeamB;
+    const eloDeltaA = isWin ? 25 : isDraw ? 5 : -15;
+    const eloDeltaB = isWin ? -15 : isDraw ? 5 : 25;
+
+    const updatedClubs = clubs.map((c) => {
+      if (c.id === clubA?.id) {
+        const newElo = Math.max(800, c.elo + eloDeltaA);
+        return {
+          ...c,
+          elo: newElo,
+          rank: getEloRank(newElo),
+          wins: c.wins + (isWin ? 1 : 0),
+          draws: c.draws + (isDraw ? 1 : 0),
+          losses: c.losses + (!isWin && !isDraw ? 1 : 0),
+        };
+      }
+      if (c.id === clubB?.id) {
+        const newElo = Math.max(800, c.elo + eloDeltaB);
+        return {
+          ...c,
+          elo: newElo,
+          rank: getEloRank(newElo),
+          wins: c.wins + (!isWin && !isDraw ? 1 : 0),
+          draws: c.draws + (isDraw ? 1 : 0),
+          losses: c.losses + (isWin ? 1 : 0),
+        };
+      }
+      return c;
+    });
+
+    setClubs(updatedClubs);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("football_clubs", JSON.stringify(updatedClubs));
+    }
+
+    if (clubA && clubB) {
+      fetch(`${API}/clubs/match-result`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teamAId: clubA.id,
+          teamBId: clubB.id,
+          scoreA: scoreTeamA,
+          scoreB: scoreTeamB,
+        }),
+      }).catch(() => {});
+    }
+
+    setMatchPosts((prev) =>
+      prev.map((p) =>
+        p.id === matchScoreModal.id ? { ...p, status: "FINISHED" as any, score: `${scoreTeamA} - ${scoreTeamB}` } : p
+      )
+    );
+
+    setMatchScoreModal(null);
+    alert(`🎉 Đã lưu kết quả trận đấu (${scoreTeamA} - ${scoreTeamB})! FC ${clubA?.name} ${eloDeltaA > 0 ? `+${eloDeltaA}` : eloDeltaA} ELO!`);
+  }
 
   const [errorNotice, setErrorNotice] = useState("");
   const [busyBooking, setBusyBooking] = useState(false);
@@ -4363,46 +4594,88 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Customer Profile & Settings Modal */}
+      {/* Customer Profile & Player Hub Dashboard Modal */}
       {profileModalOpen && currentUser && (
         <div className="modal-overlay" onClick={() => setProfileModalOpen(false)}>
-          <div className="modal-content" style={{ maxWidth: "580px", width: "95%" }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" style={{ maxWidth: "860px", width: "95%" }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
-                <span className="section-tag">TRUNG TÂM CÀI ĐẶT TÀI KHOẢN</span>
-                <h3 style={{ margin: 0 }}>Hồ Sơ &amp; Cài Đặt Khách Hàng</h3>
+                <span className="section-tag" style={{ background: "rgba(50, 157, 210, 0.15)", color: "#329dd2", border: "1px solid rgba(50, 157, 210, 0.35)" }}>TRUNG TÂM CẦU THỦ BMT</span>
+                <h3 style={{ margin: 0, color: "#ffffff" }}>Bảng Điều Khiển Tài Khoản &amp; Vé Của Tôi</h3>
               </div>
               <button type="button" className="modal-close-btn" onClick={() => setProfileModalOpen(false)}>✕</button>
             </div>
 
-            <div className="modal-body" style={{ maxHeight: "78vh", overflowY: "auto", padding: "18px 24px" }}>
+            <div className="modal-body" style={{ maxHeight: "78vh", overflowY: "auto", padding: "20px 24px" }}>
               {/* Profile card summary */}
-              <div style={{ background: "linear-gradient(135deg, #15803d 0%, #065f46 100%)", color: "#ffffff", padding: "18px 20px", borderRadius: "14px", marginBottom: "16px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>
+              <div style={{ background: "linear-gradient(135deg, #0e1626 0%, #152238 100%)", color: "#ffffff", padding: "20px 24px", borderRadius: "16px", marginBottom: "20px", border: "1px solid rgba(50, 157, 210, 0.35)", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "14px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                    <div style={{ width: "54px", height: "54px", borderRadius: "50%", background: "rgba(50, 157, 210, 0.2)", border: "2px solid #329dd2", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px" }}>
                       {userAvatar}
                     </div>
                     <div>
-                      <div style={{ fontSize: "17px", fontWeight: 800 }}>{currentUser.fullName}</div>
-                      <div style={{ fontSize: "12px", opacity: 0.9, marginTop: "2px" }}>📞 {currentUser.phone} · {currentUser.email || "Chưa gắn email"}</div>
+                      <div style={{ fontSize: "19px", fontWeight: 800, color: "#ffffff" }}>{currentUser.fullName}</div>
+                      <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>📞 {currentUser.phone} · {currentUser.email || "Chưa gắn email"}</div>
                     </div>
                   </div>
-                  <span style={{ background: "#fef3c7", color: "#b45309", padding: "4px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: 800 }}>
-                    👑 HỘI VIÊN VIP VÀNG (10% OFF)
-                  </span>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                    <span style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24", border: "1px solid rgba(245, 158, 11, 0.35)", padding: "4px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: 800 }}>
+                      👑 HỘI VIÊN BMT VIP
+                    </span>
+                    {myClub && (
+                      <span style={{ background: "rgba(50, 157, 210, 0.15)", color: "#38bdf8", border: "1px solid rgba(50, 157, 210, 0.35)", padding: "4px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: 800 }}>
+                        🛡️ {myClub.name} ({myClub.elo} ELO · {myClub.tier})
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div style={{ marginTop: "12px", borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "8px", fontSize: "12px", opacity: 0.95 }}>
-                  ⚽ Vị trí: <strong>{userPosition}</strong> · Khu vực: <strong>{userArea}</strong> · Đội: <strong>{userTeam}</strong>
+                <div style={{ marginTop: "14px", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "10px", fontSize: "12px", color: "#cbd5e1", display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                  <span>⚽ Vị trí: <strong style={{ color: "#38bdf8" }}>{userPosition}</strong></span>
+                  <span>👟 Chân thuận: <strong style={{ color: "#38bdf8" }}>{userPreferredFoot}</strong></span>
+                  <span>👕 Số áo: <strong style={{ color: "#f59e0b" }}>#{userFavoriteNumber}</strong></span>
+                  <span>📍 Khu vực: <strong style={{ color: "#cbd5e1" }}>{userArea}</strong></span>
                 </div>
               </div>
 
               {/* Sub-tab navigation buttons */}
-              <div style={{ display: "flex", gap: "6px", marginBottom: "18px", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", overflowX: "auto" }}>
+              <div style={{ display: "flex", gap: "6px", marginBottom: "20px", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "10px", overflowX: "auto" }}>
+                <button
+                  type="button"
+                  className={`quick-day-btn ${profileTab === "BOOKINGS" ? "active" : ""}`}
+                  style={{ fontSize: "12px", padding: "8px 14px", whiteSpace: "nowrap", background: profileTab === "BOOKINGS" ? "#329dd2" : "rgba(255,255,255,0.05)", color: "#ffffff", border: "1px solid rgba(50, 157, 210, 0.3)" }}
+                  onClick={() => { setProfileTab("BOOKINGS"); setProfileNotice(""); fetchMyBookings(); }}
+                >
+                  🎫 Vé &amp; Lịch sân ({myBookings.length})
+                </button>
+                <button
+                  type="button"
+                  className={`quick-day-btn ${profileTab === "FC_TEAM" ? "active" : ""}`}
+                  style={{ fontSize: "12px", padding: "8px 14px", whiteSpace: "nowrap", background: profileTab === "FC_TEAM" ? "#329dd2" : "rgba(255,255,255,0.05)", color: "#ffffff", border: "1px solid rgba(50, 157, 210, 0.3)" }}
+                  onClick={() => { setProfileTab("FC_TEAM"); setProfileNotice(""); }}
+                >
+                  🛡️ FC Của Tôi {myClub ? `(${myClub.members?.length || 1}/15)` : ""}
+                </button>
+                <button
+                  type="button"
+                  className={`quick-day-btn ${profileTab === "MATCHES" ? "active" : ""}`}
+                  style={{ fontSize: "12px", padding: "8px 14px", whiteSpace: "nowrap", background: profileTab === "MATCHES" ? "#329dd2" : "rgba(255,255,255,0.05)", color: "#ffffff", border: "1px solid rgba(50, 157, 210, 0.3)" }}
+                  onClick={() => { setProfileTab("MATCHES"); setProfileNotice(""); }}
+                >
+                  🤝 Kèo thi đấu của tôi
+                </button>
+                <button
+                  type="button"
+                  className={`quick-day-btn ${profileTab === "FAVORITES" ? "active" : ""}`}
+                  style={{ fontSize: "12px", padding: "8px 14px", whiteSpace: "nowrap", background: profileTab === "FAVORITES" ? "#329dd2" : "rgba(255,255,255,0.05)", color: "#ffffff", border: "1px solid rgba(50, 157, 210, 0.3)" }}
+                  onClick={() => { setProfileTab("FAVORITES"); setProfileNotice(""); }}
+                >
+                  ⭐ Sân yêu thích ({favoritePitchIds.length})
+                </button>
                 <button
                   type="button"
                   className={`quick-day-btn ${profileTab === "PROFILE" ? "active" : ""}`}
-                  style={{ fontSize: "12px", padding: "6px 12px", whiteSpace: "nowrap" }}
+                  style={{ fontSize: "12px", padding: "8px 14px", whiteSpace: "nowrap", background: profileTab === "PROFILE" ? "#329dd2" : "rgba(255,255,255,0.05)", color: "#ffffff", border: "1px solid rgba(50, 157, 210, 0.3)" }}
                   onClick={() => { setProfileTab("PROFILE"); setProfileNotice(""); }}
                 >
                   👤 Hồ sơ cá nhân
@@ -4410,36 +4683,499 @@ export default function Home() {
                 <button
                   type="button"
                   className={`quick-day-btn ${profileTab === "PASSWORD" ? "active" : ""}`}
-                  style={{ fontSize: "12px", padding: "6px 12px", whiteSpace: "nowrap" }}
+                  style={{ fontSize: "12px", padding: "8px 14px", whiteSpace: "nowrap", background: profileTab === "PASSWORD" ? "#329dd2" : "rgba(255,255,255,0.05)", color: "#ffffff", border: "1px solid rgba(50, 157, 210, 0.3)" }}
                   onClick={() => { setProfileTab("PASSWORD"); setProfileNotice(""); }}
                 >
-                  🔐 Đổi mật khẩu
-                </button>
-                <button
-                  type="button"
-                  className={`quick-day-btn ${profileTab === "NOTIFICATIONS" ? "active" : ""}`}
-                  style={{ fontSize: "12px", padding: "6px 12px", whiteSpace: "nowrap" }}
-                  onClick={() => { setProfileTab("NOTIFICATIONS"); setProfileNotice(""); }}
-                >
-                  🔔 Thông báo
-                </button>
-                <button
-                  type="button"
-                  className={`quick-day-btn ${profileTab === "PREFERENCES" ? "active" : ""}`}
-                  style={{ fontSize: "12px", padding: "6px 12px", whiteSpace: "nowrap" }}
-                  onClick={() => { setProfileTab("PREFERENCES"); setProfileNotice(""); }}
-                >
-                  ⚙️ Tiện ích đặt sân
+                  🔐 Mật khẩu
                 </button>
               </div>
 
               {profileNotice && (
-                <div style={{ background: profileNotice.startsWith("❌") ? "#fee2e2" : "#f0fdf4", border: `1px solid ${profileNotice.startsWith("❌") ? "#fca5a5" : "#86efac"}`, color: profileNotice.startsWith("❌") ? "#991b1b" : "#166534", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "14px", fontWeight: 600 }}>
+                <div style={{ background: profileNotice.startsWith("❌") ? "rgba(235, 47, 51, 0.15)" : "rgba(50, 157, 210, 0.15)", border: `1px solid ${profileNotice.startsWith("❌") ? "rgba(235, 47, 51, 0.35)" : "rgba(50, 157, 210, 0.35)"}`, color: profileNotice.startsWith("❌") ? "#fca5a5" : "#38bdf8", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", marginBottom: "16px", fontWeight: 600 }}>
                   {profileNotice}
                 </div>
               )}
 
-              {/* TAB 1: THÔNG TIN CÁ NHÂN */}
+              {/* TAB 1: DANH SÁCH VÉ & LỊCH SÂN CỦA TÔI */}
+              {profileTab === "BOOKINGS" && (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                    <span style={{ fontSize: "13px", color: "#94a3b8" }}>
+                      Tổng cộng <strong>{myBookings.length}</strong> ca đặt sân liên kết với số điện thoại <strong>{currentUser.phone}</strong>:
+                    </span>
+                    <button type="button" onClick={fetchMyBookings} className="outline-button" style={{ padding: "4px 10px", fontSize: "11px" }}>
+                      🔄 Làm mới
+                    </button>
+                  </div>
+
+                  {loadingBookings ? (
+                    <div style={{ textAlign: "center", padding: "30px", color: "#94a3b8" }}>
+                      Đang đồng bộ dữ liệu vé từ CSDL Neon...
+                    </div>
+                  ) : myBookings.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "36px 20px", background: "var(--surface-alt)", borderRadius: "12px", border: "1px solid var(--border)" }}>
+                      <div style={{ fontSize: "36px", marginBottom: "10px" }}>🎟️</div>
+                      <p style={{ margin: "0 0 12px 0", color: "#94a3b8", fontSize: "14px" }}>Bạn chưa có ca đặt sân nào trong hệ thống.</p>
+                      <button
+                        type="button"
+                        className="primary-button"
+                        style={{ padding: "8px 18px", fontSize: "12px" }}
+                        onClick={() => {
+                          setProfileModalOpen(false);
+                          const el = document.getElementById("dat-san");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }}
+                      >
+                        ⚡ Đặt ca sân ngay
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                      {myBookings.map((b, idx) => {
+                        const isPending = b.status === "PENDING";
+                        const isConfirmed = b.status === "CONFIRMED";
+                        const isCancelled = b.status === "CANCELLED";
+                        const isDone = b.status === "COMPLETED";
+
+                        return (
+                          <div
+                            key={b.bookingCode || idx}
+                            style={{
+                              background: "var(--surface-alt)",
+                              border: "1px solid var(--border)",
+                              borderRadius: "14px",
+                              padding: "16px 20px",
+                              position: "relative",
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px", marginBottom: "8px" }}>
+                              <div>
+                                <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#38bdf8", fontWeight: 800, background: "rgba(50, 157, 210, 0.12)", padding: "2px 8px", borderRadius: "6px" }}>
+                                  {b.bookingCode}
+                                </span>
+                                <h4 style={{ margin: "6px 0 2px", fontSize: "16px", color: "#ffffff" }}>
+                                  {b.parentVenueName || b.fieldName || "Cụm sân Buôn Ma Thuột"}
+                                </h4>
+                                <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                                  ⚽ Sân con: <strong style={{ color: "#38bdf8" }}>{b.subPitchName || "Sân con mini"}</strong> ({b.categoryName || "Sân tiêu chuẩn"})
+                                </div>
+                              </div>
+
+                              <div>
+                                {isPending && (
+                                  <span style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24", border: "1px solid rgba(245, 158, 11, 0.35)", padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: 800 }}>
+                                    ⏳ CHỜ CHUYỂN CỌC (30%)
+                                  </span>
+                                )}
+                                {isConfirmed && (
+                                  <span style={{ background: "rgba(50, 157, 210, 0.15)", color: "#38bdf8", border: "1px solid rgba(50, 157, 210, 0.35)", padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: 800 }}>
+                                    ✓ ĐÃ CỌC - SẴN SÀNG ĐÁ
+                                  </span>
+                                )}
+                                {isCancelled && (
+                                  <span style={{ background: "rgba(235, 47, 51, 0.15)", color: "#fca5a5", border: "1px solid rgba(235, 47, 51, 0.35)", padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: 800 }}>
+                                    ✕ ĐÃ HỦY
+                                  </span>
+                                )}
+                                {isDone && (
+                                  <span style={{ background: "rgba(148, 163, 184, 0.15)", color: "#cbd5e1", border: "1px solid rgba(148, 163, 184, 0.35)", padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: 800 }}>
+                                    ✓ ĐÃ HOÀN THÀNH
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "8px", fontSize: "12px", color: "#cbd5e1", margin: "10px 0" }}>
+                              <div>📅 Ngày đá: <strong>{b.date || (b.startAt ? b.startAt.slice(0, 10) : "Hôm nay")}</strong></div>
+                              <div>⏰ Giờ đá: <strong>{b.timeLabel || "Ca chiều / tối"}</strong></div>
+                              <div>💰 Tổng tiền: <strong style={{ color: "#f59e0b" }}>{money(Number(b.totalPrice || 350000))}</strong></div>
+                              <div>💳 Tiền cọc (30%): <strong style={{ color: "#38bdf8" }}>{money(Math.max(100000, Math.round(Number(b.totalPrice || 350000) * 0.3)))}</strong></div>
+                            </div>
+
+                            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "12px", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "10px" }}>
+                              {b.qrUrl && (
+                                <button
+                                  type="button"
+                                  className="primary-button"
+                                  style={{ padding: "6px 12px", fontSize: "11px" }}
+                                  onClick={() => setActiveTicketQr(b)}
+                                >
+                                  📱 Quét mã VietQR
+                                </button>
+                              )}
+                              <a
+                                href={getGoogleMapsDirUrl(b.parentVenueName || b.fieldName, b.fieldAddress || b.ward)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="outline-button"
+                                style={{ padding: "6px 12px", fontSize: "11px", textDecoration: "none" }}
+                              >
+                                🧭 Chỉ đường Maps
+                              </a>
+                              {(b.ownerPhone || b.fieldPhone) && (
+                                <a
+                                  href={`tel:${(b.ownerPhone || b.fieldPhone).replace(/\s+/g, '')}`}
+                                  className="outline-button"
+                                  style={{ padding: "6px 12px", fontSize: "11px", textDecoration: "none", color: "#f59e0b", borderColor: "rgba(245, 158, 11, 0.4)" }}
+                                >
+                                  📞 Gọi chủ sân ({b.ownerPhone || b.fieldPhone})
+                                </a>
+                              )}
+                              {isPending && (
+                                <button
+                                  type="button"
+                                  className="outline-button"
+                                  style={{ padding: "6px 12px", fontSize: "11px", color: "#eb2f33", borderColor: "rgba(235, 47, 51, 0.35)", marginLeft: "auto" }}
+                                  onClick={() => handleCancelMyBooking(b)}
+                                >
+                                  ✕ Hủy ca sân
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 2: QUẢN LÝ FC & ĐỘI HÌNH 15 NGƯỜI */}
+              {profileTab === "FC_TEAM" && (
+                <div>
+                  {myClub ? (
+                    <div>
+                      <div style={{ background: "linear-gradient(135deg, #131e32 0%, #0e1626 100%)", border: "1px solid rgba(50, 157, 210, 0.35)", borderRadius: "14px", padding: "18px 20px", marginBottom: "18px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px" }}>
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                              <span style={{ fontSize: "28px" }}>{myClub.avatar || "🛡️"}</span>
+                              <div>
+                                <h3 style={{ margin: 0, fontSize: "20px", color: "#ffffff" }}>{myClub.name}</h3>
+                                <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                                  Đội trưởng: <strong style={{ color: "#38bdf8" }}>{myClub.captainName}</strong> ({myClub.captainPhone}) · Sân nhà: <strong>{myClub.homePitch || "SVĐ Buôn Ma Thuột"}</strong>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontSize: "22px", fontWeight: 900, color: "#f59e0b" }}>{myClub.elo} ELO</div>
+                            <span style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24", padding: "2px 8px", borderRadius: "999px", fontSize: "10px", fontWeight: 800 }}>
+                              {myClub.tier || "Hạng Đồng"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginTop: "14px", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "12px", textAlign: "center", fontSize: "12px" }}>
+                          <div><div style={{ color: "#94a3b8" }}>Trận đấu</div><strong style={{ fontSize: "16px", color: "#ffffff" }}>{myClub.wins + myClub.draws + myClub.losses}</strong></div>
+                          <div><div style={{ color: "#38bdf8" }}>Thắng</div><strong style={{ fontSize: "16px", color: "#38bdf8" }}>{myClub.wins}</strong></div>
+                          <div><div style={{ color: "#fbbf24" }}>Hòa</div><strong style={{ fontSize: "16px", color: "#fbbf24" }}>{myClub.draws}</strong></div>
+                          <div><div style={{ color: "#eb2f33" }}>Thua</div><strong style={{ fontSize: "16px", color: "#eb2f33" }}>{myClub.losses}</strong></div>
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: "18px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                          <h4 style={{ margin: 0, fontSize: "14px", color: "#ffffff" }}>
+                            📋 ĐỘI HÌNH THI ĐẤU ({myClub.members?.length || 1}/15 THÀNH VIÊN TỐI ĐA):
+                          </h4>
+                          <span style={{ fontSize: "11px", color: "#94a3b8" }}>Quy định giải: Tối đa 15 người/FC</span>
+                        </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "10px" }}>
+                          {myClub.members?.map((m, mIdx) => (
+                            <div
+                              key={m.phone || mIdx}
+                              style={{
+                                background: "var(--surface-alt)",
+                                border: "1px solid var(--border)",
+                                borderRadius: "10px",
+                                padding: "10px 14px",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "rgba(50, 157, 210, 0.15)", color: "#38bdf8", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "12px" }}>
+                                  #{mIdx + 1}
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: "13px", fontWeight: 700, color: "#ffffff" }}>
+                                    {m.name} {m.role === "CAPTAIN" && "👑"}
+                                  </div>
+                                  <div style={{ fontSize: "11px", color: "#94a3b8" }}>
+                                    {m.phone} · {m.role === "CAPTAIN" ? "Đội trưởng" : "Cầu thủ"}
+                                  </div>
+                                </div>
+                              </div>
+                              {m.role !== "CAPTAIN" && (myClub.captainId === currentUser.id || myClub.captainPhone === currentUser.phone) && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveMemberFromClub(m.phone)}
+                                  style={{ background: "none", border: "none", color: "#eb2f33", cursor: "pointer", fontSize: "14px", padding: "4px" }}
+                                  title="Xóa thành viên khỏi đội"
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Form thêm thành viên mới nếu chưa đủ 15 người */}
+                      {myClub.members?.length < 15 ? (
+                        <form onSubmit={handleAddMemberToMyClub} style={{ background: "rgba(50, 157, 210, 0.06)", border: "1px dashed rgba(50, 157, 210, 0.35)", borderRadius: "12px", padding: "14px 18px" }}>
+                          <strong style={{ fontSize: "13px", color: "#38bdf8", display: "block", marginBottom: "10px" }}>
+                            ➕ Thêm cầu thủ mới vào danh sách đội (Còn trống {15 - (myClub.members?.length || 1)} chỗ):
+                          </strong>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 90px auto", gap: "8px", alignItems: "flex-end" }}>
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontSize: "11px", color: "#94a3b8" }}>Tên cầu thủ *</label>
+                              <input
+                                value={newMemberName}
+                                onChange={(e) => setNewMemberName(e.target.value)}
+                                placeholder="VD: Nguyễn Văn C"
+                                required
+                                style={{ height: "36px", fontSize: "12px" }}
+                              />
+                            </div>
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontSize: "11px", color: "#94a3b8" }}>Số điện thoại *</label>
+                              <input
+                                value={newMemberPhone}
+                                onChange={(e) => setNewMemberPhone(e.target.value)}
+                                placeholder="VD: 0912345678"
+                                required
+                                style={{ height: "36px", fontSize: "12px" }}
+                              />
+                            </div>
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontSize: "11px", color: "#94a3b8" }}>Vị trí</label>
+                              <select
+                                value={newMemberPos}
+                                onChange={(e) => setNewMemberPos(e.target.value)}
+                                style={{ height: "36px", fontSize: "12px", background: "var(--bg)", color: "#ffffff", border: "1px solid var(--border)", borderRadius: "8px" }}
+                              >
+                                <option value="Tiền đạo">Tiền đạo (FW)</option>
+                                <option value="Tiền vệ">Tiền vệ (MF)</option>
+                                <option value="Hậu vệ">Hậu vệ (DF)</option>
+                                <option value="Thủ môn">Thủ môn (GK)</option>
+                              </select>
+                            </div>
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontSize: "11px", color: "#94a3b8" }}>Số áo</label>
+                              <input
+                                type="number"
+                                min={1}
+                                max={99}
+                                value={newMemberNum}
+                                onChange={(e) => setNewMemberNum(Number(e.target.value))}
+                                style={{ height: "36px", fontSize: "12px" }}
+                              />
+                            </div>
+                            <button type="submit" className="primary-button" style={{ height: "36px", padding: "0 14px", fontSize: "12px" }}>
+                              + Thêm
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div style={{ background: "rgba(245, 158, 11, 0.12)", border: "1px solid rgba(245, 158, 11, 0.3)", borderRadius: "10px", padding: "12px", fontSize: "13px", color: "#fbbf24", textAlign: "center" }}>
+                          🔒 FC đã đủ giới hạn tối đa 15 thành viên thi đấu theo quy chuẩn ban tổ chức giải.
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: "center", padding: "36px 20px", background: "var(--surface-alt)", borderRadius: "14px", border: "1px solid var(--border)" }}>
+                      <div style={{ fontSize: "40px", marginBottom: "12px" }}>🛡️</div>
+                      <h4 style={{ margin: "0 0 8px 0", fontSize: "17px", color: "#ffffff" }}>Bạn chưa tham gia Câu lạc bộ (FC) nào</h4>
+                      <p style={{ margin: "0 0 16px 0", fontSize: "13px", color: "#94a3b8", maxWidth: "420px", marginInline: "auto" }}>
+                        Hãy thành lập FC của riêng bạn để đăng ký thi đấu, xây dựng đội hình 15 người và leo rank ELO trên bảng xếp hạng Buôn Ma Thuột!
+                      </p>
+                      <button
+                        type="button"
+                        className="primary-button"
+                        style={{ padding: "10px 22px", fontSize: "13px" }}
+                        onClick={() => {
+                          setProfileModalOpen(false);
+                          setCreateClubOpen(true);
+                        }}
+                      >
+                        ⚡ Thành lập FC Mới Của Tôi (1000 ELO)
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 3: KÈO THI ĐẤU CỦA TÔI & BÁO KẾT QUẢ ELO */}
+              {profileTab === "MATCHES" && (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                    <span style={{ fontSize: "13px", color: "#94a3b8" }}>Các bài đăng bắt đối do bạn tạo hoặc đội của bạn đã nhận:</span>
+                    <button
+                      type="button"
+                      className="primary-button"
+                      style={{ padding: "6px 12px", fontSize: "11px" }}
+                      onClick={() => {
+                        setProfileModalOpen(false);
+                        setCreateMatchOpen(true);
+                      }}
+                    >
+                      ➕ Đăng kèo mới
+                    </button>
+                  </div>
+
+                  {(() => {
+                    const myMatches = matchPosts.filter(
+                      (p) =>
+                        p.captainName === currentUser.fullName ||
+                        p.phone === currentUser.phone ||
+                        (myClub && p.teamName === myClub.name)
+                    );
+
+                    if (myMatches.length === 0) {
+                      return (
+                        <div style={{ textAlign: "center", padding: "36px 20px", background: "var(--surface-alt)", borderRadius: "12px", border: "1px solid var(--border)" }}>
+                          <div style={{ fontSize: "36px", marginBottom: "10px" }}>🤝</div>
+                          <p style={{ margin: "0 0 12px 0", color: "#94a3b8", fontSize: "14px" }}>Bạn chưa có bài đăng cáp kèo nào trên sàn phủi.</p>
+                          <button
+                            type="button"
+                            className="primary-button"
+                            style={{ padding: "8px 18px", fontSize: "12px" }}
+                            onClick={() => {
+                              setProfileModalOpen(false);
+                              setCreateMatchOpen(true);
+                            }}
+                          >
+                            ➕ Đăng tin tìm đối ngay
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        {myMatches.map((p) => {
+                          const isOpen = p.status === "OPEN";
+                          const isMatched = p.status === "MATCHED";
+
+                          return (
+                            <div
+                              key={p.id}
+                              style={{
+                                background: "var(--surface-alt)",
+                                border: "1px solid var(--border)",
+                                borderRadius: "14px",
+                                padding: "16px 20px",
+                              }}
+                            >
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px" }}>
+                                <div>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                    <h4 style={{ margin: 0, fontSize: "16px", color: "#ffffff" }}>
+                                      {p.teamName} {isMatched ? `vs ${p.matchedBy || "Đối thủ"}` : ""}
+                                    </h4>
+                                    <span style={{ background: isOpen ? "rgba(50, 157, 210, 0.15)" : "rgba(245, 158, 11, 0.15)", color: isOpen ? "#38bdf8" : "#fbbf24", padding: "2px 8px", borderRadius: "6px", fontSize: "10px", fontWeight: 800 }}>
+                                      {isOpen ? "ĐANG TÌM ĐỐI" : "ĐÃ BẮT ĐỐI"}
+                                    </span>
+                                  </div>
+                                  <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
+                                    🏟️ {p.fieldName} · 📅 {p.matchDate} · ⏰ {p.timeSlot}
+                                  </div>
+                                </div>
+
+                                <div style={{ display: "flex", gap: "8px" }}>
+                                  {isMatched && (
+                                    <button
+                                      type="button"
+                                      className="primary-button"
+                                      style={{ padding: "6px 12px", fontSize: "11px", background: "#f59e0b" }}
+                                      onClick={() => setMatchScoreModal(p)}
+                                    >
+                                      🏆 Ghi nhận tỷ số &amp; ELO
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* TAB 4: SÂN BÓNG YÊU THÍCH */}
+              {profileTab === "FAVORITES" && (
+                <div>
+                  <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "14px" }}>
+                    Các cụm sân bạn đánh dấu yêu thích để truy cập nhanh:
+                  </p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "12px" }}>
+                    {fieldsList
+                      .filter((f) => favoritePitchIds.includes(f.id))
+                      .map((f) => (
+                        <div
+                          key={f.id}
+                          style={{
+                            background: "var(--surface-alt)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "12px",
+                            padding: "14px",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                              <h4 style={{ margin: "0 0 4px", fontSize: "15px", color: "#ffffff" }}>{f.name}</h4>
+                              <button
+                                type="button"
+                                onClick={() => handleToggleFavorite(f.id)}
+                                style={{ background: "none", border: "none", color: "#f59e0b", cursor: "pointer", fontSize: "16px" }}
+                                title="Bỏ yêu thích"
+                              >
+                                ★
+                              </button>
+                            </div>
+                            <div style={{ fontSize: "11px", color: "#94a3b8" }}>📍 {f.ward} · {f.address}</div>
+                          </div>
+                          <div style={{ marginTop: "12px", display: "flex", gap: "6px" }}>
+                            <button
+                              type="button"
+                              className="primary-button"
+                              style={{ flex: 1, padding: "6px 10px", fontSize: "11px" }}
+                              onClick={() => {
+                                setSelectedPitchId(f.id);
+                                setProfileModalOpen(false);
+                                const el = document.getElementById("dat-san");
+                                if (el) el.scrollIntoView({ behavior: "smooth" });
+                              }}
+                            >
+                              ⚡ Đặt ca sân này
+                            </button>
+                            <a
+                              href={getGoogleMapsDirUrl(f.name, f.address)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="outline-button"
+                              style={{ padding: "6px 10px", fontSize: "11px", textDecoration: "none" }}
+                            >
+                              🧭 Maps
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: THÔNG TIN HỒ SƠ CÁ NHÂN */}
               {profileTab === "PROFILE" && (
                 <form
                   onSubmit={(e) => {
@@ -4455,29 +5191,30 @@ export default function Home() {
                       email: newEmail || currentUser.email,
                     };
                     setCurrentUser(updated);
-                    window.localStorage.setItem("football_logged_user", JSON.stringify(updated));
-                    setProfileNotice("✓ Đã cập nhật thành công thông tin hồ sơ cá nhân!");
+                    window.localStorage.setItem("football_auth_user", JSON.stringify(updated));
+                    setProfileNotice("✓ Đã cập nhật thành công thông tin hồ sơ cầu thủ!");
                   }}
                   style={{ display: "flex", flexDirection: "column", gap: "14px" }}
                 >
                   <div>
-                    <label style={{ fontSize: "12px", fontWeight: 700, color: "#475569", display: "block", marginBottom: "6px" }}>
-                      Chọn ảnh đại diện (Avatar):
+                    <label style={{ fontSize: "12px", fontWeight: 700, color: "#94a3b8", display: "block", marginBottom: "8px" }}>
+                      Chọn ảnh đại diện cầu thủ (Avatar):
                     </label>
                     <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                      {["⚽", "🏃", "🥅", "👟", "🏆", "🥇", "🎯"].map((emoji) => (
+                      {["⚽", "🏃", "🥅", "👟", "🏆", "🥇", "🎯", "⚡", "🔥"].map((emoji) => (
                         <button
                           key={emoji}
                           type="button"
                           onClick={() => setUserAvatar(emoji)}
                           style={{
-                            width: "38px",
-                            height: "38px",
-                            fontSize: "20px",
-                            borderRadius: "8px",
-                            border: userAvatar === emoji ? "2px solid #16a34a" : "1px solid #cbd5e1",
-                            background: userAvatar === emoji ? "#dcfce7" : "#ffffff",
+                            width: "42px",
+                            height: "42px",
+                            fontSize: "22px",
+                            borderRadius: "10px",
+                            border: userAvatar === emoji ? "2px solid #329dd2" : "1px solid var(--border)",
+                            background: userAvatar === emoji ? "rgba(50, 157, 210, 0.2)" : "rgba(255,255,255,0.04)",
                             cursor: "pointer",
+                            transition: "all 0.2s",
                           }}
                         >
                           {emoji}
@@ -4487,25 +5224,45 @@ export default function Home() {
                   </div>
 
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Họ và tên khách hàng *</label>
+                    <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Họ và tên cầu thủ *</label>
                     <input name="name" defaultValue={currentUser.fullName} required style={{ height: "40px" }} />
                   </div>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                     <div className="form-group" style={{ margin: 0 }}>
-                      <label style={{ fontSize: "12px", fontWeight: 700 }}>Số điện thoại *</label>
+                      <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Số điện thoại liên hệ *</label>
                       <input name="phone" defaultValue={currentUser.phone} required style={{ height: "40px" }} />
                     </div>
                     <div className="form-group" style={{ margin: 0 }}>
-                      <label style={{ fontSize: "12px", fontWeight: 700 }}>Email nhận vé</label>
+                      <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Email nhận vé điện tử</label>
                       <input name="email" defaultValue={currentUser.email || ""} placeholder="example@gmail.com" style={{ height: "40px" }} />
                     </div>
                   </div>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                     <div className="form-group" style={{ margin: 0 }}>
-                      <label style={{ fontSize: "12px", fontWeight: 700 }}>Khu vực tại Buôn Ma Thuột</label>
-                      <select value={userArea} onChange={(e) => setUserArea(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}>
+                      <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Vị trí thi đấu sở trường</label>
+                      <select value={userPosition} onChange={(e) => setUserPosition(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--bg)", color: "#ffffff", fontSize: "13px" }}>
+                        <option value="Tiền đạo (ST)">Tiền đạo (ST)</option>
+                        <option value="Tiền vệ (MF)">Tiền vệ (MF)</option>
+                        <option value="Hậu vệ (DF)">Hậu vệ (DF)</option>
+                        <option value="Thủ môn (GK)">Thủ môn (GK)</option>
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Chân thuận</label>
+                      <select value={userPreferredFoot} onChange={(e) => setUserPreferredFoot(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--bg)", color: "#ffffff", fontSize: "13px" }}>
+                        <option value="Chân phải">Chân phải</option>
+                        <option value="Chân trái">Chân trái</option>
+                        <option value="Hai chân như một">Hai chân như một</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Khu vực tại Buôn Ma Thuột</label>
+                      <select value={userArea} onChange={(e) => setUserArea(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--bg)", color: "#ffffff", fontSize: "13px" }}>
                         <option value="Phường Tân Tiến">Phường Tân Tiến</option>
                         <option value="Phường Tân Lợi">Phường Tân Lợi</option>
                         <option value="Phường Tân An">Phường Tân An</option>
@@ -4513,36 +5270,34 @@ export default function Home() {
                         <option value="Phường Ea Tam">Phường Ea Tam</option>
                         <option value="Phường Tân Lập">Phường Tân Lập</option>
                         <option value="Xã Hòa Khánh">Xã Hòa Khánh</option>
+                        <option value="Xã Ea Kao">Xã Ea Kao</option>
                       </select>
                     </div>
                     <div className="form-group" style={{ margin: 0 }}>
-                      <label style={{ fontSize: "12px", fontWeight: 700 }}>Vị trí thi đấu sở trường</label>
-                      <select value={userPosition} onChange={(e) => setUserPosition(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}>
-                        <option value="Tiền đạo (ST)">Tiền đạo (ST)</option>
-                        <option value="Tiền vệ (MF)">Tiền vệ (MF)</option>
-                        <option value="Hậu vệ (DF)">Hậu vệ (DF)</option>
-                        <option value="Thủ môn (GK)">Thủ môn (GK)</option>
-                      </select>
+                      <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Số áo ưa thích</label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={99}
+                        value={userFavoriteNumber}
+                        onChange={(e) => setUserFavoriteNumber(Number(e.target.value))}
+                        style={{ height: "40px" }}
+                      />
                     </div>
                   </div>
 
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Tên đội bóng / Câu lạc bộ</label>
-                    <input value={userTeam} onChange={(e) => setUserTeam(e.target.value)} placeholder="Ví dụ: FC Anh Em BMT" style={{ height: "40px" }} />
-                  </div>
-
-                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-                    <button type="submit" className="primary-button" style={{ flex: 1, padding: "10px" }}>
+                  <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+                    <button type="submit" className="primary-button" style={{ flex: 1, padding: "11px" }}>
                       💾 Lưu thông tin hồ sơ
                     </button>
-                    <button type="button" className="outline-button" style={{ padding: "10px 16px" }} onClick={() => setProfileModalOpen(false)}>
+                    <button type="button" className="outline-button" style={{ padding: "11px 18px" }} onClick={() => setProfileModalOpen(false)}>
                       Đóng
                     </button>
                   </div>
                 </form>
               )}
 
-              {/* TAB 2: ĐỔI MẬT KHẨU & BẢO MẬT */}
+              {/* TAB 6: ĐỔI MẬT KHẨU & BẢO MẬT */}
               {profileTab === "PASSWORD" && (
                 <form
                   onSubmit={(e) => {
@@ -4564,138 +5319,113 @@ export default function Home() {
                       setProfileNotice("❌ Mật khẩu xác nhận không trùng khớp!");
                       return;
                     }
-                    setProfileNotice("✓ Đổi mật khẩu tài khoản thành công! Mật khẩu mới đã được bảo vệ.");
+                    setProfileNotice("✓ Đổi mật khẩu tài khoản thành công! Mật khẩu mới đã được bảo mật trên Neon DB.");
                     e.currentTarget.reset();
                   }}
                   style={{ display: "flex", flexDirection: "column", gap: "14px" }}
                 >
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Mật khẩu hiện tại *</label>
+                    <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Mật khẩu hiện tại *</label>
                     <input name="oldPass" type="password" required placeholder="Nhập mật khẩu hiện tại" style={{ height: "40px" }} />
                   </div>
 
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Mật khẩu mới *</label>
+                    <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Mật khẩu mới *</label>
                     <input name="newPass" type="password" required placeholder="Tối thiểu 6 ký tự" style={{ height: "40px" }} />
                   </div>
 
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label style={{ fontSize: "12px", fontWeight: 700 }}>Xác nhận mật khẩu mới *</label>
+                    <label style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>Xác nhận mật khẩu mới *</label>
                     <input name="confirmPass" type="password" required placeholder="Nhập lại mật khẩu mới" style={{ height: "40px" }} />
                   </div>
 
-                  <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px", borderRadius: "8px", fontSize: "12px", color: "#475569" }}>
-                    🔒 Mật khẩu được mã hóa an toàn trên máy chủ Neon PostgreSQL. Vui lòng ghi nhớ mật khẩu để đăng nhập lần sau.
+                  <div style={{ background: "rgba(50, 157, 210, 0.08)", border: "1px solid rgba(50, 157, 210, 0.25)", padding: "12px", borderRadius: "8px", fontSize: "12px", color: "#cbd5e1" }}>
+                    🔒 Mật khẩu được mã hóa chuẩn bcrypt an toàn trên máy chủ Neon PostgreSQL.
                   </div>
 
-                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-                    <button type="submit" className="primary-button" style={{ flex: 1, padding: "10px" }}>
+                  <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+                    <button type="submit" className="primary-button" style={{ flex: 1, padding: "11px" }}>
                       🔑 Cập nhật mật khẩu mới
                     </button>
-                    <button type="button" className="outline-button" style={{ padding: "10px 16px" }} onClick={() => setProfileModalOpen(false)}>
+                    <button type="button" className="outline-button" style={{ padding: "11px 18px" }} onClick={() => setProfileModalOpen(false)}>
                       Đóng
                     </button>
                   </div>
                 </form>
               )}
-
-              {/* TAB 3: CÀI ĐẶT THÔNG BÁO & LỜI NHẮC */}
-              {profileTab === "NOTIFICATIONS" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                  <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "16px" }}>
-                    <strong style={{ fontSize: "13px", color: "#0f172a", display: "block", marginBottom: "12px" }}>
-                      🔔 Tùy chọn thông báo nhận tin:
-                    </strong>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "13px" }}>
-                      <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
-                        <input type="checkbox" checked={notifyZalo} onChange={(e) => setNotifyZalo(e.target.checked)} />
-                        <div>
-                          <strong>Thông báo Zalo ZNS:</strong> Nhận mã đặt chỗ, QR cọc 30% và địa chỉ sân tức thì.
-                        </div>
-                      </label>
-                      <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
-                        <input type="checkbox" checked={notifyReminder} onChange={(e) => setNotifyReminder(e.target.checked)} />
-                        <div>
-                          <strong>Nhắc lịch trước 2 giờ:</strong> Nhắn tin nhắc chuẩn bị giày &amp; áo đấu trước khi bóng lăn.
-                        </div>
-                      </label>
-                      <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
-                        <input type="checkbox" checked={notifyPromo} onChange={(e) => setNotifyPromo(e.target.checked)} />
-                        <div>
-                          <strong>Ưu đãi &amp; Giờ vàng:</strong> Nhận tin giảm giá 30% vào các khung giờ vàng cuối tuần.
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-                    <button
-                      type="button"
-                      className="primary-button"
-                      style={{ flex: 1, padding: "10px" }}
-                      onClick={() => setProfileNotice("✓ Đã lưu cài đặt thông báo & lời nhắc thành công!")}
-                    >
-                      💾 Lưu cài đặt thông báo
-                    </button>
-                    <button type="button" className="outline-button" style={{ padding: "10px 16px" }} onClick={() => setProfileModalOpen(false)}>
-                      Đóng
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 4: TIỆN ÍCH ĐẶT SÂN & TÙY CHỌN */}
-              {profileTab === "PREFERENCES" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                  <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "16px" }}>
-                    <strong style={{ fontSize: "13px", color: "#0f172a", display: "block", marginBottom: "12px" }}>
-                      ⚙️ Cài đặt tiện ích thông minh khi đặt sân:
-                    </strong>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                      <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px" }}>
-                        <input type="checkbox" checked={prefAutofill} onChange={(e) => setPrefAutofill(e.target.checked)} />
-                        <span>Tự động điền nhanh tên &amp; SĐT khi bấm chọn ca sân</span>
-                      </label>
-
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label style={{ fontSize: "12px", fontWeight: 700 }}>Cụm sân ruột thường xuyên thi đấu:</label>
-                        <select value={prefFavoriteField} onChange={(e) => setPrefFavoriteField(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}>
-                          <option value="Sân bóng C1">Sân bóng C1 (Phường Tân Tiến)</option>
-                          <option value="SVĐ Buôn Ma Thuột">SVĐ Buôn Ma Thuột</option>
-                          <option value="Sân Ban Mê Sport">Sân Ban Mê Sport (Phường Tân Lập)</option>
-                          <option value="Sân CĐ Sư Phạm">Sân CĐ Sư Phạm (Phường Ea Tam)</option>
-                          <option value="Sân KenVin">Sân KenVin (Phường Tân Lợi)</option>
-                        </select>
-                      </div>
-
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label style={{ fontSize: "12px", fontWeight: 700 }}>Khung giờ đá bóng yêu thích:</label>
-                        <select value={prefFavoriteSlot} onChange={(e) => setPrefFavoriteSlot(e.target.value)} style={{ width: "100%", height: "40px", padding: "0 8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}>
-                          <option value="Ca 1 (06:00 - 07:30)">Ca 1 (06:00 - 07:30) - Buổi sáng</option>
-                          <option value="Ca 8 (16:30 - 18:00)">Ca 8 (16:30 - 18:00) - Chiều tan sở</option>
-                          <option value="Ca 9 (18:00 - 19:30)">Ca 9 (18:00 - 19:30) - Giờ vàng tối</option>
-                          <option value="Ca 10 (19:30 - 21:00)">Ca 10 (19:30 - 21:00) - Giờ vàng đêm</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-                    <button
-                      type="button"
-                      className="primary-button"
-                      style={{ flex: 1, padding: "10px" }}
-                      onClick={() => setProfileNotice("✓ Đã lưu tiện ích đặt sân yêu thích thành công!")}
-                    >
-                      💾 Lưu tiện ích đặt sân
-                    </button>
-                    <button type="button" className="outline-button" style={{ padding: "10px 16px" }} onClick={() => setProfileModalOpen(false)}>
-                      Đóng
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* POPUP XEM MÃ VIETQR VÉ ĐẶT SÂN */}
+      {activeTicketQr && (
+        <div className="modal-overlay" onClick={() => setActiveTicketQr(null)}>
+          <div className="modal-content" style={{ maxWidth: "420px", textAlign: "center", padding: "28px" }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: "0 0 6px", color: "#ffffff", fontSize: "18px" }}>MÃ VIETQR THANH TOÁN TIỀN CỌC</h3>
+            <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 16px" }}>Mã vé: <strong style={{ color: "#38bdf8" }}>{activeTicketQr.bookingCode}</strong></p>
+            <div style={{ background: "#ffffff", padding: "12px", borderRadius: "12px", display: "inline-block", marginBottom: "14px" }}>
+              <img src={activeTicketQr.qrUrl} alt="VietQR" style={{ width: "220px", height: "220px", display: "block" }} />
+            </div>
+            <div style={{ fontSize: "13px", color: "#cbd5e1", marginBottom: "14px" }}>
+              Số tiền cọc: <strong style={{ color: "#f59e0b", fontSize: "16px" }}>{money(activeTicketQr.depositAmount || 100000)}</strong>
+            </div>
+            <button type="button" className="primary-button" style={{ width: "100%", padding: "10px" }} onClick={() => setActiveTicketQr(null)}>
+              Đã hiểu &amp; Đóng
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* POPUP NHẬP TỶ SỐ TRẬN ĐẤU & CẬP NHẬT ELO */}
+      {matchScoreModal && (
+        <div className="modal-overlay" onClick={() => setMatchScoreModal(null)}>
+          <div className="modal-content" style={{ maxWidth: "460px", padding: "24px" }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header" style={{ padding: "0 0 16px", borderBottom: "1px solid var(--border)" }}>
+              <h3 style={{ margin: 0, color: "#ffffff", fontSize: "18px" }}>🏆 GHI NHẬN TỶ SỐ TRẬN ĐẤU</h3>
+              <button type="button" className="modal-close-btn" onClick={() => setMatchScoreModal(null)}>✕</button>
+            </div>
+            <form onSubmit={handleSubmitMatchScore} style={{ marginTop: "16px" }}>
+              <p style={{ fontSize: "13px", color: "#94a3b8", margin: "0 0 16px" }}>
+                Nhập tỷ số thực tế giữa 2 đội. Hệ thống sẽ tự động cập nhật điểm ELO và thứ hạng trên BXH!
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "12px", alignItems: "center", textAlign: "center", marginBottom: "20px" }}>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: 800, color: "#38bdf8", marginBottom: "6px" }}>{matchScoreModal.teamName}</div>
+                  <input
+                    type="number"
+                    min={0}
+                    max={30}
+                    value={scoreTeamA}
+                    onChange={(e) => setScoreTeamA(Number(e.target.value))}
+                    style={{ width: "70px", height: "48px", fontSize: "24px", fontWeight: 800, textAlign: "center", margin: "0 auto" }}
+                  />
+                </div>
+                <span style={{ fontSize: "20px", fontWeight: 900, color: "#94a3b8" }}>-</span>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: 800, color: "#f59e0b", marginBottom: "6px" }}>{matchScoreModal.matchedBy || "FC Đối Thủ"}</div>
+                  <input
+                    type="number"
+                    min={0}
+                    max={30}
+                    value={scoreTeamB}
+                    onChange={(e) => setScoreTeamB(Number(e.target.value))}
+                    style={{ width: "70px", height: "48px", fontSize: "24px", fontWeight: 800, textAlign: "center", margin: "0 auto" }}
+                  />
+                </div>
+              </div>
+              <div style={{ background: "rgba(50, 157, 210, 0.1)", border: "1px solid rgba(50, 157, 210, 0.3)", borderRadius: "8px", padding: "10px", fontSize: "12px", color: "#cbd5e1", marginBottom: "16px" }}>
+                Quy tắc ELO: Thắng (+25 ELO) · Hòa (+5 ELO) · Thua (-15 ELO).
+              </div>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button type="submit" className="primary-button" style={{ flex: 1, padding: "12px" }}>
+                  ✓ Xác nhận tỷ số &amp; Tính ELO
+                </button>
+                <button type="button" className="outline-button" style={{ padding: "12px 16px" }} onClick={() => setMatchScoreModal(null)}>
+                  Hủy
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

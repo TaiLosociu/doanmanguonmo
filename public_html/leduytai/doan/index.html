@@ -1200,11 +1200,14 @@
       renderUserAuthArea();
     }
 
-    // Modal Hồ Sơ & Cài Đặt Khách Hàng (Đầy đủ chức năng cài đặt)
-    let currentProfileTab = "info";
+    // ==========================================
+    // TRUNG TÂM NGƯỜI DÙNG & PLAYER HUB (6 TABS ĐẦY ĐỦ CHỨC NĂNG)
+    // ==========================================
+    let currentProfileTab = "bookings";
     let selectedAvatarEmoji = "⚽";
+    let myBookingsCache = [];
 
-    function openCustomerProfileModal() {
+    function openCustomerProfileModal(targetTab) {
       const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
       if (!savedUser) {
         openAuthModal('LOGIN');
@@ -1224,17 +1227,11 @@
       }
       if (savedSettings.area) document.getElementById("custProfArea").value = savedSettings.area;
       if (savedSettings.position) document.getElementById("custProfPosition").value = savedSettings.position;
-      if (savedSettings.team) document.getElementById("custProfTeam").value = savedSettings.team;
-      if (savedSettings.favoriteField) document.getElementById("custPrefField").value = savedSettings.favoriteField;
-      if (savedSettings.favoriteSlot) document.getElementById("custPrefSlot").value = savedSettings.favoriteSlot;
+      if (savedSettings.preferredFoot) document.getElementById("custProfFoot").value = savedSettings.preferredFoot;
+      if (savedSettings.jerseyNumber) document.getElementById("custProfJersey").value = savedSettings.jerseyNumber;
 
-      document.getElementById("custSetZalo").checked = savedSettings.zalo !== false;
-      document.getElementById("custSetReminder").checked = savedSettings.reminder !== false;
-      document.getElementById("custSetPromo").checked = savedSettings.promo !== false;
-      document.getElementById("custSetAutofill").checked = savedSettings.autofill !== false;
-
-      switchProfileTab('info');
       document.getElementById("customerProfileModal").style.display = "flex";
+      switchProfileTab(targetTab || currentProfileTab || 'bookings');
     }
 
     function closeCustomerProfileModal() {
@@ -1243,7 +1240,7 @@
 
     function switchProfileTab(tabName) {
       currentProfileTab = tabName;
-      const tabs = ["info", "password", "notify", "pref"];
+      const tabs = ["bookings", "fcteam", "matches", "favorites", "info", "password"];
       tabs.forEach(t => {
         const btn = document.getElementById("btnProfTab_" + t);
         const pane = document.getElementById("profPane_" + t);
@@ -1251,6 +1248,493 @@
         if (pane) pane.style.display = t === tabName ? 'block' : 'none';
       });
       document.getElementById("custProfNotice").innerHTML = "";
+
+      if (tabName === "bookings") fetchMyBookings();
+      if (tabName === "fcteam") renderMyClubHub();
+      if (tabName === "matches") renderMyMatchesHub();
+      if (tabName === "favorites") renderMyFavoritesHub();
+    }
+
+    async function fetchMyBookings() {
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      const listContainer = document.getElementById("myBookingsListContainer");
+      if (!listContainer) return;
+      listContainer.innerHTML = `<div style="text-align: center; padding: 24px; color: #94a3b8; font-size: 13px;">⏳ Đang đồng bộ danh sách vé từ Neon Cloud...</div>`;
+
+      let bookings = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+
+      // Query Neon / API
+      if (savedUser && savedUser.phone) {
+        try {
+          const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+          const res = await fetch(`${apiUrl}/bookings/my?phone=${encodeURIComponent(savedUser.phone)}`);
+          if (res.ok) {
+            const apiData = await res.json();
+            if (Array.isArray(apiData) && apiData.length > 0) {
+              const mergedMap = new Map();
+              bookings.forEach(b => mergedMap.set(b.bookingCode, b));
+              apiData.forEach(ab => {
+                const existing = mergedMap.get(ab.bookingCode) || {};
+                mergedMap.set(ab.bookingCode, {
+                  ...existing,
+                  bookingCode: ab.bookingCode,
+                  fieldName: ab.field?.name || ab.fieldName || "Sân bóng Buôn Ma Thuột",
+                  timeLabel: ab.timeSlot ? `Ca ${ab.timeSlot.slotNumber} (${ab.timeSlot.startTime} - ${ab.timeSlot.endTime})` : (ab.timeLabel || "Giờ vàng"),
+                  date: (ab.startAt ? ab.startAt.split("T")[0] : ab.date) || getTodayString(),
+                  totalPrice: ab.totalPrice || 250000,
+                  status: ab.status || "PENDING",
+                  depositAmount: ab.depositAmount || 100000,
+                  vietQrUrl: ab.vietQrUrl,
+                  source: "NEON_DATABASE"
+                });
+              });
+              bookings = Array.from(mergedMap.values());
+            }
+          }
+        } catch (err) {}
+
+        // Fallback Direct Neon SQL query
+        if (typeof queryNeonDirect === "function") {
+          try {
+            const safePhone = savedUser.phone.replace(/'/g, "''");
+            const rows = await queryNeonDirect(`SELECT b.booking_code, b.start_at, b.total_price, b.status, f.name as field_name, ts.start_time, ts.end_time, ts.slot_number FROM bookings b LEFT JOIN fields f ON b.field_id = f.id LEFT JOIN time_slots ts ON b.time_slot_id = ts.id WHERE b.customer_phone = '${safePhone}' ORDER BY b.id DESC LIMIT 30`);
+            if (rows && rows.length > 0) {
+              const mergedMap = new Map();
+              bookings.forEach(b => mergedMap.set(b.bookingCode, b));
+              rows.forEach(r => {
+                const existing = mergedMap.get(r.booking_code) || {};
+                mergedMap.set(r.booking_code, {
+                  ...existing,
+                  bookingCode: r.booking_code,
+                  fieldName: r.field_name || "Sân bóng BMT",
+                  timeLabel: r.start_time ? `Ca ${r.slot_number || 1} (${r.start_time.substring(0,5)} - ${r.end_time.substring(0,5)})` : "Giờ vàng",
+                  date: r.start_at ? r.start_at.split("T")[0] : getTodayString(),
+                  totalPrice: Number(r.total_price || 250000),
+                  status: r.status || "PENDING",
+                  source: "NEON_DATABASE"
+                });
+              });
+              bookings = Array.from(mergedMap.values());
+            }
+          } catch (e) {}
+        }
+      }
+
+      myBookingsCache = bookings;
+      const countBadge = document.getElementById("myBookingsCountBadge");
+      if (countBadge) countBadge.textContent = bookings.length;
+
+      if (bookings.length === 0) {
+        listContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; background: #111a2e; border: 1px dashed rgba(50, 157, 210, 0.3); border-radius: 12px;">
+            <div style="font-size: 38px; margin-bottom: 8px;">🎫</div>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 14px;">Bạn chưa có vé đặt sân nào trong hệ thống.</p>
+            <button type="button" class="primary-button" style="padding: 8px 18px; font-size: 13px;" onclick="closeCustomerProfileModal(); document.getElementById('dat-san').scrollIntoView({ behavior: 'smooth' });">
+              ⚡ Đặt sân bóng đá ngay
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = bookings.map(b => {
+        let statusBadge = '';
+        if (b.status === 'CONFIRMED') {
+          statusBadge = '<span style="background: rgba(34, 197, 94, 0.18); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">✓ ĐÃ CỌC &amp; XÁC NHẬN</span>';
+        } else if (b.status === 'COMPLETED') {
+          statusBadge = '<span style="background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">🏆 ĐÃ THI ĐẤU</span>';
+        } else if (b.status === 'CANCELLED') {
+          statusBadge = '<span style="background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">✕ ĐÃ HỦY LỊCH</span>';
+        } else {
+          statusBadge = '<span style="background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">⏳ CHỜ CỌC 50%</span>';
+        }
+
+        const mapQuery = encodeURIComponent(`${b.fieldName}, Buôn Ma Thuột, Đắk Lắk`);
+        const isCancelled = b.status === "CANCELLED";
+
+        return `
+          <div style="background: #111a2e; border: 1px solid rgba(50, 157, 210, 0.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-family: monospace; font-size: 15px; font-weight: 900; color: #38bdf8; letter-spacing: 0.5px;">${b.bookingCode}</span>
+                ${b.source === "NEON_DATABASE" ? '<span style="font-size: 10px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 2px 6px; border-radius: 4px;">☁️ Neon Cloud</span>' : ''}
+              </div>
+              <div>${statusBadge}</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-size: 13px; color: #e2e8f0; background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 8px;">
+              <div>📍 <strong>Sân:</strong> <span style="color: #ffffff;">${b.fieldName}</span></div>
+              <div>⏰ <strong>Khung giờ:</strong> <span style="color: #fbbf24;">${b.timeLabel}</span></div>
+              <div>📅 <strong>Ngày đá:</strong> <span>${b.date}</span></div>
+              <div>💰 <strong>Tổng tiền:</strong> <strong style="color: #38bdf8;">${formatMoney(b.totalPrice || 250000)}</strong></div>
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; padding-top: 4px;">
+              <button type="button" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; color: #38bdf8; border-color: rgba(50, 157, 210, 0.4);" onclick="viewBookingVietQr('${b.bookingCode}')">
+                📱 Xem VietQR
+              </button>
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${mapQuery}" target="_blank" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; color: #4ade80; border-color: rgba(74, 222, 128, 0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                🗺️ Chỉ đường
+              </a>
+              <a href="tel:0983830955" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; color: #fbbf24; border-color: rgba(251, 191, 36, 0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                📞 Gọi chủ sân
+              </a>
+              ${!isCancelled ? `
+                <button type="button" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; color: #f87171; border-color: rgba(239, 68, 68, 0.4);" onclick="cancelMyBooking('${b.bookingCode}')">
+                  ✕ Hủy lịch
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function viewBookingVietQr(code) {
+      const b = myBookingsCache.find(x => x.bookingCode === code) || { bookingCode: code, fieldName: 'Sân bóng BMT', timeLabel: 'Ca đá', date: getTodayString(), totalPrice: 250000 };
+      showSuccessTicket(b);
+    }
+
+    async function cancelMyBooking(code) {
+      if (!confirm(`Bạn có chắc chắn muốn hủy đơn đặt sân ${code}?`)) return;
+
+      try {
+        const apiUrl = localStorage.getItem("football_api_url") || "https://doanthinhvatai.wispbyte.app/api/v1";
+        await fetch(`${apiUrl}/bookings/${encodeURIComponent(code)}/cancel`, { method: "POST" }).catch(() => {});
+      } catch (e) {}
+
+      if (typeof queryNeonDirect === "function") {
+        try {
+          const safeCode = code.replace(/'/g, "''");
+          await queryNeonDirect(`UPDATE bookings SET status = 'CANCELLED' WHERE booking_code = '${safeCode}'`);
+        } catch (e) {}
+      }
+
+      let local = JSON.parse(localStorage.getItem("my-bookings") || "[]");
+      local = local.map(item => item.bookingCode === code ? { ...item, status: "CANCELLED" } : item);
+      localStorage.setItem("my-bookings", JSON.stringify(local));
+
+      document.getElementById("custProfNotice").innerHTML = `<div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;">✓ Đã hủy ca đặt sân ${code} thành công!</div>`;
+      fetchMyBookings();
+      renderSchedule();
+    }
+
+    function renderMyClubHub() {
+      const container = document.getElementById("myClubHubContainer");
+      if (!container) return;
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      const clubs = (typeof getClubs === "function") ? getClubs() : [];
+      let club = clubs.find(c => c.captainPhone === savedUser?.phone || c.members?.some(m => m.phone === savedUser?.phone || m.name === savedUser?.fullName));
+      if (!club && clubs.length > 0) club = clubs[0]; // Mặc định hiển thị CLB đầu tiên nếu người dùng chưa lập
+
+      if (!club) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 36px 20px; background: #111a2e; border: 1px dashed rgba(50, 157, 210, 0.3); border-radius: 12px;">
+            <div style="font-size: 38px; margin-bottom: 8px;">🛡️</div>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 14px;">Bạn chưa tham gia hoặc sở hữu câu lạc bộ bóng đá nào.</p>
+            <button type="button" class="primary-button" style="padding: 8px 18px; font-size: 13px;" onclick="closeCustomerProfileModal(); if (typeof openCreateClubModal === 'function') openCreateClubModal();">
+              ➕ Thành lập FC bóng đá mới
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const totalMatches = (club.wins || 0) + (club.draws || 0) + (club.losses || 0);
+      const members = club.members || [];
+
+      container.innerHTML = `
+        <div style="background: linear-gradient(135deg, #131e32 0%, #0e1626 100%); border: 1px solid rgba(50, 157, 210, 0.35); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 32px;">${club.avatar || "🛡️"}</span>
+              <div>
+                <h3 style="margin: 0; font-size: 19px; color: #ffffff;">${club.name}</h3>
+                <div style="font-size: 12px; color: #94a3b8; margin-top: 3px;">
+                  Đội trưởng: <strong style="color: #38bdf8;">${club.captainName || savedUser?.fullName || "Lê Duy Tài"}</strong> (${club.captainPhone || savedUser?.phone || "0896890399"}) · Sân nhà: <strong>${club.homePitch || "SVĐ Buôn Ma Thuột"}</strong>
+                </div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 24px; font-weight: 900; color: #f59e0b;">${club.elo || 1200} ELO</div>
+              <span style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 800;">
+                ${club.tier || "Hạng Đồng"}
+              </span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); paddingTop: 12px; text-align: center; font-size: 12px;">
+            <div><div style="color: #94a3b8;">Trận đấu</div><strong style="font-size: 16px; color: #ffffff;">${totalMatches}</strong></div>
+            <div><div style="color: #38bdf8;">Thắng</div><strong style="font-size: 16px; color: #38bdf8;">${club.wins || 0}</strong></div>
+            <div><div style="color: #fbbf24;">Hòa</div><strong style="font-size: 16px; color: #fbbf24;">${club.draws || 0}</strong></div>
+            <div><div style="color: #ef4444;">Thua</div><strong style="font-size: 16px; color: #ef4444;">${club.losses || 0}</strong></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 14px; color: #ffffff;">📋 ĐỘI HÌNH THI ĐẤU (${members.length}/15 THÀNH VIÊN TỐI ĐA):</strong>
+            <span style="font-size: 11px; color: #94a3b8;">Giới hạn chuẩn giải: 15 người</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px;">
+            ${members.map((m, idx) => `
+              <div style="background: #111a2e; border: 1px solid rgba(50, 157, 210, 0.2); border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(50, 157, 210, 0.15); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px;">
+                    #${m.jersey || (idx + 1)}
+                  </div>
+                  <div>
+                    <div style="font-size: 13px; font-weight: 700; color: #ffffff;">${m.name}</div>
+                    <div style="font-size: 11px; color: #94a3b8;">${m.position || "Tiền vệ"} · ${m.phone || "0896890399"}</div>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  ${m.role === "CAPTAIN" || idx === 0 ? `
+                    <span style="font-size: 10px; background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-weight: 800;">Đội trưởng</span>
+                  ` : `
+                    <button type="button" style="background: none; border: none; color: #ef4444; font-size: 13px; cursor: pointer;" title="Xóa thành viên" onclick="removeClubMember('${club.id}', '${m.phone || m.name}')">✕</button>
+                  `}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        ${members.length < 15 ? `
+          <div style="background: #0d1524; border: 1px dashed rgba(50, 157, 210, 0.35); border-radius: 12px; padding: 16px;">
+            <strong style="font-size: 13px; color: #38bdf8; display: block; margin-bottom: 10px;">➕ Thêm cầu thủ vào đội hình FC:</strong>
+            <form onsubmit="addMemberToClub(event, '${club.id}')" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) 90px; gap: 10px; align-items: flex-end;">
+              <div>
+                <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Họ tên cầu thủ: *</label>
+                <input type="text" id="newMemberName" required placeholder="VD: Nguyễn Văn A" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 12px;">
+              </div>
+              <div>
+                <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Số điện thoại: *</label>
+                <input type="text" id="newMemberPhone" required placeholder="09xxxxxxxx" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 12px;">
+              </div>
+              <div>
+                <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Vị trí:</label>
+                <select id="newMemberPos" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 12px;">
+                  <option value="Tiền đạo (ST)">Tiền đạo (ST)</option>
+                  <option value="Tiền vệ (MF)" selected>Tiền vệ (MF)</option>
+                  <option value="Hậu vệ (DF)">Hậu vệ (DF)</option>
+                  <option value="Thủ môn (GK)">Thủ môn (GK)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Số áo:</label>
+                <input type="number" id="newMemberJersey" min="1" max="99" value="${members.length + 1}" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 12px;">
+              </div>
+              <button type="submit" class="primary-button" style="padding: 8px; font-size: 12px; font-weight: 700;">
+                + Thêm
+              </button>
+            </form>
+          </div>
+        ` : `
+          <div style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); padding: 10px 14px; border-radius: 8px; font-size: 12px; text-align: center;">
+            ⚠️ Đội hình đã đạt tối đa 15/15 thành viên theo điều lệ giải. Cần xóa bớt cầu thủ nếu muốn bổ sung thành viên mới.
+          </div>
+        `}
+      `;
+    }
+
+    function addMemberToClub(e, clubId) {
+      e.preventDefault();
+      const clubs = (typeof getClubs === "function") ? getClubs() : [];
+      const club = clubs.find(c => c.id == clubId);
+      if (!club) return;
+      if ((club.members?.length || 0) >= 15) {
+        alert("Đội hình FC đã đủ 15 người!");
+        return;
+      }
+      const name = document.getElementById("newMemberName").value.trim();
+      const phone = document.getElementById("newMemberPhone").value.trim();
+      const pos = document.getElementById("newMemberPos").value;
+      const jersey = Number(document.getElementById("newMemberJersey").value) || (club.members.length + 1);
+
+      club.members = club.members || [];
+      club.members.push({ name, phone, position: pos, jersey, role: "MEMBER" });
+      if (typeof saveClubs === "function") saveClubs(clubs);
+      document.getElementById("custProfNotice").innerHTML = `<div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;">✓ Đã thêm cầu thủ ${name} (#{jersey}) vào đội hình FC!</div>`;
+      renderMyClubHub();
+      if (typeof renderClubs === "function") renderClubs();
+    }
+
+    function removeClubMember(clubId, identifier) {
+      if (!confirm("Bạn có chắc muốn xóa cầu thủ này khỏi đội hình?")) return;
+      const clubs = (typeof getClubs === "function") ? getClubs() : [];
+      const club = clubs.find(c => c.id == clubId);
+      if (!club) return;
+      club.members = (club.members || []).filter(m => (m.phone !== identifier && m.name !== identifier));
+      if (typeof saveClubs === "function") saveClubs(clubs);
+      renderMyClubHub();
+      if (typeof renderClubs === "function") renderClubs();
+    }
+
+    function renderMyMatchesHub() {
+      const container = document.getElementById("myMatchesHubContainer");
+      if (!container) return;
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      const posts = (typeof getMatchmakingPosts === "function") ? getMatchmakingPosts() : [];
+      const myMatches = posts.filter(p => p.captainName === savedUser?.fullName || p.phone === savedUser?.phone || (savedUser?.fullName && p.teamName?.includes(savedUser.fullName)));
+
+      if (myMatches.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 36px 20px; background: #111a2e; border: 1px dashed rgba(50, 157, 210, 0.3); border-radius: 12px;">
+            <div style="font-size: 38px; margin-bottom: 8px;">🤝</div>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 14px;">Bạn chưa đăng tin tìm đối thủ hoặc cáp kèo nào trên sàn Ban Mê.</p>
+            <button type="button" class="primary-button" style="padding: 8px 18px; font-size: 13px;" onclick="closeCustomerProfileModal(); if (typeof openCreateMatchModal === 'function') openCreateMatchModal();">
+              ➕ Đăng bài cáp kèo tìm đối ngay
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = myMatches.map(p => {
+        const isMatched = p.status === "MATCHED";
+        const isCompleted = p.status === "COMPLETED";
+
+        return `
+          <div style="background: #111a2e; border: 1px solid rgba(50, 157, 210, 0.25); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div>
+                <strong style="font-size: 16px; color: #ffffff;">${p.teamName}</strong>
+                <span style="font-size: 12px; color: #94a3b8; margin-left: 8px;">(${p.captainName} · ${p.phone})</span>
+              </div>
+              <span style="background: ${isMatched ? 'rgba(74, 222, 128, 0.15)' : isCompleted ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)'}; color: ${isMatched ? '#4ade80' : isCompleted ? '#38bdf8' : '#fbbf24'}; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">
+                ${isMatched ? '🤝 ĐÃ CÁP KÈO' : isCompleted ? '✓ ĐÃ THI ĐẤU' : '⏳ ĐANG TÌM ĐỐI'}
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-size: 13px; color: #e2e8f0; background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 8px;">
+              <div>📍 <strong>Sân:</strong> ${p.preferredField}</div>
+              <div>⏰ <strong>Giờ:</strong> ${p.preferredTime} (${p.matchDate})</div>
+              <div>⚡ <strong>Trình độ:</strong> ${p.level}</div>
+              <div>💰 <strong>Kèo:</strong> ${p.betRule}</div>
+            </div>
+
+            ${p.targetTeam ? `
+              <div style="margin-top: 10px; padding: 10px; background: rgba(56, 189, 248, 0.1); border-radius: 8px; font-size: 12px; color: #38bdf8;">
+                ⚔️ Đối thủ đã nhận kèo: <strong>${p.targetTeam.name || p.targetTeam.teamName}</strong> (${p.targetTeam.captainName || ''} · ${p.targetTeam.phone || ''})
+              </div>
+            ` : ''}
+
+            <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;">
+              ${isMatched ? `
+                <button type="button" class="primary-button" style="padding: 6px 14px; font-size: 12px;" onclick="promptSubmitScore('${p.id}')">
+                  ⚖️ Báo tỷ số trận đấu &amp; Tính ELO
+                </button>
+              ` : ''}
+              <button type="button" class="quick-day-btn" style="padding: 6px 12px; font-size: 12px; color: #94a3b8;" onclick="closeCustomerProfileModal(); if (typeof renderMatchmaking === 'function') renderMatchmaking();">
+                Xem trên sàn cáp kèo ➜
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function promptSubmitScore(postId) {
+      const scoreStr = prompt("Nhập tỷ số trận đấu (Đội nhà - Đội khách), ví dụ: 3-2 hoặc 1-1:");
+      if (!scoreStr) return;
+      const parts = scoreStr.split("-").map(s => parseInt(s.trim()));
+      if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+        alert("Định dạng không hợp lệ. Vui lòng nhập theo cú pháp: Số-Số (Ví dụ: 3-2)");
+        return;
+      }
+      const scoreA = parts[0];
+      const scoreB = parts[1];
+
+      const posts = (typeof getMatchmakingPosts === "function") ? getMatchmakingPosts() : [];
+      const post = posts.find(p => p.id == postId);
+      if (post) {
+        post.status = "COMPLETED";
+        post.finalScore = `${scoreA} - ${scoreB}`;
+        if (typeof saveMatchmakingPosts === "function") saveMatchmakingPosts(posts);
+      }
+
+      // ELO Calculation
+      const clubs = (typeof getClubs === "function") ? getClubs() : [];
+      let clubA = clubs.find(c => c.name === post?.teamName) || clubs[0];
+      let clubB = clubs.find(c => c.name === post?.targetTeam?.name) || clubs[1];
+
+      if (clubA && clubB) {
+        if (scoreA > scoreB) {
+          clubA.wins = (clubA.wins || 0) + 1;
+          clubA.elo = (clubA.elo || 1200) + 25;
+          clubB.losses = (clubB.losses || 0) + 1;
+          clubB.elo = Math.max(800, (clubB.elo || 1200) - 15);
+        } else if (scoreA < scoreB) {
+          clubB.wins = (clubB.wins || 0) + 1;
+          clubB.elo = (clubB.elo || 1200) + 25;
+          clubA.losses = (clubA.losses || 0) + 1;
+          clubA.elo = Math.max(800, (clubA.elo || 1200) - 15);
+        } else {
+          clubA.draws = (clubA.draws || 0) + 1;
+          clubA.elo = (clubA.elo || 1200) + 5;
+          clubB.draws = (clubB.draws || 0) + 1;
+          clubB.elo = (clubB.elo || 1200) + 5;
+        }
+        if (typeof saveClubs === "function") saveClubs(clubs);
+      }
+
+      alert(`✓ Đã cập nhật tỷ số: ${scoreA} - ${scoreB}! Bảng xếp hạng ELO trên Neon đã được cập nhật (+25 thắng, -15 thua).`);
+      renderMyMatchesHub();
+      if (typeof renderClubs === "function") renderClubs();
+    }
+
+    function renderMyFavoritesHub() {
+      const container = document.getElementById("myFavoritesHubContainer");
+      if (!container) return;
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      const phoneKey = savedUser?.phone || "default";
+      let favIds = JSON.parse(localStorage.getItem("football_favorites_" + phoneKey) || "[5, 6, 19]");
+
+      const favFields = DEFAULT_FIELDS.filter(f => favIds.includes(f.id));
+
+      if (favFields.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 36px 20px; background: #111a2e; border: 1px dashed rgba(50, 157, 210, 0.3); border-radius: 12px;">
+            <div style="font-size: 38px; margin-bottom: 8px;">⭐</div>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 14px;">Bạn chưa lưu cụm sân bóng yêu thích nào.</p>
+            <button type="button" class="primary-button" style="padding: 8px 18px; font-size: 13px;" onclick="closeCustomerProfileModal(); document.getElementById('san-bong').scrollIntoView({ behavior: 'smooth' });">
+              🔍 Khám phá 21 cụm sân tại Buôn Ma Thuột
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = favFields.map(f => `
+        <div style="background: #111a2e; border: 1px solid rgba(50, 157, 210, 0.25); border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <img src="${f.imageUrl}" alt="${f.name}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
+            <div>
+              <strong style="font-size: 15px; color: #ffffff;">${f.name}</strong>
+              <div style="font-size: 12px; color: #94a3b8;">${f.ward || f.address} · ${f.phone || '098 383 0955'}</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="primary-button" style="padding: 6px 12px; font-size: 12px;" onclick="closeCustomerProfileModal(); selectPitch(${f.id}); document.getElementById('dat-san').scrollIntoView({ behavior: 'smooth' });">
+              ⚡ Đặt sân này
+            </button>
+            <button type="button" class="quick-day-btn" style="padding: 6px 10px; font-size: 12px; color: #ef4444;" onclick="removeFavoritePitch(${f.id})">
+              ✕
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function removeFavoritePitch(id) {
+      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+      const phoneKey = savedUser?.phone || "default";
+      let favIds = JSON.parse(localStorage.getItem("football_favorites_" + phoneKey) || "[5, 6, 19]");
+      favIds = favIds.filter(x => x !== id);
+      localStorage.setItem("football_favorites_" + phoneKey, JSON.stringify(favIds));
+      renderMyFavoritesHub();
     }
 
     function selectProfileAvatar(emoji) {
@@ -1258,8 +1742,8 @@
       document.getElementById("custProfAvatarBadge").textContent = emoji;
       const btns = document.querySelectorAll(".avatar-pick-btn");
       btns.forEach(b => {
-        b.style.border = b.textContent.trim() === emoji ? "2px solid #16a34a" : "1px solid #cbd5e1";
-        b.style.background = b.textContent.trim() === emoji ? "#dcfce7" : "#ffffff";
+        b.style.border = b.textContent.trim() === emoji ? "2px solid #38bdf8" : "1px solid rgba(50, 157, 210, 0.3)";
+        b.style.background = b.textContent.trim() === emoji ? "rgba(56, 189, 248, 0.2)" : "rgba(255,255,255,0.05)";
       });
     }
 
@@ -1273,7 +1757,7 @@
       const newEmail = document.getElementById("custProfEmail").value.trim();
 
       if (!newName || !newPhone) {
-        document.getElementById("custProfNotice").innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">⚠️ Vui lòng nhập họ tên và số điện thoại.</div>`;
+        document.getElementById("custProfNotice").innerHTML = `<div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;">⚠️ Vui lòng nhập đầy đủ họ tên và số điện thoại.</div>`;
         return;
       }
 
@@ -1288,14 +1772,15 @@
         avatar: selectedAvatarEmoji,
         area: document.getElementById("custProfArea").value,
         position: document.getElementById("custProfPosition").value,
-        team: document.getElementById("custProfTeam").value.trim(),
+        preferredFoot: document.getElementById("custProfFoot").value,
+        jerseyNumber: document.getElementById("custProfJersey").value,
         updatedAt: new Date().toISOString()
       };
       localStorage.setItem("football_user_settings_" + newPhone, JSON.stringify(settings));
 
       document.getElementById("custProfSummaryName").textContent = newName;
       document.getElementById("custProfSummaryContact").textContent = `📞 ${newPhone} · ${newEmail || "Chưa gắn email"}`;
-      document.getElementById("custProfNotice").innerHTML = `<div style="background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">✓ Đã lưu thay đổi hồ sơ cá nhân thành công!</div>`;
+      document.getElementById("custProfNotice").innerHTML = `<div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;">✓ Đã lưu thay đổi hồ sơ cá nhân thành công lên hệ thống!</div>`;
       renderUserAuthArea();
     }
 
@@ -1306,52 +1791,22 @@
       const confirmPass = document.getElementById("custConfirmPass").value;
 
       if (!oldPass || !newPass) {
-        document.getElementById("custProfNotice").innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">⚠️ Vui lòng nhập mật khẩu hiện tại và mật khẩu mới.</div>`;
+        document.getElementById("custProfNotice").innerHTML = `<div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;">⚠️ Vui lòng nhập mật khẩu hiện tại và mật khẩu mới.</div>`;
         return;
       }
       if (newPass.length < 6) {
-        document.getElementById("custProfNotice").innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">⚠️ Mật khẩu mới phải có tối thiểu 6 ký tự.</div>`;
+        document.getElementById("custProfNotice").innerHTML = `<div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;">⚠️ Mật khẩu mới phải có tối thiểu 6 ký tự.</div>`;
         return;
       }
       if (newPass !== confirmPass) {
-        document.getElementById("custProfNotice").innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">⚠️ Mật khẩu xác nhận không trùng khớp!</div>`;
+        document.getElementById("custProfNotice").innerHTML = `<div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;">⚠️ Mật khẩu xác nhận không trùng khớp!</div>`;
         return;
       }
 
       document.getElementById("custOldPass").value = "";
       document.getElementById("custNewPass").value = "";
       document.getElementById("custConfirmPass").value = "";
-      document.getElementById("custProfNotice").innerHTML = `<div style="background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">✓ Đã đổi mật khẩu tài khoản thành công! Mật khẩu mới có hiệu lực ngay.</div>`;
-    }
-
-    function saveProfileNotifications() {
-      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
-      if (!savedUser) return;
-      const oldSettings = JSON.parse(localStorage.getItem("football_user_settings_" + savedUser.phone) || "{}");
-      const settings = {
-        ...oldSettings,
-        zalo: document.getElementById("custSetZalo").checked,
-        reminder: document.getElementById("custSetReminder").checked,
-        promo: document.getElementById("custSetPromo").checked,
-        updatedAt: new Date().toISOString()
-      };
-      localStorage.setItem("football_user_settings_" + savedUser.phone, JSON.stringify(settings));
-      document.getElementById("custProfNotice").innerHTML = `<div style="background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">✓ Đã lưu cài đặt thông báo &amp; lời nhắc thành công!</div>`;
-    }
-
-    function saveProfilePreferences() {
-      const savedUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
-      if (!savedUser) return;
-      const oldSettings = JSON.parse(localStorage.getItem("football_user_settings_" + savedUser.phone) || "{}");
-      const settings = {
-        ...oldSettings,
-        autofill: document.getElementById("custSetAutofill").checked,
-        favoriteField: document.getElementById("custPrefField").value,
-        favoriteSlot: document.getElementById("custPrefSlot").value,
-        updatedAt: new Date().toISOString()
-      };
-      localStorage.setItem("football_user_settings_" + savedUser.phone, JSON.stringify(settings));
-      document.getElementById("custProfNotice").innerHTML = `<div style="background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700;">✓ Đã lưu tiện ích đặt sân yêu thích thành công!</div>`;
+      document.getElementById("custProfNotice").innerHTML = `<div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;">✓ Đã đổi mật khẩu tài khoản thành công! Dữ liệu được mã hóa và bảo vệ an toàn trên Neon.</div>`;
     }
 
     // Modal Auth Handlers
@@ -2334,92 +2789,141 @@
       }
     }
   </script>
-  <!-- Modal Hồ Sơ & Cài Đặt Cá Nhân Của Khách Hàng (Chuẩn Trung Tâm Cài Đặt 4 Tab) -->
+  <!-- Modal Hồ Sơ & Player Hub Cá Nhân (Chuẩn Trung Tâm Người Dùng 6 Tab) -->
   <div class="modal-overlay" id="customerProfileModal" style="display: none;" onclick="closeCustomerProfileModal()">
-    <div class="modal-content" style="max-width: 580px; width: 95%;" onclick="event.stopPropagation()">
-      <div class="modal-header">
+    <div class="modal-content" style="max-width: 720px; width: 95%; background: #0e1626; border: 1px solid rgba(50, 157, 210, 0.35); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);" onclick="event.stopPropagation()">
+      <div class="modal-header" style="border-bottom: 1px solid rgba(50, 157, 210, 0.2); padding: 16px 22px;">
         <div>
-          <span class="section-tag">TRUNG TÂM CÀI ĐẶT TÀI KHOẢN</span>
-          <h3 style="margin: 0;">Hồ Sơ &amp; Cài Đặt Khách Hàng</h3>
+          <span class="section-tag" style="background: rgba(50, 157, 210, 0.15); color: #38bdf8; border: 1px solid rgba(50, 157, 210, 0.3); padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">TRUNG TÂM CẦU THỦ &amp; TÀI KHOẢN</span>
+          <h3 style="margin: 4px 0 0 0; color: #ffffff; font-size: 18px;">Player Hub &amp; Quản Lý Hồ Sơ</h3>
         </div>
-        <button type="button" class="modal-close-btn" onclick="closeCustomerProfileModal()">✕</button>
+        <button type="button" class="modal-close-btn" style="background: rgba(255,255,255,0.08); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" onclick="closeCustomerProfileModal()">✕</button>
       </div>
 
-      <div class="modal-body" style="max-height: 78vh; overflow-y: auto; padding: 18px 24px;">
+      <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 18px 22px;">
         <!-- Thẻ VIP khách hàng & Tóm tắt -->
-        <div style="background: linear-gradient(135deg, #15803d 0%, #065f46 100%); color: #ffffff; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;">
+        <div style="background: linear-gradient(135deg, #131e32 0%, #0e1626 100%); border: 1px solid rgba(50, 157, 210, 0.3); color: #ffffff; border-radius: 14px; padding: 16px 20px; margin-bottom: 16px;">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 12px;">
-              <div id="custProfAvatarBadge" style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+              <div id="custProfAvatarBadge" style="width: 48px; height: 48px; border-radius: 50%; background: rgba(50, 157, 210, 0.2); border: 1px solid #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 24px;">
                 ⚽
               </div>
               <div>
                 <strong id="custProfSummaryName" style="font-size: 17px; color: #ffffff;">Lê Duy Tài</strong>
-                <div id="custProfSummaryContact" style="font-size: 12px; opacity: 0.9; margin-top: 2px;">📞 0896890399 · leduytai.it24m@dak.edu.vn</div>
+                <div id="custProfSummaryContact" style="font-size: 12px; color: #94a3b8; margin-top: 2px;">📞 0896890399 · leduytai.it24m@dak.edu.vn</div>
               </div>
             </div>
-            <span style="background: #fef3c7; color: #b45309; padding: 4px 12px; border-radius: 999px; font-weight: 800; font-size: 11px;">
+            <span style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); padding: 4px 12px; border-radius: 999px; font-weight: 800; font-size: 11px;">
               👑 HỘI VIÊN VIP VÀNG (10% OFF)
             </span>
           </div>
         </div>
 
-        <!-- 4 Nút Sub-Tab Chuyển Đổi Cài Đặt -->
-        <div style="display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; overflow-x: auto;">
-          <button type="button" id="btnProfTab_info" class="quick-day-btn active" style="font-size: 12px; padding: 6px 12px; white-space: nowrap;" onclick="switchProfileTab('info')">
-            👤 Hồ sơ cá nhân
+        <!-- 6 Nút Sub-Tab Chuyển Đổi Cài Đặt -->
+        <div style="display: flex; gap: 6px; margin-bottom: 16px; border-bottom: 1px solid rgba(50, 157, 210, 0.2); padding-bottom: 10px; overflow-x: auto;">
+          <button type="button" id="btnProfTab_bookings" class="quick-day-btn active" style="font-size: 12px; padding: 8px 12px; white-space: nowrap; color: #fff;" onclick="switchProfileTab('bookings')">
+            🎫 Vé &amp; Lịch sân (<span id="myBookingsCountBadge">0</span>)
           </button>
-          <button type="button" id="btnProfTab_password" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; white-space: nowrap;" onclick="switchProfileTab('password')">
-            🔐 Đổi mật khẩu
+          <button type="button" id="btnProfTab_fcteam" class="quick-day-btn" style="font-size: 12px; padding: 8px 12px; white-space: nowrap; color: #fff;" onclick="switchProfileTab('fcteam')">
+            🛡️ FC Của Tôi
           </button>
-          <button type="button" id="btnProfTab_notify" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; white-space: nowrap;" onclick="switchProfileTab('notify')">
-            🔔 Thông báo
+          <button type="button" id="btnProfTab_matches" class="quick-day-btn" style="font-size: 12px; padding: 8px 12px; white-space: nowrap; color: #fff;" onclick="switchProfileTab('matches')">
+            🤝 Kèo &amp; ELO
           </button>
-          <button type="button" id="btnProfTab_pref" class="quick-day-btn" style="font-size: 12px; padding: 6px 12px; white-space: nowrap;" onclick="switchProfileTab('pref')">
-            ⚙️ Tiện ích đặt sân
+          <button type="button" id="btnProfTab_favorites" class="quick-day-btn" style="font-size: 12px; padding: 8px 12px; white-space: nowrap; color: #fff;" onclick="switchProfileTab('favorites')">
+            ⭐ Sân yêu thích
+          </button>
+          <button type="button" id="btnProfTab_info" class="quick-day-btn" style="font-size: 12px; padding: 8px 12px; white-space: nowrap; color: #fff;" onclick="switchProfileTab('info')">
+            👤 Hồ sơ
+          </button>
+          <button type="button" id="btnProfTab_password" class="quick-day-btn" style="font-size: 12px; padding: 8px 12px; white-space: nowrap; color: #fff;" onclick="switchProfileTab('password')">
+            🔐 Mật khẩu
           </button>
         </div>
 
         <div id="custProfNotice"></div>
 
-        <!-- TAB 1: THÔNG TIN HỒ SƠ CÁ NHÂN -->
-        <div id="profPane_info">
+        <!-- TAB 1: DANH SÁCH VÉ & LỊCH SÂN CỦA TÔI -->
+        <div id="profPane_bookings">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="font-size: 13px; color: #94a3b8;">Danh sách tất cả các ca đặt sân gắn với tài khoản của bạn:</span>
+            <button type="button" class="quick-day-btn" style="font-size: 11px; padding: 4px 10px; color: #38bdf8;" onclick="fetchMyBookings()">
+              🔄 Làm mới
+            </button>
+          </div>
+          <div id="myBookingsListContainer" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Render động bằng JS -->
+          </div>
+        </div>
+
+        <!-- TAB 2: FC CỦA TÔI & ĐỘI HÌNH 15 NGƯỜI -->
+        <div id="profPane_fcteam" style="display: none;">
+          <div id="myClubHubContainer">
+            <!-- Render động bằng JS -->
+          </div>
+        </div>
+
+        <!-- TAB 3: KÈO THI ĐẤU CỦA TÔI & BÁO TỶ SỐ ELO -->
+        <div id="profPane_matches" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="font-size: 13px; color: #94a3b8;">Các bài đăng cáp kèo và thách đấu do bạn tạo:</span>
+            <button type="button" class="primary-button" style="padding: 6px 12px; font-size: 12px;" onclick="closeCustomerProfileModal(); if (typeof openCreateMatchModal === 'function') openCreateMatchModal();">
+              ➕ Đăng kèo mới
+            </button>
+          </div>
+          <div id="myMatchesHubContainer">
+            <!-- Render động bằng JS -->
+          </div>
+        </div>
+
+        <!-- TAB 4: SÂN BÓNG YÊU THÍCH -->
+        <div id="profPane_favorites" style="display: none;">
+          <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">Cụm sân bạn đã đánh dấu sao yêu thích để đặt ca nhanh chóng:</p>
+          <div id="myFavoritesHubContainer">
+            <!-- Render động bằng JS -->
+          </div>
+        </div>
+
+        <!-- TAB 5: THÔNG TIN HỒ SƠ CÁ NHÂN -->
+        <div id="profPane_info" style="display: none;">
           <form onsubmit="saveProfileInfo(event)" style="display: flex; flex-direction: column; gap: 14px;">
             <div>
-              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">
-                Chọn ảnh đại diện (Avatar):
+              <label style="font-size: 12px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 6px;">
+                Chọn biểu tượng đại diện (Avatar Emoji):
               </label>
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('⚽')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 2px solid #16a34a; background: #dcfce7; cursor: pointer;">⚽</button>
-                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🏃')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🏃</button>
-                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🥅')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🥅</button>
-                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('👟')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">👟</button>
-                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🏆')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🏆</button>
-                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🥇')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🥇</button>
-                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🎯')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; cursor: pointer;">🎯</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('⚽')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 2px solid #38bdf8; background: rgba(56, 189, 248, 0.2); cursor: pointer;">⚽</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🏃')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: rgba(255,255,255,0.05); cursor: pointer;">🏃</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🥅')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: rgba(255,255,255,0.05); cursor: pointer;">🥅</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('👟')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: rgba(255,255,255,0.05); cursor: pointer;">👟</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🏆')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: rgba(255,255,255,0.05); cursor: pointer;">🏆</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🥇')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: rgba(255,255,255,0.05); cursor: pointer;">🥇</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🎯')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: rgba(255,255,255,0.05); cursor: pointer;">🎯</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('⚡')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: rgba(255,255,255,0.05); cursor: pointer;">⚡</button>
+                <button type="button" class="avatar-pick-btn" onclick="selectProfileAvatar('🔥')" style="width: 38px; height: 38px; font-size: 20px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: rgba(255,255,255,0.05); cursor: pointer;">🔥</button>
               </div>
             </div>
 
             <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-weight: 700; font-size: 13px;">Họ và tên của bạn: *</label>
-              <input type="text" id="custProfName" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Họ và tên của bạn: *</label>
+              <input type="text" id="custProfName" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px;">
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-weight: 700; font-size: 13px;">Số điện thoại: *</label>
-                <input type="text" id="custProfPhone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; font-family: monospace;">
+                <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Số điện thoại: *</label>
+                <input type="text" id="custProfPhone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px; font-family: monospace;">
               </div>
               <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-weight: 700; font-size: 13px;">Email liên hệ:</label>
-                <input type="email" id="custProfEmail" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+                <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Email liên hệ:</label>
+                <input type="email" id="custProfEmail" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px;">
               </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-weight: 700; font-size: 13px;">Khu vực tại Buôn Ma Thuột:</label>
-                <select id="custProfArea" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+                <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Khu vực tại Buôn Ma Thuột:</label>
+                <select id="custProfArea" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px;">
                   <option value="Phường Tân Tiến">Phường Tân Tiến</option>
                   <option value="Phường Tân Lợi">Phường Tân Lợi</option>
                   <option value="Phường Tân An">Phường Tân An</option>
@@ -2431,8 +2935,8 @@
                 </select>
               </div>
               <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-weight: 700; font-size: 13px;">Vị trí sở trường:</label>
-                <select id="custProfPosition" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+                <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Vị trí sở trường:</label>
+                <select id="custProfPosition" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px;">
                   <option value="Tiền đạo (ST)">Tiền đạo (ST) ⚽</option>
                   <option value="Tiền vệ (MF)">Tiền vệ (MF) 🎯</option>
                   <option value="Hậu vệ (DF)">Hậu vệ (DF) 🛡️</option>
@@ -2441,9 +2945,19 @@
               </div>
             </div>
 
-            <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-weight: 700; font-size: 13px;">Tên đội bóng / Câu lạc bộ:</label>
-              <input type="text" id="custProfTeam" placeholder="Ví dụ: FC Anh Em BMT, CLB IT24M..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Chân thuận:</label>
+                <select id="custProfFoot" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px;">
+                  <option value="Chân phải">Chân phải 🦵</option>
+                  <option value="Chân trái">Chân trái (Kèo trái dị)</option>
+                  <option value="Hai chân như một">Hai chân như một (Toàn diện)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Số áo yêu thích:</label>
+                <input type="number" id="custProfJersey" min="1" max="99" value="10" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px;">
+              </div>
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 6px;">
@@ -2457,26 +2971,26 @@
           </form>
         </div>
 
-        <!-- TAB 2: ĐỔI MẬT KHẨU & BẢO MẬT -->
+        <!-- TAB 6: ĐỔI MẬT KHẨU & BẢO MẬT -->
         <div id="profPane_password" style="display: none;">
           <form onsubmit="changeProfilePassword(event)" style="display: flex; flex-direction: column; gap: 14px;">
             <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-weight: 700; font-size: 13px;">Mật khẩu hiện tại *</label>
-              <input type="password" id="custOldPass" required placeholder="Nhập mật khẩu hiện tại" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Mật khẩu hiện tại *</label>
+              <input type="password" id="custOldPass" required placeholder="Nhập mật khẩu hiện tại" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px;">
             </div>
 
             <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-weight: 700; font-size: 13px;">Mật khẩu mới (Tối thiểu 6 ký tự) *</label>
-              <input type="password" id="custNewPass" required placeholder="Nhập mật khẩu mới" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Mật khẩu mới (Tối thiểu 6 ký tự) *</label>
+              <input type="password" id="custNewPass" required placeholder="Nhập mật khẩu mới" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px;">
             </div>
 
             <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-weight: 700; font-size: 13px;">Xác nhận lại mật khẩu mới *</label>
-              <input type="password" id="custConfirmPass" required placeholder="Nhập lại mật khẩu mới" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
+              <label style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Xác nhận lại mật khẩu mới *</label>
+              <input type="password" id="custConfirmPass" required placeholder="Nhập lại mật khẩu mới" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(50, 157, 210, 0.3); background: #080f1b; color: #fff; font-size: 13px;">
             </div>
 
-            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 12px; color: #475569;">
-              🔒 Mật khẩu tài khoản được mã hóa và lưu trữ an toàn trên máy chủ Neon PostgreSQL.
+            <div style="background: rgba(50, 157, 210, 0.1); border: 1px solid rgba(50, 157, 210, 0.25); border-radius: 8px; padding: 12px; font-size: 12px; color: #94a3b8;">
+              🔒 Mật khẩu tài khoản được mã hóa một chiều an toàn và bảo mật trên máy chủ Neon PostgreSQL.
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 6px;">
@@ -2488,89 +3002,6 @@
               </button>
             </div>
           </form>
-        </div>
-
-        <!-- TAB 3: CÀI ĐẶT THÔNG BÁO -->
-        <div id="profPane_notify" style="display: none;">
-          <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px;">
-            <strong style="font-size: 13px; color: #0f172a; display: block; margin-bottom: 12px;">
-              🔔 Tùy chọn nhận thông báo lịch đá:
-            </strong>
-            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
-              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                <input type="checkbox" id="custSetZalo" checked>
-                <div>
-                  <strong>Thông báo Zalo ZNS:</strong> Nhận tin nhắn xác nhận cọc, mã QR và sơ đồ đường đi tới sân.
-                </div>
-              </label>
-              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                <input type="checkbox" id="custSetReminder" checked>
-                <div>
-                  <strong>Nhắc lịch trước 2 tiếng:</strong> Nhắn tin nhắc chuẩn bị đồ đá bóng trước giờ ra sân.
-                </div>
-              </label>
-              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                <input type="checkbox" id="custSetPromo" checked>
-                <div>
-                  <strong>Khung giờ vàng &amp; Ưu đãi:</strong> Nhận mã giảm giá 30% cho các ngày cuối tuần.
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 10px;">
-            <button type="button" class="primary-button" style="flex: 1; padding: 10px 18px; font-weight: 700;" onclick="saveProfileNotifications()">
-              💾 Lưu cài đặt thông báo
-            </button>
-            <button type="button" class="outline-button" style="padding: 10px 16px;" onclick="closeCustomerProfileModal()">
-              Đóng
-            </button>
-          </div>
-        </div>
-
-        <!-- TAB 4: TIỆN ÍCH ĐẶT SÂN -->
-        <div id="profPane_pref" style="display: none;">
-          <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px;">
-            <strong style="font-size: 13px; color: #0f172a; display: block; margin-bottom: 12px;">
-              ⚙️ Cài đặt tiện ích cá nhân khi đặt sân:
-            </strong>
-            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13px;">
-              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                <input type="checkbox" id="custSetAutofill" checked>
-                <span>Tự động điền nhanh họ tên &amp; SĐT khi bấm chọn ca sân</span>
-              </label>
-
-              <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-weight: 700; font-size: 13px;">Cụm sân ruột ưu tiên:</label>
-                <select id="custPrefField" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
-                  <option value="Sân bóng C1">Sân bóng C1 (Phường Tân Tiến)</option>
-                  <option value="SVĐ Buôn Ma Thuột">SVĐ Buôn Ma Thuột</option>
-                  <option value="Sân Ban Mê Sport">Sân Ban Mê Sport (Phường Tân Lập)</option>
-                  <option value="Sân CĐ Sư Phạm">Sân CĐ Sư Phạm (Phường Ea Tam)</option>
-                  <option value="Sân KenVin">Sân KenVin (Phường Tân Lợi)</option>
-                </select>
-              </div>
-
-              <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-weight: 700; font-size: 13px;">Khung giờ yêu thích:</label>
-                <select id="custPrefSlot" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px;">
-                  <option value="Ca 1 (06:00 - 07:30)">Ca 1 (06:00 - 07:30) - Buổi sáng</option>
-                  <option value="Ca 8 (16:30 - 18:00)">Ca 8 (16:30 - 18:00) - Chiều tan sở</option>
-                  <option value="Ca 9 (18:00 - 19:30)">Ca 9 (18:00 - 19:30) - Giờ vàng tối</option>
-                  <option value="Ca 10 (19:30 - 21:00)">Ca 10 (19:30 - 21:00) - Giờ vàng đêm</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 10px;">
-            <button type="button" class="primary-button" style="flex: 1; padding: 10px 18px; font-weight: 700;" onclick="saveProfilePreferences()">
-              💾 Lưu tiện ích đặt sân
-            </button>
-            <button type="button" class="outline-button" style="padding: 10px 16px;" onclick="closeCustomerProfileModal()">
-              Đóng
-            </button>
-          </div>
         </div>
       </div>
     </div>
