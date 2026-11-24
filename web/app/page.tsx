@@ -1090,7 +1090,6 @@ export default function Home() {
   const [createMatchOpen, setCreateMatchOpen] = useState<boolean>(false);
   const [acceptMatchOpen, setAcceptMatchOpen] = useState<boolean>(false);
   const [activeMatchToAccept, setActiveMatchToAccept] = useState<MatchmakingPost | null>(null);
-  const [hostingModalOpen, setHostingModalOpen] = useState<boolean>(false);
 
   // Form Đăng tin
   const [cmTeam, setCmTeam] = useState<string>("");
@@ -2268,53 +2267,6 @@ export default function Home() {
           </nav>
 
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {/* Nút Xem Bản Hosting Thầy Port 8080 */}
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-              <button
-                type="button"
-                onClick={() => setHostingModalOpen(true)}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "6px 14px",
-                  borderRadius: "999px",
-                  border: "1px solid rgba(56, 189, 248, 0.4)",
-                  background: "rgba(56, 189, 248, 0.12)",
-                  color: "#38bdf8",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-                title="Nhấn để xem trực tiếp bản Web Hosting của Thầy (Port 8080 / public_html)"
-              >
-                <span>🌐</span>
-                <span>Bản Hosting Thầy (8080)</span>
-              </button>
-              <a
-                href="http://localhost:8080/"
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "50%",
-                  border: "1px solid rgba(56, 189, 248, 0.3)",
-                  background: "rgba(56, 189, 248, 0.1)",
-                  color: "#38bdf8",
-                  fontSize: "12px",
-                  textDecoration: "none",
-                }}
-                title="Mở bản Port 8080 trong Tab mới ↗"
-              >
-                ↗
-              </a>
-            </div>
-
             {/* Nút Viên Thuốc Trạng Thái Kết Nối API Wispbyte & Neon */}
             <button
               type="button"
@@ -2445,28 +2397,7 @@ export default function Home() {
             <a href="#bang-gia" onClick={() => setMobileMenuOpen(false)}>💰 Bảng giá</a>
             <a href="/lookup" onClick={() => setMobileMenuOpen(false)}>🔍 Tra cứu vé đặt sân</a>
             <Link href="/cv" onClick={() => setMobileMenuOpen(false)} style={{ color: "#38bdf8", fontWeight: "700" }}>👨‍💻 Hồ sơ CV &amp; Bài tập 1 ↗</Link>
-            <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setHostingModalOpen(true);
-                }}
-                className="outline-button"
-                style={{ flex: 1, padding: "8px 12px", fontSize: "12px", color: "#38bdf8", fontWeight: "700" }}
-              >
-                🌐 Xem Bản Hosting (8080)
-              </button>
-              <a
-                href="http://localhost:8080/"
-                target="_blank"
-                rel="noreferrer"
-                className="btn-accent-red"
-                style={{ padding: "8px 14px", fontSize: "12px", textDecoration: "none", fontWeight: "800" }}
-              >
-                Mở Tab ↗
-              </a>
-            </div>
+
           </div>
         )}
       </header>
@@ -5960,109 +5891,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL: XEM BẢN WEB HOSTING CỦA THẦY (PORT 8080) */}
-      {hostingModalOpen && (
-        <div
-          className="modal-backdrop"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setHostingModalOpen(false);
-          }}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(3, 7, 18, 0.85)",
-            backdropFilter: "blur(8px)",
-            zIndex: 99999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "16px",
-          }}
-        >
-          <div
-            className="modal-card"
-            style={{
-              width: "100%",
-              maxWidth: "1240px",
-              height: "92vh",
-              display: "flex",
-              flexDirection: "column",
-              background: "#0e1626",
-              border: "1px solid var(--border)",
-              borderRadius: "16px",
-              boxShadow: "0 25px 70px rgba(0, 0, 0, 0.7)",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "16px 20px",
-                borderBottom: "1px solid var(--border)",
-                background: "var(--surface-alt)",
-                flexWrap: "wrap",
-                gap: "10px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span style={{ fontSize: "24px" }}>🌐</span>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: "16px", color: "#ffffff", fontWeight: 800 }}>
-                    Bản Web Tĩnh Hosting của Thầy (Cổng 8080 &amp; public_html cPanel)
-                  </h3>
-                  <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--text-muted)" }}>
-                    Đang xem trực tiếp từ: <code style={{ color: "#38bdf8" }}>http://localhost:8080/leduytai/doan/</code>
-                  </p>
-                </div>
-              </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <a
-                  href="http://localhost:8080/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn-accent-red"
-                  style={{
-                    padding: "8px 16px",
-                    fontSize: "12px",
-                    fontWeight: 800,
-                    textDecoration: "none",
-                    borderRadius: "8px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
-                >
-                  <span>🚀</span> Mở Tab Mới Cổng 8080 ↗
-                </a>
-                <button
-                  type="button"
-                  onClick={() => setHostingModalOpen(false)}
-                  className="outline-button"
-                  style={{ padding: "8px 14px", fontSize: "13px", borderRadius: "8px" }}
-                >
-                  ✕ Đóng Popup
-                </button>
-              </div>
-            </div>
-
-            <div style={{ flex: 1, position: "relative", background: "#080f1b" }}>
-              <iframe
-                src="http://localhost:8080/leduytai/doan/"
-                title="Bản Hosting Thầy Port 8080"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  border: "none",
-                  display: "block",
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );
