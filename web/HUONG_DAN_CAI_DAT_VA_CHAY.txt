@@ -1,0 +1,49 @@
+================================================================================
+                    ĐỒ ÁN TỐT NGHIỆP / BÁO CÁO MÔN HỌC
+               HỆ THỐNG ĐẶT SÂN BÓNG ĐÁ TRỰC TUYẾN - SÂN NHÀ FC
+================================================================================
+
+1. GIỚI THIỆU DỰ ÁN:
+   - Tên hệ thống: SÂN NHÀ FC (Mini Football Booking & Matching Platform)
+   - Nền tảng: Next.js 15, React 19, TypeScript, Tailwind CSS
+   - Cơ sở dữ liệu: Neon Cloud PostgreSQL (Đã tích hợp sẵn kết nối trực tiếp đám mây)
+   - Tính năng chính:
+     + Đặt sân trực tuyến 21 cụm sân bóng đá phủ khắp TP. Buôn Ma Thuột
+     + Bản đồ Radar GPS định vị sân gần nhất theo tọa độ thực tế
+     + Sàn Cáp Kèo & Tuyển Cầu Thủ trực tuyến (Tạo kèo, đăng tin, nhận đối, đồng bộ Cloud Neon DB)
+     + Quản lý câu lạc bộ (FC) & Đội hình ra sân 15 cầu thủ
+     + Tra cứu vé đặt sân, quét mã VietQR tự động
+     + Bảng giá sân, quy trình đặt sân chuẩn hóa
+
+2. YÊU CẦU MÔI TRƯỜNG:
+   - Node.js version 18 trở lên (Khuyến nghị Node.js 20 hoặc 22)
+   - Trình duyệt web hiện đại: Chrome, Edge, Firefox, Safari
+
+3. CÁCH CÀI ĐẶT VÀ KHỞI CHẠY (DÀNH CHO THẦY CÔ / NGƯỜI ĐÁNH GIÁ):
+
+   --- CÁCH 1: KHỞI CHẠY BẰNG 1 CLICK (TRÊN WINDOWS) ---
+   - Nhấp đúp chuột vào file: `chay_web.bat`
+   - File sẽ tự động cài đặt thư viện (nếu chưa có) và khởi động web trên cổng 3001.
+
+   --- CÁCH 2: CHẠY BẰNG DÒNG LỆNH (TERMINAL / CMD / POWERSHELL) ---
+   Bước 1: Mở thư mục dự án trong Terminal
+   Bước 2: Cài đặt các gói phụ thuộc:
+      npm install
+
+   Bước 3: Khởi chạy môi trường phát triển (Development):
+      npm run dev
+      Hoặc chạy bản tối ưu sản phẩm (Production):
+      npm run build
+      npm run start
+
+   Bước 4: Truy cập hệ thống trên trình duyệt:
+      http://localhost:3001
+
+4. CẤU HÌNH CƠ SỞ DỮ LIỆU:
+   - Hệ thống đã tích hợp sẵn chuỗi kết nối Neon PostgreSQL Cloud (không cần cấu hình thêm bất kỳ phần mềm database local nào).
+   - Tệp .env.local đã được đính kèm sẵn.
+
+5. THÔNG TIN SINH VIÊN THỰC HIỆN:
+   - Sinh viên: Lê Duy Tài
+   - Dự án: Đồ án Mã Nguồn Mở - Website Sân Nhà FC
+================================================================================
