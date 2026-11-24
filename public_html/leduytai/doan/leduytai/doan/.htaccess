@@ -1,0 +1,35 @@
+# Cấu hình máy chủ Apache / cPanel cho Đồ Án Lê Duy Tài
+# Đường dẫn: /leduytai/doan/
+
+AddDefaultCharset UTF-8
+
+<IfModule mod_mime.c>
+  AddType text/html .html .htm
+  AddType text/css .css
+  AddType application/javascript .js
+  AddType image/svg+xml .svg
+  AddType image/webp .webp
+  AddType image/png .png
+  AddType image/jpeg .jpg .jpeg
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /leduytai/doan/
+  
+  # Không rewrite nếu file hoặc thư mục thực tế tồn tại
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Định tuyến các request không khớp về index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Cho phép CORS
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+  Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE, PATCH"
+  Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+</IfModule>
+
