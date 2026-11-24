@@ -5615,12 +5615,12 @@ export default function Home() {
     
       {/* MODAL: ĐĂNG TIN CÁP KÈO / TÌM ĐỐI */}
       {createMatchOpen && (
-        <div className="modal-backdrop" style={{ display: "flex" }}>
-          <div className="modal-card" style={{ maxWidth: "520px", maxHeight: "90vh", overflowY: "auto" }}>
+        <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setCreateMatchOpen(false); }}>
+          <div className="modal-card" style={{ maxWidth: "540px", maxHeight: "90vh", overflowY: "auto" }}>
             <div className="modal-header">
               <div>
-                <h3 style={{ fontSize: "18px", margin: 0, color: "#0f172a" }}>➕ Đăng tin tìm đối giao lưu</h3>
-                <p style={{ fontSize: "12px", color: "#64748b", margin: "2px 0 0 0" }}>Đăng kèo thi đấu lên sàn phủi Ban Mê để các đội bắt đối</p>
+                <h3 style={{ fontSize: "18px", margin: 0, color: "#ffffff", fontWeight: 800 }}>➕ Đăng tin tìm đối giao lưu</h3>
+                <p style={{ fontSize: "12px", color: "#94a3b8", margin: "4px 0 0 0" }}>Đăng kèo thi đấu lên sàn phủi Ban Mê để các đội bắt đối (Lưu Neon Cloud)</p>
               </div>
               <button type="button" className="modal-close" onClick={() => setCreateMatchOpen(false)}>✕</button>
             </div>
@@ -5845,12 +5845,12 @@ export default function Home() {
 
       {/* MODAL: BẮT ĐỐI / NHẬN KÈO */}
       {acceptMatchOpen && activeMatchToAccept && (
-        <div className="modal-backdrop" style={{ display: "flex" }}>
-          <div className="modal-card" style={{ maxWidth: "460px" }}>
+        <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setAcceptMatchOpen(false); }}>
+          <div className="modal-card" style={{ maxWidth: "480px" }}>
             <div className="modal-header">
               <div>
-                <h3 style={{ fontSize: "18px", margin: 0, color: "#0f172a" }}>🤝 Xác nhận bắt đối giao lưu</h3>
-                <p style={{ fontSize: "12px", color: "#64748b", margin: "2px 0 0 0" }}>Cáp kèo thi đấu với đội bạn</p>
+                <h3 style={{ fontSize: "18px", margin: 0, color: "#ffffff", fontWeight: 800 }}>🤝 Xác nhận bắt đối giao lưu</h3>
+                <p style={{ fontSize: "12px", color: "#94a3b8", margin: "4px 0 0 0" }}>Cáp kèo thi đấu với đội bạn</p>
               </div>
               <button type="button" className="modal-close" onClick={() => setAcceptMatchOpen(false)}>✕</button>
             </div>

@@ -823,35 +823,84 @@ button {
 }
 
 /* Booking Modal / Dialog */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(5, 10, 18, 0.85);
-  backdrop-filter: blur(8px);
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  animation: fadeIn 0.2s ease-out;
+.modal-overlay,
+.modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(5, 10, 18, 0.88) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  animation: fadeIn 0.2s ease-out !important;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.modal-content,
+.modal-card {
+  background: #0e1626 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(50, 157, 210, 0.35) !important;
+  border-radius: 20px !important;
+  max-width: 540px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(50, 157, 210, 0.15) !important;
+  animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative !important;
 }
 
-.modal-content {
-  background: var(--surface);
-  color: var(--text-main);
-  border-radius: var(--radius-lg);
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(50, 157, 210, 0.15);
-  border: 1px solid var(--border);
-  animation: slideUp 0.25s ease-out;
+.modal-card input,
+.modal-card select,
+.modal-card textarea {
+  background: #080f1b !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(50, 157, 210, 0.3) !important;
+  border-radius: 8px !important;
+  font-family: inherit !important;
+}
+
+.modal-card input:focus,
+.modal-card select:focus,
+.modal-card textarea:focus {
+  border-color: #38bdf8 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+}
+
+.modal-card label {
+  color: #94a3b8 !important;
+}
+
+.modal-close {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #94a3b8 !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+.modal-close:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+  border-color: #ef4444 !important;
+}
+
+@keyframes modalScaleUp {
+  0% { transform: scale(0.92); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes slideUp {
