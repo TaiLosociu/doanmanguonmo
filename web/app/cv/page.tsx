@@ -8,7 +8,7 @@ export default function CVPage() {
       {/* Top action bar */}
       <div className="cv-nav-bar">
         <Link href="/" className="cv-btn-back">
-          <span>←</span> Quay lại Trang Đặt Sân
+          <span>🏠</span> Về Trang Chủ Chính (Sân Nhà FC)
         </Link>
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <a
@@ -17,7 +17,7 @@ export default function CVPage() {
             rel="noreferrer"
             className="cv-btn-online"
           >
-            <span>🌐</span> CV Lê Duy Tài (it24m.dak.edu.vn) ↗
+            <span>📚</span> Xem Bài Tập 1 (Portfolio) ↗
           </a>
           <a
             href="https://cv-landing-page-peach.vercel.app/"

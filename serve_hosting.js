@@ -19,7 +19,7 @@ const MIME_TYPES = {
 
 const server = http.createServer((req, res) => {
   let reqPath = decodeURI(req.url.split('?')[0]);
-  if (reqPath === '/' || reqPath === '') {
+  if (reqPath === '/' || reqPath === '' || reqPath === '/leduytai' || reqPath === '/leduytai/') {
     res.writeHead(302, { 'Location': '/leduytai/doan/' });
     return res.end();
   }

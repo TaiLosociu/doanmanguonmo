@@ -2261,7 +2261,8 @@ export default function Home() {
             </div>
             <div className="nav-group-pill">
               <a href="#bang-gia" title="Bảng giá chuẩn các loại sân">💰 Bảng giá</a>
-              <a href="/lookup" title="Tra cứu mã phiếu đặt sân">🔍 Tra cứu vé</a>
+              <a href="/lookup" title="Tra cứu mã phiếu đặt sân">🎫 Tra cứu vé</a>
+              <Link href="/cv" title="Hồ sơ năng lực & CV sinh viên Lê Duy Tài (Trang con bên trong)" style={{ color: "#38bdf8", fontWeight: "700" }}>👨‍💻 Hồ sơ CV</Link>
             </div>
           </nav>
 
@@ -2395,6 +2396,7 @@ export default function Home() {
             <a href="#hoi-nhom" onClick={() => setMobileMenuOpen(false)}>🛡️ FC &amp; Leo rank ELO</a>
             <a href="#bang-gia" onClick={() => setMobileMenuOpen(false)}>💰 Bảng giá</a>
             <a href="/lookup" onClick={() => setMobileMenuOpen(false)}>🔍 Tra cứu vé đặt sân</a>
+            <Link href="/cv" onClick={() => setMobileMenuOpen(false)} style={{ color: "#38bdf8", fontWeight: "700" }}>👨‍💻 Hồ sơ CV &amp; Bài tập 1 ↗</Link>
           </div>
         )}
       </header>
