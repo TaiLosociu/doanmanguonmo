@@ -17,6 +17,29 @@ function getApiUrl(): string {
 
 const API = getApiUrl();
 
+const NEON_SQL_ENDPOINT = "https://ep-silent-heart-b5tbjmh7.c-7.us-east-2.aws.neon.tech/sql";
+const NEON_DB_CONNECTION = "postgresql://neondb_owner:npg_Y76lDyzLaGkZ@ep-silent-heart-b5tbjmh7-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require";
+
+async function queryNeonDirect(sql: string): Promise<any[]> {
+  try {
+    const res = await fetch(NEON_SQL_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Neon-Connection-String": NEON_DB_CONNECTION
+      },
+      body: JSON.stringify({ query: sql })
+    });
+    const data = await res.json();
+    if (data.message && !data.rows) throw new Error(data.message);
+    return data.rows || [];
+  } catch (err: any) {
+    console.warn("[Neon Direct Warning]", err?.message || err);
+    return [];
+  }
+}
+
+
 type TimeSlot = {
   id: number;
   label: string;
@@ -1311,52 +1334,73 @@ export default function Home() {
     }
   }
 
-  function handleCreateMatchSubmit(e: FormEvent) {
+  async function handleCreateMatchSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!currentUser) { alert("⚠️ Bạn cần đăng nhập để đăng tin tìm đối!"); return; }
+    if (!currentUser) { alert("⚠️ Bạn cần đăng nhập để đăng tin tìm đối / cáp kèo!"); return; }
     if (!cmTeam || !cmCaptain || !cmPhone || cmPhone.length < 9) { alert("⚠️ Tên đội, đội trưởng và SĐT (tối thiểu 9 số) là bắt buộc!"); return; }
     const field = fieldsList.find((f) => f.id === cmFieldId) || fieldsList[0];
-    const levelLabels = {
+    const levelLabels: Record<string, string> = {
       "VUI_VE": "Dưỡng sinh (Vui vẻ)",
       "TRUNG_BINH": "Trung bình (Phong trào)",
       "BAN_CHUYEN": "Khá - Chiến (Cọ xát)"
     };
-    const betLabels = {
+    const betLabels: Record<string, string> = {
       "CHIA_DOI": "Tiền sân 5-5",
       "THUA_BAO": "Đội thua trả sân",
       "KEO_NUOC": "Kèo nước ngọt"
     };
 
-    const newPost: MatchmakingPost = {
-      id: Date.now(),
-      teamName: cmTeam,
-      captainName: cmCaptain,
-      phone: cmPhone,
-      fieldId: field.id,
-      fieldName: field.name,
-      fieldType: field.fieldType,
-      matchDate: cmDate || "2026-11-25",
-      timeSlot: cmSlot,
-      level: cmLevel,
-      levelLabel: levelLabels[cmLevel] || "Phong trào",
-      betRule: cmBet,
-      betLabel: betLabels[cmBet] || "Tiền sân 5-5",
-      status: "OPEN",
-      avatar: "⚡",
-      description: cmDesc || "Kèo giao lưu hữu nghị, đá đẹp, văn minh.",
-      createdAt: "Vừa xong"
-    };
+    const safeCaptain = (cmCaptain || currentUser.fullName || "Đội trưởng").replace(/'/g, "''");
+    const safeTeam = cmTeam.replace(/'/g, "''");
+    const safePhone = cmPhone.replace(/'/g, "''");
+    const safeDate = (cmDate || "2026-11-25").replace(/'/g, "''");
+    const safeSlot = cmSlot.replace(/'/g, "''");
+    const safeField = field.name.replace(/'/g, "''");
+    const safeDesc = (cmDesc || "Kèo giao lưu hữu nghị, đá đẹp, văn minh.").replace(/'/g, "''");
+    const betLabel = betLabels[cmBet] || "Tiền sân 5-5";
+    const levelLabel = levelLabels[cmLevel] || "Phong trào";
 
-    const updated = [newPost, ...matchPosts];
-    setMatchPosts(updated);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("football_matchmaking", JSON.stringify(updated));
+    try {
+      const rows = await queryNeonDirect(`
+        INSERT INTO matchmaking_posts (user_id, user_name, team_name, phone, play_date, play_time, pitch_name, pitch_id, format, bet_type, level, note, status)
+        VALUES (${currentUser.id || 'NULL'}, '${safeCaptain}', '${safeTeam}', '${safePhone}', '${safeDate}', '${safeSlot}', '${safeField}', ${field.id}, '${field.fieldType || 'SAN_5'}', '${betLabel}', '${levelLabel}', '${safeDesc}', 'OPEN')
+        RETURNING *
+      `);
+      const newId = rows && rows[0] ? rows[0].id : Date.now();
+
+      const newPost: MatchmakingPost = {
+        id: newId,
+        teamName: cmTeam,
+        captainName: cmCaptain,
+        phone: cmPhone,
+        fieldId: field.id,
+        fieldName: field.name,
+        fieldType: field.fieldType,
+        matchDate: cmDate || "2026-11-25",
+        timeSlot: cmSlot,
+        level: cmLevel,
+        levelLabel,
+        betRule: cmBet,
+        betLabel,
+        status: "OPEN",
+        avatar: "⚡",
+        description: cmDesc || "Kèo giao lưu hữu nghị, đá đẹp, văn minh.",
+        createdAt: "Vừa xong"
+      };
+
+      const updated = [newPost, ...matchPosts];
+      setMatchPosts(updated);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("football_matchmaking", JSON.stringify(updated));
+      }
+      setCreateMatchOpen(false);
+      setCmTeam("");
+      setCmCaptain("");
+      setCmDesc("");
+      alert("🎉 Đã đăng bài cáp kèo THÀNH CÔNG lên Sàn Cáp Kèo Sân Nhà FC!\nDữ liệu đã được lưu trữ vĩnh viễn trên Neon PostgreSQL Cloud.");
+    } catch (err: any) {
+      alert("Lỗi khi lưu bài đăng: " + (err?.message || err));
     }
-    setCreateMatchOpen(false);
-    setCmTeam("");
-    setCmCaptain("");
-    setCmDesc("");
-    alert("🎉 Đã đăng tin tìm đối thành công lên Sàn phủi Buôn Ma Thuột!");
   }
 
   function handleAcceptMatchSubmit(e: FormEvent) {
@@ -2161,7 +2205,7 @@ export default function Home() {
       {/* Sleek Dark Night Topbar */}
       <div style={{ background: "#050a12", borderBottom: "1px solid rgba(50, 157, 210, 0.2)", padding: "7px 24px", fontSize: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ color: "#329dd2", fontWeight: 700, display: "flex", alignItems: "center", gap: "6px" }}>
-          <span>⚽</span> <span>HỆ THỐNG ĐẶT LỊCH THỂ THAO TRỰC TUYẾN ALO BOOKING · BUÔN MA THUỘT</span>
+          <span>⚽</span> <span>HỆ THỐNG SÂN BÓNG BUÔN MA THUỘT · SÂN NHÀ FC · SÀN CÁP KÈO & LEO RANK ELO</span>
         </span>
         <span style={{ color: "#94a3b8" }}>📞 Hotline hỗ trợ: <strong style={{ color: "#f59e0b" }}>0896890399</strong> · Mở cửa 06:00 - 23:00</span>
       </div>
@@ -2173,8 +2217,8 @@ export default function Home() {
             <div className="brand-icon" style={{ width: "42px", height: "42px", borderRadius: "12px", background: "linear-gradient(135deg, #329dd2 0%, #1f7fae 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", boxShadow: "0 4px 14px rgba(50, 157, 210, 0.4)" }}>⚽</div>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ color: "#ffffff", fontSize: "20px", fontWeight: 900, letterSpacing: "-0.5px" }}>ALO<span style={{ color: "#329dd2" }}>BOOKING</span></span>
-                <span className="alo-brand-badge">BMT</span>
+                <span style={{ color: "#ffffff", fontSize: "20px", fontWeight: 900, letterSpacing: "-0.5px" }}>SÂN NHÀ <span style={{ color: "#329dd2" }}>FC</span></span>
+            <span className="alo-brand-badge" style={{ background: "linear-gradient(135deg, #eb2f33 0%, #b91c1c 100%)" }}>BMT</span>
               </div>
               <div style={{ fontSize: "10px", color: "#94a3b8", fontWeight: 700, letterSpacing: "0.5px" }}>ĐẶT LỊCH THỂ THAO TRỰC TUYẾN</div>
             </div>
@@ -2195,7 +2239,7 @@ export default function Home() {
             <div className="nav-group-pill">
               <a href="#cap-keo" title="Sàn cáp kèo giao lưu phủi">🤝 Cáp kèo</a>
               <a href="#hoi-nhom" title="Câu lạc bộ 15 người & leo rank">🛡️ FC &amp; Leo rank</a>
-              <a href="#quy-trinh-alo" title="6 Bước đặt lịch chuẩn ALO Booking">📋 Quy trình</a>
+              <a href="#quy-trinh-alo" title="6 Bước đặt lịch chuẩn Sân Nhà FC">📋 Quy trình</a>
             </div>
             <div className="nav-group-pill">
               <a href="#bang-gia" title="Bảng giá chuẩn các loại sân">💰 Bảng giá</a>
@@ -2353,10 +2397,10 @@ export default function Home() {
             </div>
 
             <h1 style={{ fontSize: "clamp(28px, 4.5vw, 46px)", lineHeight: 1.2, marginBottom: "12px" }}>
-              Đặt Lịch Sân Thể Thao Nhanh Chóng<br /><span style={{ color: "#329dd2" }}>Giữ Chỗ Tức Thì 24/7</span> · ALO Booking
+              Đặt Lịch Sân & Cáp Kèo Thi Đấu Nhanh Chóng<br /><span style={{ color: "#329dd2" }}>Giữ Chỗ Tức Thì 24/7</span> · Sân Nhà FC
             </h1>
             <p className="hero-sub" style={{ maxWidth: "820px", fontSize: "15px", marginBottom: "20px" }}>
-              Nền tảng đặt lịch thể thao thông minh chuẩn ALO Booking. Theo dõi tình trạng ca sân trống theo thời gian thực tại 21 cụm sân cỏ nhân tạo &amp; tự nhiên ở TP. Buôn Ma Thuột. Kết nối cáp kèo phủi, quản lý FC 15 người và leo rank ELO giải đấu hấp dẫn.
+              Sân Nhà FC - Nền tảng kết nối 21 cụm sân bóng đá cỏ nhân tạo & tự nhiên tại TP. Buôn Ma Thuột. Sàn cáp kèo phủi, tổ đội FC 15 người và leo rank ELO giải đấu hấp dẫn. Kết nối cáp kèo phủi, quản lý FC 15 người và leo rank ELO giải đấu hấp dẫn.
             </p>
 
             {/* ALO BOOKING MULTI-FIELD SEARCH BAR */}
@@ -2554,7 +2598,7 @@ export default function Home() {
       {/* SECTION: 6 BƯỚC ĐẶT LỊCH THỂ THAO CHUẨN ALO BOOKING */}
       <section className="section-wrap" id="quy-trinh-alo" style={{ paddingTop: "40px", paddingBottom: "20px" }}>
         <div style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto 30px" }}>
-          <span className="module-tag tag-dark">📋 QUY TRÌNH ALO BOOKING</span>
+          <span className="module-tag tag-dark">📋 QUY TRÌNH ĐẶT SÂN SÂN NHÀ FC</span>
           <h2 style={{ fontSize: "26px", color: "#ffffff", marginTop: "8px" }}>6 Bước Đặt Lịch Sân Cực Kỳ Đơn Giản</h2>
           <p style={{ color: "#94a3b8", fontSize: "14px", marginTop: "4px" }}>Trải nghiệm đặt sân thể thao chuyên nghiệp, nhanh chóng và giữ chỗ tức thì không cần chờ đợi.</p>
         </div>

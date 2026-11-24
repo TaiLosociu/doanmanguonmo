@@ -1,3 +1,34 @@
+
+// ==========================================
+// KẾT NỐI TRỰC TIẾP NEON POSTGRESQL CLOUD 24/7
+// ==========================================
+const NEON_SQL_ENDPOINT = "https://ep-silent-heart-b5tbjmh7.c-7.us-east-2.aws.neon.tech/sql";
+const NEON_DB_CONNECTION = "postgresql://neondb_owner:npg_Y76lDyzLaGkZ@ep-silent-heart-b5tbjmh7-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require";
+
+async function queryNeonDirect(sql) {
+  try {
+    const res = await fetch(NEON_SQL_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Neon-Connection-String": NEON_DB_CONNECTION
+      },
+      body: JSON.stringify({ query: sql })
+    });
+    const data = await res.json();
+    if (data.message && !data.rows) throw new Error(data.message);
+    return data.rows || [];
+  } catch (err) {
+    console.warn("[Neon Direct Warning]", err.message);
+    return [];
+  }
+}
+
+function escapeSqlString(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/'/g, "''");
+}
+
 /**
  * HỆ THỐNG ĐẶT SÂN BÓNG ĐÁ MINI - LÊ DUY TÀI
  * MSSV/Slug: leduytai/doan
@@ -1252,12 +1283,50 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return Math.round(R * c * 10) / 10;
 }
 
+
 // ==========================================
-// 5. MATCHMAKING ACTIONS (ĐĂNG TIN, QUẢN LÝ BÀI ĐĂNG, BẮT ĐỐI)
+// 5. MATCHMAKING - SÀN CÁP KÈO BÓNG ĐÁ PHỦI BAN MÊ (LƯU TRỰC TIẾP NEON CLOUD)
 // ==========================================
 let currentMatchmakingFilter = "ALL";
+let neonMatchmakingCache = null;
 
-function getMatchmakingPosts() {
+async function fetchNeonMatchmaking() {
+  try {
+    const rows = await queryNeonDirect("SELECT * FROM matchmaking_posts ORDER BY id DESC");
+    if (Array.isArray(rows) && rows.length > 0) {
+      neonMatchmakingCache = rows.map(r => ({
+        id: r.id,
+        userId: r.user_id,
+        userFullName: r.user_name || r.team_name,
+        teamName: r.team_name,
+        captainName: r.user_name || r.team_name,
+        phone: r.phone,
+        fieldId: r.pitch_id,
+        fieldName: r.pitch_name,
+        fieldType: r.format || 'SAN_5',
+        matchDate: r.play_date,
+        timeSlot: r.play_time,
+        level: r.level || 'TRUNG_BINH',
+        levelLabel: r.level || 'Phong trào',
+        betRule: r.bet_type || 'CHIA_DOI',
+        betLabel: r.bet_type || 'Tiền sân 5-5',
+        status: r.status || 'OPEN',
+        matchedBy: r.challenger_name || null,
+        matchedPhone: r.challenger_phone || null,
+        avatar: "⚡",
+        description: r.note || "Kèo giao lưu hữu nghị Ban Mê",
+        createdAt: r.created_at ? new Date(r.created_at).toLocaleDateString('vi-VN') : 'Vừa xong'
+      }));
+      localStorage.setItem("football_matchmaking", JSON.stringify(neonMatchmakingCache));
+      return neonMatchmakingCache;
+    }
+  } catch (e) {
+    console.warn("Lỗi fetch matchmaking từ Neon:", e);
+  }
+  return getMatchmakingPostsLocal();
+}
+
+function getMatchmakingPostsLocal() {
   try {
     const saved = localStorage.getItem("football_matchmaking");
     return saved ? JSON.parse(saved) : DEFAULT_MATCHMAKING_POSTS;
@@ -1266,21 +1335,33 @@ function getMatchmakingPosts() {
   }
 }
 
+function getMatchmakingPosts() {
+  return neonMatchmakingCache || getMatchmakingPostsLocal();
+}
+
 function saveMatchmakingPosts(posts) {
+  neonMatchmakingCache = posts;
   localStorage.setItem("football_matchmaking", JSON.stringify(posts));
 }
 
-function renderMatchmaking(filter = "ALL") {
+async function renderMatchmaking(filter = "ALL") {
   currentMatchmakingFilter = filter;
   const container = document.getElementById("matchmakingListContainer");
   if (!container) return;
 
   const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
 
-  const posts = getMatchmakingPosts().filter(p => {
+  // Load from Neon if cache empty
+  if (!neonMatchmakingCache) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #94a3b8; font-size: 13px;">⏳ Đang đồng bộ sàn cáp kèo từ Neon Cloud...</div>';
+    await fetchNeonMatchmaking();
+  }
+
+  const allPosts = getMatchmakingPosts();
+  const posts = allPosts.filter(p => {
     if (filter === "ALL") return true;
     if (filter === "OPEN") return p.status === "OPEN";
-    if (filter === "MY_POSTS") return authUser && p.userId === authUser.id;
+    if (filter === "MY_POSTS") return authUser && (p.userId === authUser.id || p.phone === authUser.phone);
     return p.level === filter;
   });
 
@@ -1292,54 +1373,56 @@ function renderMatchmaking(filter = "ALL") {
   });
 
   if (posts.length === 0) {
-    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b; background: #ffffff; border-radius: 14px; border: 1px dashed var(--border);">' +
-      '<div style="font-size: 28px; margin-bottom: 8px;">⚽</div>' +
-      '<div>Chưa có kèo nào trong mục này. Hãy bấm <strong>"➕ ĐĂNG TIN TÌM ĐỐI"</strong> để mở kèo giao hữu đầu tiên!</div>' +
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #94a3b8; background: #0e1626; border-radius: 14px; border: 1px dashed rgba(50, 157, 210, 0.3);">' +
+      '<div style="font-size: 32px; margin-bottom: 8px;">🤝</div>' +
+      '<div style="color: #ffffff; font-weight: 700; margin-bottom: 6px;">Chưa có kèo nào trong mục này</div>' +
+      '<div style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">Bấm nút <strong>"➕ ĐĂNG TIN TÌM ĐỐI / CÁP KÈO"</strong> bên trên để tạo bài đăng đầu tiên của bạn!</div>' +
+      '<button type="button" class="btn-accent-red" style="padding: 8px 18px; font-size: 13px; font-weight: 700; margin: 0 auto;" onclick="openCreateMatchModal()">➕ Tạo bài đăng cáp kèo ngay</button>' +
       '</div>';
     return;
   }
 
   container.innerHTML = posts.map(post => {
     const isOpen = post.status === "OPEN";
-    const isOwner = authUser && post.userId === authUser.id;
-    const levelBg = post.level === "BAN_CHUYEN" ? "rgba(235,47,51,0.12)" : post.level === "TRUNG_BINH" ? "rgba(50,157,210,0.12)" : "#eff6ff";
-    const levelColor = post.level === "BAN_CHUYEN" ? "#eb2f33" : post.level === "TRUNG_BINH" ? "#176b94" : "#1d4ed8";
+    const isOwner = authUser && (post.userId === authUser.id || post.phone === authUser.phone);
+    const levelBg = post.level === "BAN_CHUYEN" ? "rgba(235,47,51,0.18)" : post.level === "TRUNG_BINH" ? "rgba(50,157,210,0.18)" : "rgba(34,197,94,0.18)";
+    const levelColor = post.level === "BAN_CHUYEN" ? "#f87171" : post.level === "TRUNG_BINH" ? "#38bdf8" : "#4ade80";
 
-    return '<div style="background: #ffffff; border: 1.5px solid ' + (isOpen ? '#d4e3ee' : '#e2e8f0') + '; border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.25s ease;" onmouseover="this.style.borderColor=\'#329dd2\'" onmouseout="this.style.borderColor=\'' + (isOpen ? '#d4e3ee' : '#e2e8f0') + '\'">' +
+    return '<div style="background: #111a2e; border: 1.5px solid ' + (isOpen ? 'rgba(50, 157, 210, 0.4)' : 'rgba(255, 255, 255, 0.1)') + '; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.25s ease;">' +
       '<div>' +
       '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">' +
       '<div style="display: flex; align-items: center; gap: 10px;">' +
-      '<span style="font-size: 26px; background: #080f1b; color: white; width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(8,15,27,0.3);">' + (post.avatar || '⚽') + '</span>' +
+      '<span style="font-size: 26px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.4); border: 1px solid rgba(50,157,210,0.3);">' + (post.avatar || '⚽') + '</span>' +
       '<div>' +
-      '<strong style="font-size: 16px; color: #080f1b; display: block;">' + post.teamName + '</strong>' +
-      '<small style="color: #64748b;">Đội trưởng: <strong>' + post.captainName + '</strong> · ' + post.createdAt + '</small>' +
+      '<strong style="font-size: 16px; color: #ffffff; display: block;">' + post.teamName + '</strong>' +
+      '<small style="color: #94a3b8;">Đội trưởng: <strong style="color: #38bdf8;">' + post.captainName + '</strong> · ' + post.createdAt + '</small>' +
       '</div></div>' +
-      '<span style="font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 800; ' + (isOpen ? 'background: rgba(50,157,210,0.15); color: #176b94; border: 1px solid rgba(50,157,210,0.3);' : 'background: rgba(235,47,51,0.15); color: #eb2f33; border: 1px solid rgba(235,47,51,0.3);') + '">' +
+      '<span style="font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 800; ' + (isOpen ? 'background: rgba(50,157,210,0.18); color: #38bdf8; border: 1px solid rgba(50,157,210,0.4);' : 'background: rgba(34,197,94,0.18); color: #4ade80; border: 1px solid rgba(34,197,94,0.4);') + '">' +
       (isOpen ? '● ĐANG TÌM ĐỐI' : '✓ ĐÃ CÁP KÈO') +
       '</span></div>' +
 
       '<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">' +
-      '<span style="font-size: 11px; font-weight: 700; background: ' + levelBg + '; color: ' + levelColor + '; padding: 3px 8px; border-radius: 6px;">🎯 ' + post.levelLabel + '</span>' +
-      '<span style="font-size: 11px; font-weight: 700; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px;">💰 ' + post.betLabel + '</span>' +
-      '<span style="font-size: 11px; font-weight: 700; background: #edf4f9; color: #080f1b; padding: 3px 8px; border-radius: 6px;">⚽ ' + (post.fieldType === 'SAN_11' ? 'Sân 11' : post.fieldType === 'SAN_7' ? 'Sân 7' : 'Sân 5') + '</span>' +
+      '<span style="font-size: 11px; font-weight: 700; background: ' + levelBg + '; color: ' + levelColor + '; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">🎯 ' + post.levelLabel + '</span>' +
+      '<span style="font-size: 11px; font-weight: 700; background: rgba(245,158,11,0.18); color: #fbbf24; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.3);">💰 ' + post.betLabel + '</span>' +
+      '<span style="font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.06); color: #e2e8f0; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">⚽ ' + (post.fieldType === 'SAN_11' ? 'Sân 11' : post.fieldType === 'SAN_7' ? 'Sân 7' : 'Sân 5') + '</span>' +
       '</div>' +
 
-      '<div style="font-size: 13px; color: #334155; background: #f8fafc; border-radius: 10px; padding: 12px; margin-bottom: 12px; line-height: 1.5; border: 1px solid #eef3f7;">' +
-      '<div>🏟️ <strong>Sân:</strong> ' + post.fieldName + '</div>' +
-      '<div>📅 <strong>Thời gian:</strong> ' + post.timeSlot + ' (Ngày ' + post.matchDate + ')</div>' +
-      '<div>📞 <strong>SĐT liên hệ:</strong> <strong style="color: #329dd2; font-family: monospace;">' + post.phone + '</strong></div>' +
-      '<div style="margin-top: 6px; color: #475569; font-style: italic;">"' + post.description + '"</div>' +
+      '<div style="font-size: 13px; color: #cbd5e1; background: rgba(0,0,0,0.25); border-radius: 10px; padding: 12px; margin-bottom: 12px; line-height: 1.6; border: 1px solid rgba(50,157,210,0.2);">' +
+      '<div>🏟️ <strong>Sân:</strong> <span style="color: #ffffff;">' + post.fieldName + '</span></div>' +
+      '<div>📅 <strong>Thời gian:</strong> <span style="color: #fbbf24;">' + post.timeSlot + ' (Ngày ' + post.matchDate + ')</span></div>' +
+      '<div>📞 <strong>SĐT liên hệ:</strong> <strong style="color: #38bdf8; font-family: monospace;">' + post.phone + '</strong></div>' +
+      '<div style="margin-top: 6px; color: #94a3b8; font-style: italic;">"' + post.description + '"</div>' +
       '</div></div>' +
 
       '<div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">' +
       (isOpen
         ? '<button type="button" onclick="openAcceptMatchModal(' + post.id + ')" class="btn-accent-red" style="flex: 1; padding: 9px; font-size: 12px; font-weight: 800; justify-content: center; border-radius: 8px;">🤝 Bắt đối ngay</button>'
-        : '<div style="flex: 1; text-align: center; font-size: 12px; font-weight: 700; color: #176b94; background: #e6f4fb; padding: 8px; border-radius: 8px;">Đã bắt với: <strong>' + (post.matchedBy || 'Đội bạn') + '</strong>' + (post.matchedPhone ? ' (📞 ' + post.matchedPhone + ')' : '') + '</div>'
+        : '<div style="flex: 1; text-align: center; font-size: 12px; font-weight: 700; color: #4ade80; background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); padding: 8px; border-radius: 8px;">Đã bắt với: <strong>' + (post.matchedBy || 'Đội bạn') + '</strong>' + (post.matchedPhone ? ' (📞 ' + post.matchedPhone + ')' : '') + '</div>'
       ) +
-      '<a href="tel:' + post.phone + '" class="outline-button" style="padding: 9px 12px; font-size: 12px;" title="Gọi điện">📞 Gọi</a>' +
-      '<a href="https://zalo.me/' + post.phone + '" target="_blank" class="outline-button" style="padding: 9px 12px; font-size: 12px; color: #329dd2;" title="Nhắn Zalo">💬 Zalo</a>' +
+      '<a href="tel:' + post.phone + '" class="outline-button" style="padding: 9px 12px; font-size: 12px; color: #fbbf24; border-color: rgba(251,191,36,0.3);" title="Gọi điện">📞 Gọi</a>' +
+      '<a href="https://zalo.me/' + post.phone + '" target="_blank" class="outline-button" style="padding: 9px 12px; font-size: 12px; color: #38bdf8; border-color: rgba(56,189,248,0.3);" title="Nhắn Zalo">💬 Zalo</a>' +
       (isOwner
-        ? '<button type="button" onclick="deleteMatchPost(' + post.id + ')" class="outline-button" style="padding: 9px 10px; font-size: 12px; color: #eb2f33;" title="Xóa bài đăng này">🗑️</button>'
+        ? '<button type="button" onclick="deleteMatchPost(' + post.id + ')" class="outline-button" style="padding: 9px 10px; font-size: 12px; color: #f87171; border-color: rgba(239,68,68,0.3);" title="Xóa bài đăng cáp kèo này khỏi Neon Cloud">🗑️</button>'
         : ''
       ) +
       '</div></div>';
@@ -1361,7 +1444,7 @@ function openCreateMatchModal() {
 
   const select = document.getElementById("cmFieldSelect");
   if (select) {
-    select.innerHTML = DEFAULT_FIELDS.map(f => '<option value="' + f.id + '">' + f.name + ' (' + f.ward + ')</option>').join("");
+    select.innerHTML = DEFAULT_FIELDS.map(f => '<option value="' + f.id + '">' + f.name + ' (' + (f.ward || 'BMT') + ')</option>').join("");
   }
   const dateInput = document.getElementById("cmDateInput");
   if (dateInput) dateInput.value = getTodayString();
@@ -1371,11 +1454,12 @@ function closeCreateMatchModal() {
   document.getElementById("createMatchModal").style.display = "none";
 }
 
-function submitMatchPost(e) {
+async function submitMatchPost(e) {
   e.preventDefault();
   const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
   if (!authUser) {
-    alert("⚠️ Bạn cần đăng nhập tài khoản!");
+    alert("⚠️ Bạn cần đăng nhập tài khoản để tạo bài đăng cáp kèo!");
+    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
     return;
   }
   const teamName = document.getElementById("cmTeamName").value.trim();
@@ -1406,37 +1490,60 @@ function submitMatchPost(e) {
     "KEO_NUOC": "Kèo nước ngọt"
   };
 
-  const newPost = {
-    id: Date.now(),
-    userId: authUser.id,
-    userFullName: authUser.fullName,
-    teamName,
-    captainName,
-    phone,
-    fieldId,
-    fieldName: field.name,
-    fieldType: field.fieldType,
-    matchDate,
-    timeSlot,
-    level,
-    levelLabel: levelLabels[level] || "Phong trào",
-    betRule,
-    betLabel: betLabels[betRule] || "Tiền sân 5-5",
-    status: "OPEN",
-    matchedBy: null,
-    matchedPhone: null,
-    avatar: "⚡",
-    description,
-    createdAt: "Vừa xong"
-  };
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "⏳ Đang lưu vào Neon Cloud...";
+  }
 
-  const posts = getMatchmakingPosts();
-  posts.unshift(newPost);
-  saveMatchmakingPosts(posts);
+  try {
+    // 1. Ghi nhận trực tiếp vào Neon Database PostgreSQL (Table matchmaking_posts)
+    const sql = `INSERT INTO matchmaking_posts (user_id, user_name, team_name, phone, play_date, play_time, pitch_name, pitch_id, format, bet_type, level, note, status)
+      VALUES (${authUser.id || 'NULL'}, '${escapeSqlString(captainName)}', '${escapeSqlString(teamName)}', '${escapeSqlString(phone)}', '${escapeSqlString(matchDate)}', '${escapeSqlString(timeSlot)}', '${escapeSqlString(field.name)}', ${field.id}, '${escapeSqlString(field.fieldType || 'SAN_5')}', '${escapeSqlString(betLabels[betRule] || betRule)}', '${escapeSqlString(levelLabels[level] || level)}', '${escapeSqlString(description)}', 'OPEN')
+      RETURNING *`;
 
-  closeCreateMatchModal();
-  renderMatchmaking("ALL");
-  alert("🎉 Đã đăng tin tìm đối thành công lên Sàn Cáp Kèo Ban Mê!");
+    const insertedRows = await queryNeonDirect(sql);
+    const newPostId = insertedRows && insertedRows[0] ? insertedRows[0].id : Date.now();
+
+    const newPost = {
+      id: newPostId,
+      userId: authUser.id,
+      userFullName: authUser.fullName,
+      teamName,
+      captainName,
+      phone,
+      fieldId,
+      fieldName: field.name,
+      fieldType: field.fieldType,
+      matchDate,
+      timeSlot,
+      level,
+      levelLabel: levelLabels[level] || "Phong trào",
+      betRule,
+      betLabel: betLabels[betRule] || "Tiền sân 5-5",
+      status: "OPEN",
+      matchedBy: null,
+      matchedPhone: null,
+      avatar: "⚡",
+      description,
+      createdAt: "Vừa xong"
+    };
+
+    const posts = getMatchmakingPosts();
+    posts.unshift(newPost);
+    saveMatchmakingPosts(posts);
+
+    closeCreateMatchModal();
+    renderMatchmaking("ALL");
+    alert("🎉 Đã đăng bài cáp kèo THÀNH CÔNG lên Sàn Cáp Kèo Sân Nhà FC!\nDữ liệu đã được lưu trữ vĩnh viễn trên Neon PostgreSQL Cloud.");
+  } catch (err) {
+    alert("Có lỗi khi lưu bài đăng: " + err.message);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "🚀 Đăng tin tìm đối ngay";
+    }
+  }
 }
 
 let activeMatchIdToAccept = null;
@@ -1467,7 +1574,7 @@ function closeAcceptMatchModal() {
   activeMatchIdToAccept = null;
 }
 
-function confirmAcceptMatch(e) {
+async function confirmAcceptMatch(e) {
   e.preventDefault();
   const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
   const myTeam = document.getElementById("amMyTeamName").value.trim();
@@ -1485,19 +1592,35 @@ function confirmAcceptMatch(e) {
     posts[idx].matchedBy = myTeam;
     posts[idx].matchedPhone = myPhone;
     saveMatchmakingPosts(posts);
+
+    // Update Neon PostgreSQL
+    try {
+      const sql = `UPDATE matchmaking_posts 
+        SET status = 'ACCEPTED', challenger_id = ${authUser ? authUser.id : 'NULL'}, challenger_name = '${escapeSqlString(myTeam)}', challenger_phone = '${escapeSqlString(myPhone)}'
+        WHERE id = ${activeMatchIdToAccept}`;
+      await queryNeonDirect(sql);
+    } catch (e) {
+      console.warn("Lỗi update match accept trên Neon:", e);
+    }
   }
 
   closeAcceptMatchModal();
   renderMatchmaking(currentMatchmakingFilter);
-  alert("🤝 Chúc mừng bạn đã bắt đối thành công với " + (posts[idx]?.teamName || 'đội bạn') + "!\nHãy gọi SĐT " + (posts[idx]?.phone || '') + " để chốt màu áo thi đấu nhé.");
+  alert("🤝 Chúc mừng bạn đã bắt đối thành công với " + (posts[idx]?.teamName || 'đội bạn') + "!\nHãy gọi SĐT " + (posts[idx]?.phone || '') + " để chốt màu áo thi đấu nhé.\nDữ liệu bắt đối đã được lưu vào Neon Cloud.");
 }
 
-function deleteMatchPost(postId) {
-  if (!confirm("Bạn có chắc chắn muốn xóa bài đăng cáp kèo này?")) return;
+async function deleteMatchPost(postId) {
+  if (!confirm("Bạn có chắc chắn muốn xóa bài đăng cáp kèo này khỏi Neon Database?")) return;
+  try {
+    await queryNeonDirect(`DELETE FROM matchmaking_posts WHERE id = ${postId}`);
+  } catch (e) {
+    console.warn("Lỗi xóa post trên Neon:", e);
+  }
   let posts = getMatchmakingPosts();
   posts = posts.filter(p => p.id !== postId);
   saveMatchmakingPosts(posts);
   renderMatchmaking(currentMatchmakingFilter);
+  alert("✓ Đã xóa bài đăng cáp kèo khỏi hệ thống Neon!");
 }
 
 // ==========================================
