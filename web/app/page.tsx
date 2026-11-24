@@ -1336,8 +1336,26 @@ export default function Home() {
 
   async function handleCreateMatchSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!currentUser) { alert("⚠️ Bạn cần đăng nhập để đăng tin tìm đối / cáp kèo!"); return; }
-    if (!cmTeam || !cmCaptain || !cmPhone || cmPhone.length < 9) { alert("⚠️ Tên đội, đội trưởng và SĐT (tối thiểu 9 số) là bắt buộc!"); return; }
+    if (!cmTeam || !cmPhone || cmPhone.length < 9) {
+      alert("⚠️ Tên đội và Số điện thoại (tối thiểu 9 số) là bắt buộc!");
+      return;
+    }
+    const effectiveCaptain = cmCaptain || (currentUser ? currentUser.fullName : "Đội trưởng");
+    let activeUser = currentUser;
+    if (!activeUser) {
+      activeUser = {
+        id: Date.now(),
+        fullName: effectiveCaptain,
+        phone: cmPhone,
+        email: null,
+        role: "CUSTOMER",
+        accessToken: "temp-session-" + Date.now()
+      };
+      setCurrentUser(activeUser);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("football_auth_user", JSON.stringify(activeUser));
+      }
+    }
     const field = fieldsList.find((f) => f.id === cmFieldId) || fieldsList[0];
     const levelLabels: Record<string, string> = {
       "VUI_VE": "Dưỡng sinh (Vui vẻ)",
@@ -1350,7 +1368,7 @@ export default function Home() {
       "KEO_NUOC": "Kèo nước ngọt"
     };
 
-    const safeCaptain = (cmCaptain || currentUser.fullName || "Đội trưởng").replace(/'/g, "''");
+    const safeCaptain = (cmCaptain || (activeUser ? activeUser.fullName : "Đội trưởng")).replace(/'/g, "''");
     const safeTeam = cmTeam.replace(/'/g, "''");
     const safePhone = cmPhone.replace(/'/g, "''");
     const safeDate = (cmDate || "2026-11-25").replace(/'/g, "''");
@@ -1363,7 +1381,7 @@ export default function Home() {
     try {
       const rows = await queryNeonDirect(`
         INSERT INTO matchmaking_posts (user_id, user_name, team_name, phone, play_date, play_time, pitch_name, pitch_id, format, bet_type, level, note, status)
-        VALUES (${currentUser.id || 'NULL'}, '${safeCaptain}', '${safeTeam}', '${safePhone}', '${safeDate}', '${safeSlot}', '${safeField}', ${field.id}, '${field.fieldType || 'SAN_5'}', '${betLabel}', '${levelLabel}', '${safeDesc}', 'OPEN')
+        VALUES (${activeUser ? activeUser.id : 'NULL'}, '${safeCaptain}', '${safeTeam}', '${safePhone}', '${safeDate}', '${safeSlot}', '${safeField}', ${field.id}, '${field.fieldType || 'SAN_5'}', '${betLabel}', '${levelLabel}', '${safeDesc}', 'OPEN')
         RETURNING *
       `);
       const newId = rows && rows[0] ? rows[0].id : Date.now();
@@ -2777,7 +2795,7 @@ export default function Home() {
             <button
               type="button"
               className="btn-accent-red"
-              onClick={() => { if (!currentUser) { alert("⚠️ Đăng nhập tài khoản để đăng tin tìm đối!"); return; } setCreateMatchOpen(true); }}
+              onClick={() => setCreateMatchOpen(true)}
               style={{ padding: "10px 18px", fontSize: "13px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "8px" }}
             >
               <span>➕</span> Đăng tin tìm đối / Cáp kèo

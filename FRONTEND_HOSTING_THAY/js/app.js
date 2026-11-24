@@ -1431,11 +1431,6 @@ async function renderMatchmaking(filter = "ALL") {
 
 function openCreateMatchModal() {
   const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
-  if (!authUser) {
-    alert("⚠️ Bạn cần đăng nhập tài khoản để đăng tin tìm đối!\nHãy bấm nút 'Đăng nhập / Đăng ký' trên thanh menu.");
-    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
-    return;
-  }
   document.getElementById("createMatchModal").style.display = "flex";
   const captainInput = document.getElementById("cmCaptainName");
   const phoneInput = document.getElementById("cmPhone");
@@ -1456,11 +1451,24 @@ function closeCreateMatchModal() {
 
 async function submitMatchPost(e) {
   e.preventDefault();
-  const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
-  if (!authUser) {
-    alert("⚠️ Bạn cần đăng nhập tài khoản để tạo bài đăng cáp kèo!");
-    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
+  let authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  const teamName = document.getElementById("cmTeamName").value.trim();
+  const captainName = document.getElementById("cmCaptainName").value.trim() || (authUser ? authUser.fullName : "Đội trưởng");
+  const phone = document.getElementById("cmPhone").value.trim();
+  if (!teamName || !phone || phone.length < 9) {
+    alert("⚠️ Vui lòng nhập Tên đội và Số điện thoại / Zalo (tối thiểu 9 số) để đội bạn liên hệ bắt đối!");
     return;
+  }
+  if (!authUser) {
+    authUser = {
+      id: Date.now(),
+      fullName: captainName,
+      phone: phone,
+      role: "CUSTOMER",
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem("football_auth_user", JSON.stringify(authUser));
+    if (typeof renderUserAuthArea === 'function') renderUserAuthArea();
   }
   const teamName = document.getElementById("cmTeamName").value.trim();
   const captainName = document.getElementById("cmCaptainName").value.trim() || authUser.fullName;
@@ -1550,11 +1558,6 @@ let activeMatchIdToAccept = null;
 
 function openAcceptMatchModal(postId) {
   const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
-  if (!authUser) {
-    alert("⚠️ Bạn cần đăng nhập tài khoản để nhận kèo / bắt đối!\nHãy bấm 'Đăng nhập / Đăng ký' trên thanh menu.");
-    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
-    return;
-  }
   activeMatchIdToAccept = postId;
   const posts = getMatchmakingPosts();
   const post = posts.find(p => p.id === postId);
@@ -1576,7 +1579,26 @@ function closeAcceptMatchModal() {
 
 async function confirmAcceptMatch(e) {
   e.preventDefault();
-  const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  let authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  const myTeam = document.getElementById("amMyTeamName").value.trim();
+  const myPhone = document.getElementById("amMyPhone").value.trim();
+
+  if (!myTeam || !myPhone || myPhone.length < 9) {
+    alert("⚠️ Tên đội nhận kèo và Số điện thoại (tối thiểu 9 số) là bắt buộc!");
+    return;
+  }
+
+  if (!authUser) {
+    authUser = {
+      id: Date.now(),
+      fullName: myTeam,
+      phone: myPhone,
+      role: "CUSTOMER",
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem("football_auth_user", JSON.stringify(authUser));
+    if (typeof renderUserAuthArea === 'function') renderUserAuthArea();
+  }
   const myTeam = document.getElementById("amMyTeamName").value.trim();
   const myPhone = document.getElementById("amMyPhone").value.trim();
 
@@ -1715,18 +1737,6 @@ function renderClubs(filter = "ALL") {
 
 function openCreateClubModal() {
   const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
-  if (!authUser) {
-    alert("⚠️ Bạn cần đăng nhập tài khoản để tạo câu lạc bộ!");
-    if (typeof openAuthModal === 'function') openAuthModal('LOGIN');
-    return;
-  }
-  const clubs = getClubs();
-  const existing = clubs.find(c => c.members.some(m => m.userId === authUser.id));
-  if (existing) {
-    alert("⚠️ Bạn hiện đã là thành viên của FC " + existing.name + "!\nMỗi tài khoản chỉ được tham gia 1 câu lạc bộ. Hãy rời đội cũ trước khi tạo đội mới.");
-    return;
-  }
-
   document.getElementById("createClubModal").style.display = "flex";
   const captainInput = document.getElementById("ccCaptainName");
   const phoneInput = document.getElementById("ccPhone");
@@ -1738,10 +1748,27 @@ function closeCreateClubModal() {
   document.getElementById("createClubModal").style.display = "none";
 }
 
-function submitCreateClub(e) {
+async function submitCreateClub(e) {
   e.preventDefault();
-  const authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
-  if (!authUser) return;
+  let authUser = JSON.parse(localStorage.getItem("football_auth_user") || "null");
+  const clubName = document.getElementById("ccClubName").value.trim();
+  const captainName = document.getElementById("ccCaptainName").value.trim() || (authUser ? authUser.fullName : "Đội trưởng");
+  const phone = document.getElementById("ccPhone").value.trim();
+  if (!clubName || !phone || phone.length < 9) {
+    alert("⚠️ Tên FC và Số điện thoại Đội trưởng là bắt buộc (tối thiểu 9 số)!");
+    return;
+  }
+  if (!authUser) {
+    authUser = {
+      id: Date.now(),
+      fullName: captainName,
+      phone: phone,
+      role: "CUSTOMER",
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem("football_auth_user", JSON.stringify(authUser));
+    if (typeof renderUserAuthArea === 'function') renderUserAuthArea();
+  }
 
   const clubName = document.getElementById("ccClubName").value.trim();
   const shortName = document.getElementById("ccShortName").value.trim().toUpperCase();
