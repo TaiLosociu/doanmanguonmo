@@ -799,91 +799,80 @@ function getFieldSubPitches(field) {
 const DEFAULT_MATCHMAKING_POSTS = [
   {
     id: 1,
-    userId: 1,
-    teamName: "FC Ban Mê Trẻ",
-    captainName: "Lê Duy Tài",
-    phone: "0896890399",
+    teamName: "FC Ban Mê Phủi",
+    captainName: "Anh Tuấn",
+    phone: "0905123456",
     fieldId: 6,
     fieldName: "Sân bóng đá C1",
     fieldType: "SAN_5",
-    matchDate: getTodayString(),
-    timeSlot: "18:00 - 19:30",
+    matchDate: "2026-11-24",
+    timeSlot: "17:30 - 19:00",
     level: "TRUNG_BINH",
     levelLabel: "Trung bình (Phong trào)",
     betRule: "CHIA_DOI",
     betLabel: "Tiền sân 5-5",
     status: "OPEN",
-    matchedBy: null,
-    matchedPhone: null,
-    avatar: "⚡",
-    description: "Đội sinh viên đá lành tính, phối hợp ban bật, không chơi xấu, giao lưu vui vẻ nâng cao sức khỏe.",
-    createdAt: "Vừa xong"
+    avatar: "🦁",
+    description: "Đội gồm anh em công sở, đá vui vẻ cọ xát sau giờ làm, không va chạm mạnh.",
+    createdAt: "10 phút trước"
   },
   {
     id: 2,
-    userId: 2,
-    teamName: "FC Ea Tam 47",
-    captainName: "Quang Thịnh",
-    phone: "0905123456",
-    fieldId: 11,
-    fieldName: "Sân vận động ĐTL (Hà Huy Tập)",
+    teamName: "FC Ea Kao Trẻ",
+    captainName: "Hoàng Long",
+    phone: "0914888999",
+    fieldId: 19,
+    fieldName: "Sân bóng đá Ban Mê Sport",
     fieldType: "SAN_7",
-    matchDate: getTodayString(1),
-    timeSlot: "19:30 - 21:00",
+    matchDate: "2026-11-24",
+    timeSlot: "19:00 - 20:30",
     level: "BAN_CHUYEN",
     levelLabel: "Khá - Chiến (Cọ xát)",
     betRule: "THUA_BAO",
     betLabel: "Đội thua trả sân",
     status: "OPEN",
-    matchedBy: null,
-    matchedPhone: null,
-    avatar: "🔥",
-    description: "Đội cọ xát chuẩn bị tham gia giải sân 7 Đắk Lắk, tìm đối đá nhiệt tình, fair-play.",
-    createdAt: "15 phút trước"
-  },
-  {
-    id: 3,
-    userId: 100,
-    teamName: "FC Lão Tướng BMT",
-    captainName: "Anh Hoàng",
-    phone: "0913456789",
-    fieldId: 12,
-    fieldName: "Sân bóng đá Tân Thái Long",
-    fieldType: "SAN_5",
-    matchDate: getTodayString(1),
-    timeSlot: "16:30 - 18:00",
-    level: "VUI_VE",
-    levelLabel: "Dưỡng sinh (Vui vẻ)",
-    betRule: "KEO_NUOC",
-    betLabel: "Kèo nước ngọt",
-    status: "MATCHED",
-    matchedBy: "FC Tân Lợi United",
-    matchedPhone: "0918334455",
-    avatar: "☕",
-    description: "Anh em văn phòng U35+ đá dưỡng sinh rèn luyện thể lực, không va chạm mạnh.",
+    avatar: "⚡",
+    description: "Cần tìm đối sân 7 cứng chân, thể lực tốt để tập dượt trước giải D-League Đắk Lắk.",
     createdAt: "1 giờ trước"
   },
   {
+    id: 3,
+    teamName: "FC Bác Sĩ Đắk Lắk",
+    captainName: "Bác sĩ Minh",
+    phone: "0935112233",
+    fieldId: 10,
+    fieldName: "Sân Bóng Đá Ngọc Anh",
+    fieldType: "SAN_5",
+    matchDate: "2026-11-25",
+    timeSlot: "06:30 - 08:00",
+    level: "VUI_VE",
+    levelLabel: "Dưỡng sinh (Vui vẻ)",
+    betRule: "KEO_NUOC",
+    betLabel: "Tiền sân 5-5 + Kèo nước",
+    status: "MATCHED",
+    matchedBy: "FC Dược Phẩm Ban Mê",
+    avatar: "🩺",
+    description: "Giao lưu thể dục buổi sáng, giữ sức khỏe và tinh thần thoải mái.",
+    createdAt: "3 giờ trước"
+  },
+  {
     id: 4,
-    userId: 101,
-    teamName: "FC CNTT Đắk Lắk",
-    captainName: "Hoàng Nam",
-    phone: "0912345678",
+    teamName: "FC Sinh Viên Tây Nguyên",
+    captainName: "Quang Thịnh",
+    phone: "0947000111",
     fieldId: 17,
     fieldName: "SVĐ Trường ĐH Tây Nguyên",
     fieldType: "SAN_11",
-    matchDate: getTodayString(2),
-    timeSlot: "15:00 - 17:00",
+    matchDate: "2026-11-26",
+    timeSlot: "16:00 - 18:00",
     level: "TRUNG_BINH",
-    levelLabel: "Trung bình (SV ĐH Tây Nguyên)",
+    levelLabel: "Trung bình (Phong trào)",
     betRule: "CHIA_DOI",
     betLabel: "Tiền sân 5-5",
     status: "OPEN",
-    matchedBy: null,
-    matchedPhone: null,
-    avatar: "💻",
-    description: "Kèo sân lớn 11 người giao hữu bóng đá sinh viên và cựu sinh viên, cọ xát nâng cao kỹ chiến thuật.",
-    createdAt: "2 giờ trước"
+    avatar: "🎓",
+    description: "Kèo sân 11 người giao hữu sinh viên và cựu sinh viên, cọ xát nâng cao kỹ chiến thuật.",
+    createdAt: "Hôm nay"
   }
 ];
 
@@ -1385,44 +1374,43 @@ async function renderMatchmaking(filter = "ALL") {
   container.innerHTML = posts.map(post => {
     const isOpen = post.status === "OPEN";
     const isOwner = authUser && (post.userId === authUser.id || post.phone === authUser.phone);
-    const levelBg = post.level === "BAN_CHUYEN" ? "rgba(235,47,51,0.18)" : post.level === "TRUNG_BINH" ? "rgba(50,157,210,0.18)" : "rgba(34,197,94,0.18)";
-    const levelColor = post.level === "BAN_CHUYEN" ? "#f87171" : post.level === "TRUNG_BINH" ? "#38bdf8" : "#4ade80";
+    const levelBg = post.level === "BAN_CHUYEN" ? "rgba(235, 47, 51, 0.2)" : post.level === "TRUNG_BINH" ? "rgba(50, 157, 210, 0.2)" : "rgba(148, 163, 184, 0.15)";
+    const levelColor = post.level === "BAN_CHUYEN" ? "#ff474b" : post.level === "TRUNG_BINH" ? "#329dd2" : "#cbd5e1";
 
-    return '<div style="background: #111a2e; border: 1.5px solid ' + (isOpen ? 'rgba(50, 157, 210, 0.4)' : 'rgba(255, 255, 255, 0.1)') + '; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.25s ease;">' +
+    return '<div style="background: var(--surface-alt); border: 1.5px solid ' + (isOpen ? 'rgba(50, 157, 210, 0.35)' : 'var(--border)') + '; border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;">' +
       '<div>' +
       '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">' +
       '<div style="display: flex; align-items: center; gap: 10px;">' +
-      '<span style="font-size: 26px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.4); border: 1px solid rgba(50,157,210,0.3);">' + (post.avatar || '⚽') + '</span>' +
+      '<span style="font-size: 26px; background: #050a12; border: 1px solid var(--border); width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">' + (post.avatar || '⚽') + '</span>' +
       '<div>' +
-      '<strong style="font-size: 16px; color: #ffffff; display: block;">' + post.teamName + '</strong>' +
-      '<small style="color: #94a3b8;">Đội trưởng: <strong style="color: #38bdf8;">' + post.captainName + '</strong> · ' + post.createdAt + '</small>' +
+      '<strong style="font-size: 16px; color: var(--text-main); display: block;">' + post.teamName + '</strong>' +
+      '<small style="color: var(--text-muted);">Đội trưởng: ' + post.captainName + ' · ' + post.createdAt + '</small>' +
       '</div></div>' +
-      '<span style="font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 800; ' + (isOpen ? 'background: rgba(50,157,210,0.18); color: #38bdf8; border: 1px solid rgba(50,157,210,0.4);' : 'background: rgba(34,197,94,0.18); color: #4ade80; border: 1px solid rgba(34,197,94,0.4);') + '">' +
+      '<span style="font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 800; background: ' + (isOpen ? 'rgba(50, 157, 210, 0.15)' : 'rgba(235, 47, 51, 0.15)') + '; color: ' + (isOpen ? '#329dd2' : '#eb2f33') + '; border: 1px solid ' + (isOpen ? 'rgba(50, 157, 210, 0.3)' : 'rgba(235, 47, 51, 0.3)') + ';">' +
       (isOpen ? '● ĐANG TÌM ĐỐI' : '✓ ĐÃ CÁP KÈO') +
       '</span></div>' +
 
       '<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">' +
-      '<span style="font-size: 11px; font-weight: 700; background: ' + levelBg + '; color: ' + levelColor + '; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">🎯 ' + post.levelLabel + '</span>' +
-      '<span style="font-size: 11px; font-weight: 700; background: rgba(245,158,11,0.18); color: #fbbf24; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.3);">💰 ' + post.betLabel + '</span>' +
-      '<span style="font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.06); color: #e2e8f0; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">⚽ ' + (post.fieldType === 'SAN_11' ? 'Sân 11' : post.fieldType === 'SAN_7' ? 'Sân 7' : 'Sân 5') + '</span>' +
+      '<span style="font-size: 11px; font-weight: 700; background: ' + levelBg + '; color: ' + levelColor + '; padding: 3px 8px; border-radius: 6px;">🎯 ' + post.levelLabel + '</span>' +
+      '<span style="font-size: 11px; font-weight: 700; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 3px 8px; border-radius: 6px;">💰 ' + post.betLabel + '</span>' +
+      '<span style="font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.08); color: var(--text-main); padding: 3px 8px; border-radius: 6px;">⚽ ' + (post.fieldType === 'SAN_11' ? 'Sân 11' : post.fieldType === 'SAN_7' ? 'Sân 7' : 'Sân 5') + '</span>' +
       '</div>' +
 
-      '<div style="font-size: 13px; color: #cbd5e1; background: rgba(0,0,0,0.25); border-radius: 10px; padding: 12px; margin-bottom: 12px; line-height: 1.6; border: 1px solid rgba(50,157,210,0.2);">' +
-      '<div>🏟️ <strong>Sân:</strong> <span style="color: #ffffff;">' + post.fieldName + '</span></div>' +
-      '<div>📅 <strong>Thời gian:</strong> <span style="color: #fbbf24;">' + post.timeSlot + ' (Ngày ' + post.matchDate + ')</span></div>' +
-      '<div>📞 <strong>SĐT liên hệ:</strong> <strong style="color: #38bdf8; font-family: monospace;">' + post.phone + '</strong></div>' +
-      '<div style="margin-top: 6px; color: #94a3b8; font-style: italic;">"' + post.description + '"</div>' +
+      '<div style="font-size: 13px; color: var(--text-main); background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; line-height: 1.5;">' +
+      '<div>🏟️ <strong>Sân:</strong> ' + post.fieldName + '</div>' +
+      '<div>📅 <strong>Thời gian:</strong> ' + post.timeSlot + ' (Ngày ' + post.matchDate + ')</div>' +
+      '<div style="margin-top: 6px; color: var(--text-muted); font-style: italic;">"' + post.description + '"</div>' +
       '</div></div>' +
 
-      '<div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">' +
+      '<div style="display: flex; gap: 8px; margin-top: 6px;">' +
       (isOpen
-        ? '<button type="button" onclick="openAcceptMatchModal(' + post.id + ')" class="btn-accent-red" style="flex: 1; padding: 9px; font-size: 12px; font-weight: 800; justify-content: center; border-radius: 8px;">🤝 Bắt đối ngay</button>'
-        : '<div style="flex: 1; text-align: center; font-size: 12px; font-weight: 700; color: #4ade80; background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); padding: 8px; border-radius: 8px;">Đã bắt với: <strong>' + (post.matchedBy || 'Đội bạn') + '</strong>' + (post.matchedPhone ? ' (📞 ' + post.matchedPhone + ')' : '') + '</div>'
+        ? '<button type="button" onclick="openAcceptMatchModal(' + post.id + ')" class="btn-accent-red" style="flex: 1; padding: 9px; font-size: 12px; font-weight: 700; justify-content: center; border-radius: 8px;">🤝 Bắt đối ngay</button>'
+        : '<div style="flex: 1; text-align: center; font-size: 12px; font-weight: 700; color: #329dd2; background: rgba(50, 157, 210, 0.15); border: 1px solid rgba(50, 157, 210, 0.3); padding: 8px; border-radius: 8px;">Đã bắt với: ' + (post.matchedBy || 'Đội bạn') + '</div>'
       ) +
-      '<a href="tel:' + post.phone + '" class="outline-button" style="padding: 9px 12px; font-size: 12px; color: #fbbf24; border-color: rgba(251,191,36,0.3);" title="Gọi điện">📞 Gọi</a>' +
-      '<a href="https://zalo.me/' + post.phone + '" target="_blank" class="outline-button" style="padding: 9px 12px; font-size: 12px; color: #38bdf8; border-color: rgba(56,189,248,0.3);" title="Nhắn Zalo">💬 Zalo</a>' +
+      '<a href="tel:' + post.phone + '" class="outline-button" style="padding: 9px 12px; font-size: 12px; display: inline-flex; align-items: center;" title="Gọi điện">📞</a>' +
+      '<a href="https://zalo.me/' + post.phone + '" target="_blank" rel="noreferrer" class="outline-button" style="padding: 9px 12px; font-size: 12px; color: #329dd2; display: inline-flex; align-items: center;" title="Nhắn Zalo">💬</a>' +
       (isOwner
-        ? '<button type="button" onclick="deleteMatchPost(' + post.id + ')" class="outline-button" style="padding: 9px 10px; font-size: 12px; color: #f87171; border-color: rgba(239,68,68,0.3);" title="Xóa bài đăng cáp kèo này khỏi Neon Cloud">🗑️</button>'
+        ? '<button type="button" onclick="deleteMatchPost(' + post.id + ')" class="outline-button" style="padding: 9px 10px; font-size: 12px; color: #f87171; border-color: rgba(239, 68, 68, 0.3);" title="Xóa bài đăng cáp kèo này khỏi Neon Cloud">🗑️</button>'
         : ''
       ) +
       '</div></div>';
@@ -1677,7 +1665,7 @@ function renderClubs(filter = "ALL") {
   }).sort((a, b) => b.elo - a.elo);
 
   if (clubs.length === 0) {
-    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b; background: #ffffff; border-radius: 14px; border: 1px dashed var(--border);">Chưa có câu lạc bộ nào trong mục này. Hãy bấm "Tạo FC mới"!</div>';
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted); background: var(--surface-alt); border-radius: 14px; border: 1px dashed var(--border);">Chưa có câu lạc bộ nào trong mục này. Hãy bấm "➕ Tạo FC mới (15 người)"!</div>';
     return;
   }
 
@@ -1688,45 +1676,46 @@ function renderClubs(filter = "ALL") {
     const isFull = memberCount >= MAX_CLUB_MEMBERS;
     const rankMedal = idx === 0 ? '👑 #1 ' : (idx === 1 ? '🥈 #2 ' : (idx === 2 ? '🥉 #3 ' : '#' + (idx + 1) + ' '));
 
-    return '<div style="background: #ffffff; border: 1.5px solid #d4e3ee; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.25s;" onmouseover="this.style.borderColor=\'#329dd2\'" onmouseout="this.style.borderColor=\'#d4e3ee\'">' +
+    return '<div style="background: var(--surface-alt); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;">' +
       '<div>' +
-      '<div style="position: relative; height: 110px;">' +
+      '<div style="position: relative; height: 100px;">' +
       '<img src="' + club.banner + '" style="width: 100%; height: 100%; object-fit: cover;" alt="' + club.name + '" />' +
-      '<div style="position: absolute; inset: 0; background: linear-gradient(transparent 30%, rgba(8,15,27,0.75));"></div>' +
+      '<div style="position: absolute; inset: 0; background: linear-gradient(transparent 30%, rgba(0,0,0,0.75));"></div>' +
       '<div style="position: absolute; bottom: 8px; left: 12px; display: flex; align-items: center; gap: 8px;">' +
-      '<span style="font-size: 26px; background: #080f1b; width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid #329dd2;">' + club.avatar + '</span>' +
+      '<span style="font-size: 28px; background: rgba(8, 15, 27, 0.9); border: 1px solid var(--border); width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">' + club.avatar + '</span>' +
       '<div>' +
-      '<strong style="font-size: 15px; color: #ffffff; display: block; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">' + club.name + '</strong>' +
-      '<span style="font-size: 11px; color: #cbd5e1;">' + club.ward + '</span>' +
+      '<strong style="font-size: 15px; color: #ffffff; display: block; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">' + club.name + '</strong>' +
+      '<span style="font-size: 11px; color: rgba(255,255,255,0.9);">' + club.ward + '</span>' +
       '</div></div>' +
-      '<div style="position: absolute; top: 8px; right: 8px; background: #080f1b; color: ' + getEloColor(club.elo) + '; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid ' + getEloColor(club.elo) + ';">' + rankMedal + club.rank + ' · ' + club.elo + ' ELO</div>' +
+      '<div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.75); color: ' + getEloColor(club.elo) + '; border: 1px solid rgba(255,255,255,0.15); padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">' + rankMedal + club.rank + ' · ' + club.elo + ' ELO</div>' +
       '</div>' +
 
-      '<div style="padding: 16px;">' +
-      '<div style="font-size: 12px; color: #64748b; margin-bottom: 10px; line-height: 1.4;">' + club.description + '</div>' +
+      '<div style="padding: 14px;">' +
+      '<div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">' + club.description + '</div>' +
 
-      '<div style="margin-bottom: 12px;">' +
-      '<div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-bottom: 4px;">' +
+      '<div style="margin-bottom: 10px;">' +
+      '<div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--text-main);">' +
       '<span>Quân số FC: <strong>' + memberCount + '/' + MAX_CLUB_MEMBERS + '</strong></span>' +
       '<span style="color: ' + (isFull ? '#eb2f33' : '#329dd2') + ';">' + (isFull ? '🔴 Đã đủ 15 người' : '🟢 Còn trống ' + (MAX_CLUB_MEMBERS - memberCount) + ' slot') + '</span>' +
       '</div>' +
-      '<div style="height: 6px; background: #edf4f9; border-radius: 999px; overflow: hidden;">' +
+      '<div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden;">' +
       '<div style="height: 100%; width: ' + ((memberCount / MAX_CLUB_MEMBERS) * 100) + '%; background: ' + (isFull ? '#eb2f33' : '#329dd2') + '; border-radius: 999px;"></div>' +
       '</div></div>' +
 
-      '<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">' +
-      '<span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(50,157,210,0.12); color: #176b94;">🏆 ' + club.wins + 'W · ' + club.draws + 'D · ' + club.losses + 'L</span>' +
-      '<span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #fef3c7; color: #92400e;">⚽ ' + club.goalsFor + ' BT - ' + club.goalsAgainst + ' BB</span>' +
+      '<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">' +
+      '<span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(50, 157, 210, 0.15); color: #329dd2;">🏆 ' + club.wins + 'W · ' + club.draws + 'D · ' + club.losses + 'L</span>' +
+      '<span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(245, 158, 11, 0.15); color: #f59e0b;">⚽ ' + club.goalsFor + ' BT - ' + club.goalsAgainst + ' BB</span>' +
+      (club.isRecruiting ? '<span style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(34, 197, 94, 0.15); color: #22c55e;">🟢 Đang tuyển</span>' : '') +
       '</div>' +
-      '<div style="font-size: 11px; color: #080f1b; margin-bottom: 12px;">🎖️ Đội trưởng: <strong>' + club.captainName + '</strong> · 📞 ' + (club.captainPhone || club.members[0]?.phone || '0896890399') + '</div>' +
+      '<div style="font-size: 11px; color: var(--text-main); margin-bottom: 10px;">🎖️ Đội trưởng: <strong>' + club.captainName + '</strong></div>' +
       '</div></div>' +
 
-      '<div style="padding: 0 16px 16px; display: flex; gap: 6px; flex-wrap: wrap;">' +
+      '<div style="padding: 0 14px 14px; display: flex; gap: 6px; flex-wrap: wrap;">' +
       (isMember
-        ? '<div style="flex: 1; text-align: center; font-size: 11px; font-weight: 800; color: #176b94; background: #e6f4fb; padding: 8px; border-radius: 8px;">✓ Bạn là thành viên' + (isCaptain ? ' (Đội trưởng)' : '') + '</div>'
+        ? '<div style="flex: 1; text-align: center; font-size: 11px; font-weight: 700; color: #329dd2; background: rgba(50, 157, 210, 0.15); border: 1px solid rgba(50, 157, 210, 0.3); padding: 8px; border-radius: 8px;">✓ Bạn là thành viên' + (isCaptain ? ' (Đội trưởng)' : '') + '</div>'
         : (isFull
-          ? '<div style="flex: 1; text-align: center; font-size: 11px; font-weight: 800; color: #eb2f33; background: #fee2e2; padding: 8px; border-radius: 8px;">Đội đã đủ 15 người</div>'
-          : '<button type="button" onclick="joinClub(' + club.id + ')" class="primary-button" style="flex: 1; padding: 8px; font-size: 11px; font-weight: 700; justify-content: center;">🤝 Xin gia nhập</button>'
+          ? '<div style="flex: 1; text-align: center; font-size: 11px; font-weight: 700; color: #eb2f33; background: rgba(235, 47, 51, 0.15); border: 1px solid rgba(235, 47, 51, 0.3); padding: 8px; border-radius: 8px;">Đã đủ 15 người</div>'
+          : '<button type="button" onclick="joinClub(' + club.id + ')" class="primary-button" style="flex: 1; padding: 8px; font-size: 11px; font-weight: 700; justify-content: center;">🤝 Gia nhập</button>'
         )
       ) +
       '<button type="button" onclick="openMatchChallengeModal(' + club.id + ')" class="btn-accent-red" style="padding: 8px 12px; font-size: 11px; font-weight: 800;" title="Thách đấu tính điểm ELO">⚔️ Thách đấu</button>' +
@@ -2127,25 +2116,25 @@ function renderTournamentBracket(data) {
     const t1Win = isFinished && m.team1.score > m.team2.score;
     const t2Win = isFinished && m.team2.score > m.team1.score;
 
-    return '<div style="background: #ffffff; border: 1.5px solid #d4e3ee; border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm); position: relative;">' +
-      '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #edf4f9; padding-bottom: 8px;">' +
+    return '<div style="background: var(--surface-alt); border: 1.5px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm); position: relative;">' +
+      '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">' +
       '<span style="font-size: 12px; font-weight: 800; color: #329dd2; letter-spacing: 0.5px;">' + m.round + '</span>' +
-      '<span style="font-size: 11px; color: #64748b;">' + m.time + '</span>' +
+      '<span style="font-size: 11px; color: var(--text-muted);">' + m.time + '</span>' +
       '</div>' +
 
       '<div style="display: flex; flex-direction: column; gap: 8px;">' +
-      '<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; background: ' + (t1Win ? 'rgba(50,157,210,0.12)' : '#f8fafc') + '; font-weight: ' + (t1Win ? '800' : '600') + '; color: ' + (t1Win ? '#176b94' : '#080f1b') + ';">' +
+      '<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; background: ' + (t1Win ? 'rgba(50, 157, 210, 0.2)' : 'rgba(0,0,0,0.25)') + '; border: 1px solid ' + (t1Win ? 'rgba(50, 157, 210, 0.4)' : 'var(--border)') + '; font-weight: ' + (t1Win ? '800' : '600') + '; color: ' + (t1Win ? '#329dd2' : 'var(--text-main)') + ';">' +
       '<span style="display: flex; align-items: center; gap: 8px;"><span>' + (t1Win ? '👑' : '⚪') + '</span> ' + m.team1.name + '</span>' +
       '<span style="font-size: 16px; font-weight: 800;">' + (m.team1.score !== null ? m.team1.score : '-') + '</span>' +
       '</div>' +
 
-      '<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; background: ' + (t2Win ? 'rgba(50,157,210,0.12)' : '#f8fafc') + '; font-weight: ' + (t2Win ? '800' : '600') + '; color: ' + (t2Win ? '#176b94' : '#080f1b') + ';">' +
+      '<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; background: ' + (t2Win ? 'rgba(50, 157, 210, 0.2)' : 'rgba(0,0,0,0.25)') + '; border: 1px solid ' + (t2Win ? 'rgba(50, 157, 210, 0.4)' : 'var(--border)') + '; font-weight: ' + (t2Win ? '800' : '600') + '; color: ' + (t2Win ? '#329dd2' : 'var(--text-main)') + ';">' +
       '<span style="display: flex; align-items: center; gap: 8px;"><span>' + (t2Win ? '👑' : '⚪') + '</span> ' + m.team2.name + '</span>' +
       '<span style="font-size: 16px; font-weight: 800;">' + (m.team2.score !== null ? m.team2.score : '-') + '</span>' +
       '</div></div>' +
 
       (m.winner
-        ? '<div style="margin-top: 10px; font-size: 11px; text-align: center; color: #176b94; font-weight: 800; background: #e6f4fb; padding: 6px; border-radius: 6px;">Đội chiến thắng: ' + m.winner + '</div>'
+        ? '<div style="margin-top: 10px; font-size: 11px; text-align: center; color: #329dd2; font-weight: 700; background: rgba(50, 157, 210, 0.15); border: 1px solid rgba(50, 157, 210, 0.3); padding: 4px; borderRadius: 6px;">Đội chiến thắng: ' + m.winner + '</div>'
         : ''
       ) +
       '</div>';
@@ -2158,17 +2147,17 @@ function renderTournamentStandings(data) {
 
   tbody.innerHTML = data.standings.map(s => {
     const medal = s.rank === 1 ? '🥇' : s.rank === 2 ? '🥈' : s.rank === 3 ? '🥉' : s.rank;
-    return '<tr style="border-bottom: 1px solid #edf4f9; text-align: center;">' +
+    return '<tr style="border-bottom: 1px solid var(--border); text-align: center;">' +
       '<td style="padding: 12px 8px; font-weight: 800; font-size: 14px;">' + medal + '</td>' +
-      '<td style="padding: 12px 8px; text-align: left; font-weight: 700; color: #080f1b;">' + s.team + '</td>' +
-      '<td style="padding: 12px 8px;">' + s.played + '</td>' +
+      '<td style="padding: 12px 8px; text-align: left; font-weight: 700; color: var(--text-main);">' + s.team + '</td>' +
+      '<td style="padding: 12px 8px; color: var(--text-muted);">' + s.played + '</td>' +
       '<td style="padding: 12px 8px; color: #329dd2; font-weight: 700;">' + s.won + '</td>' +
-      '<td style="padding: 12px 8px; color: #64748b;">' + s.drawn + '</td>' +
+      '<td style="padding: 12px 8px; color: var(--text-muted);">' + s.drawn + '</td>' +
       '<td style="padding: 12px 8px; color: #eb2f33;">' + s.lost + '</td>' +
-      '<td style="padding: 12px 8px;">' + s.gf + '</td>' +
-      '<td style="padding: 12px 8px;">' + s.ga + '</td>' +
-      '<td style="padding: 12px 8px; font-weight: 700;">' + s.gd + '</td>' +
-      '<td style="padding: 12px 8px; font-weight: 900; color: #176b94; font-size: 16px; background: rgba(50,157,210,0.12);">' + s.points + '</td>' +
+      '<td style="padding: 12px 8px; color: var(--text-muted);">' + s.gf + '</td>' +
+      '<td style="padding: 12px 8px; color: var(--text-muted);">' + s.ga + '</td>' +
+      '<td style="padding: 12px 8px; font-weight: 700; color: var(--text-main);">' + s.gd + '</td>' +
+      '<td style="padding: 12px 8px; font-weight: 900; color: #329dd2; font-size: 15px; background: rgba(50, 157, 210, 0.15);">' + s.points + '</td>' +
       '</tr>';
   }).join("");
 }
